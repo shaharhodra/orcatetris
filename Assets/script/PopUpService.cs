@@ -4,22 +4,24 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum PopUpCondition
+{
+    None,
+    OnGameStart,
+    OnWin,
+    OnLose,
+    Custom
+}
+
 public class PopUpService : MonoBehaviour
 {
     [SerializeField] private Image _overlay;
     [SerializeField] private RectTransform _popUpRect;
+    [SerializeField] private PopUpCondition condition = PopUpCondition.None; 
 
     public bool IsActive;
-
-    public const float TWEEN_DURATION = 0.5f;
-   
-
-   
-    private void Start()
-    {
-        ShowOpenPopUpSequence().Forget();
-    }
-
+    [SerializeField] public const float popUPDuretion= 1f;
+    [SerializeField] public const float TWEEN_DURATION = 0.5f;
     public void SetOverlayActiveState (bool isActive)
     {
         _overlay.gameObject.SetActive(true);
@@ -33,7 +35,7 @@ public class PopUpService : MonoBehaviour
     public void ShowPopUp (bool isActive)
     {
         _popUpRect.gameObject.SetActive(true);
-        _popUpRect.DOScale(isActive ? 5.0f : 0.0f, TWEEN_DURATION).SetEase(Ease.OutSine).OnComplete(() =>
+        _popUpRect.DOScale(isActive ? 1.0f : 0.0f, TWEEN_DURATION).SetEase(Ease.OutSine).OnComplete(() =>
        {
            if (!isActive)
                _popUpRect.gameObject.SetActive(false);
@@ -58,4 +60,31 @@ public class PopUpService : MonoBehaviour
         ShowPopUp(false);
         SetOverlayActiveState(false);
     }
+
+    // מפעיל את רצף הפתיחה-סגירה רק אם הטריגר שהתקבל מתאים ל-condition שמוגדר באינספקטור
+    public void RunIfConditionMet(PopUpCondition trigger)
+    {
+        if (trigger == condition)
+        {
+            RunPopupSequenceAsync().Forget();
+        }
+    }
+
+    public async UniTask RunPopupSequenceAsync ()
+    {
+        IsActive = true;
+        SetOverlayActiveState(true);
+        ShowPopUp(true);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(popUPDuretion));
+
+        ShowPopUp(false);
+        SetOverlayActiveState(false);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(popUPDuretion));
+
+        IsActive = false;
+    }
+     
 }
+

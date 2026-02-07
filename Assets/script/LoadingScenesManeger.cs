@@ -55,6 +55,6 @@ public class LoadingScenesManeger : MonoBehaviour
         }
 
 
-        SceneManager.LoadScene(targetSceneIndex);
+        SceneManager.LoadScene(targetSceneIndex, LoadSceneMode.Single);
     }
 }
