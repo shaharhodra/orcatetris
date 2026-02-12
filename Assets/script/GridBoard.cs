@@ -1,10 +1,13 @@
 using UnityEngine;
+using System.Collections;
 
 public class GridBoard : MonoBehaviour
 {
     [Header("Grid Size")]
     public int width = 6;
     public int height = 8;
+
+    [SerializeField] private bool buildOnStart = true;
 
     [Header("Cell Settings")]
     public float cellSize = 1f;
@@ -17,7 +20,8 @@ public class GridBoard : MonoBehaviour
 
     private void Start()
     {
-        BuildGrid();
+        if (buildOnStart)
+            BuildGrid();
     }
 
     public void ClearHover()
@@ -62,14 +66,31 @@ public class GridBoard : MonoBehaviour
     {
         width = Mathf.Max(1, newWidth);
         height = Mathf.Max(1, newHeight);
+        Debug.Log($"GridBoard.ApplySize -> {name} width={width} height={height} (children before rebuild: {transform.childCount})");
         RebuildGrid();
     }
 
     public void RebuildGrid()
     {
+        if (Application.isPlaying)
+        {
+            StopAllCoroutines();
+            StartCoroutine(RebuildGridCoroutine());
+            return;
+        }
+
         ClearHover();
         ClearGridObjects();
         BuildGrid();
+    }
+
+    private IEnumerator RebuildGridCoroutine()
+    {
+        ClearHover();
+        ClearGridObjects();
+        yield return null;
+        BuildGrid();
+        Debug.Log($"GridBoard.RebuildGrid -> {name} children after rebuild: {transform.childCount}");
     }
 
     public void Clear()

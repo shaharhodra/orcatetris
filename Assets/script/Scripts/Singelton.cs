@@ -8,11 +8,13 @@ public class Singleton<T> : MonoBehaviour where T : Singleton<T>
     {
         if (instance != null && instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
+            return;
         }
         else
         {
             instance = (T)this;
+            DontDestroyOnLoad(gameObject);
         }
     }
 }

@@ -287,7 +287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   loadingBar: {fileID: 561460720}
   loadingText: {fileID: 296041360}
-  targetSceneIndex: 2
+  targetSceneIndex: 3
 --- !u!4 &359506495
 Transform:
   m_ObjectHideFlags: 0

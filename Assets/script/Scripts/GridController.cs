@@ -4,14 +4,27 @@ public class GridController : MonoBehaviour
 {
     [SerializeField] private GridBoard board;
 
-    void Start()
+    private GameManager gameManager;
+
+    private void Awake()
     {
-        GameManager.instance.OnDataLoaded += HandleOnDataLoadedEvent;
+        gameManager = GameManager.instance;
+        if (gameManager == null)
+            gameManager = FindFirstObjectByType<GameManager>();
+
+        if (gameManager == null)
+            return;
+
+        gameManager.OnDataLoaded += HandleOnDataLoadedEvent;
+
+        if (gameManager.CurrentLevelData != null)
+            HandleOnDataLoadedEvent(gameManager.CurrentLevelData);
     }
 
     void OnDestroy()
     {
-        GameManager.instance.OnDataLoaded -= HandleOnDataLoadedEvent;
+        if (gameManager != null)
+            gameManager.OnDataLoaded -= HandleOnDataLoadedEvent;
     }
 
     protected void HandleOnDataLoadedEvent(LevelData levelData)
@@ -19,6 +32,7 @@ public class GridController : MonoBehaviour
         if (board == null)
             return;
 
+        Debug.Log($"GridController -> applying size to {board.name}: cols={levelData.GridColumns} rows={levelData.GridRows}");
         board.ApplySize(levelData.GridColumns, levelData.GridRows);
     }
 }
