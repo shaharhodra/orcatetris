@@ -2,6 +2,8 @@
 
 public class GridController : MonoBehaviour
 {
+    [SerializeField] private GridBoard board;
+
     void Start()
     {
         GameManager.instance.OnDataLoaded += HandleOnDataLoadedEvent;
@@ -14,6 +16,9 @@ public class GridController : MonoBehaviour
 
     protected void HandleOnDataLoadedEvent(LevelData levelData)
     {
+        if (board == null)
+            return;
 
+        board.ApplySize(levelData.GridColumns, levelData.GridRows);
     }
 }

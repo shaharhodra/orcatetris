@@ -6,7 +6,8 @@ public class GridPlacer : MonoBehaviour
 
     public bool CanPlaceShape(Shape shape, Vector2Int targetCell)
     {
-        foreach (var offset in shape.shapeData.cells)
+        var offsets = shape.GetCells(board.cellSize);
+        foreach (var offset in offsets)
         {
             Vector2Int cell = targetCell + offset;
 
@@ -22,7 +23,8 @@ public class GridPlacer : MonoBehaviour
 
     public void PlaceShape(Shape shape, Vector2Int targetCell)
     {
-        foreach (var offset in shape.shapeData.cells)
+        var offsets = shape.GetCells(board.cellSize);
+        foreach (var offset in offsets)
         {
             Vector2Int cell = targetCell + offset;
             board.SetOccupied(cell, true);

@@ -13,9 +13,62 @@ public class GridBoard : MonoBehaviour
     public GridCell cellPrefab;
 
     private GridCell[,] cells;
+    private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
 
     private void Start()
     {
+        BuildGrid();
+    }
+
+    public void ClearHover()
+    {
+        if (hoveredCells == null || hoveredCells.Count == 0 || cells == null)
+            return;
+
+        foreach (var pos in hoveredCells)
+        {
+            if (IsInside(pos) && cells[pos.x, pos.y] != null)
+                cells[pos.x, pos.y].SetShapeOver(false);
+        }
+
+        hoveredCells.Clear();
+    }
+
+    public void SetHoverCells(System.Collections.Generic.IEnumerable<Vector2Int> positions)
+    {
+        if (cells == null)
+            return;
+
+        if (hoveredCells == null)
+            hoveredCells = new System.Collections.Generic.HashSet<Vector2Int>();
+
+        ClearHover();
+
+        foreach (var pos in positions)
+        {
+            if (!IsInside(pos))
+                continue;
+
+            var cell = cells[pos.x, pos.y];
+            if (cell == null)
+                continue;
+
+            cell.SetShapeOver(true);
+            hoveredCells.Add(pos);
+        }
+    }
+
+    public void ApplySize(int newWidth, int newHeight)
+    {
+        width = Mathf.Max(1, newWidth);
+        height = Mathf.Max(1, newHeight);
+        RebuildGrid();
+    }
+
+    public void RebuildGrid()
+    {
+        ClearHover();
+        ClearGridObjects();
         BuildGrid();
     }
 
@@ -44,6 +97,8 @@ public class GridBoard : MonoBehaviour
             return;
         }
 
+        CenterOrigin();
+
         cells = new GridCell[width, height];
 
         for (int x = 0; x < width; x++)
@@ -58,8 +113,29 @@ public class GridBoard : MonoBehaviour
         }
     }
 
+    private void CenterOrigin()
+    {
+        Vector2 pivot = transform.position;
+        origin = pivot - new Vector2(width * cellSize * 0.5f, height * cellSize * 0.5f);
+    }
+
+    private void ClearGridObjects()
+    {
+        cells = null;
+
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            var child = transform.GetChild(i);
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+    }
+
     public Vector2Int WorldToGrid(Vector3 worldPos)
     {
+        CenterOrigin();
         Vector2 local = (Vector2)worldPos - origin;
         int x = Mathf.FloorToInt(local.x / cellSize);
         int y = Mathf.FloorToInt(local.y / cellSize);
@@ -68,6 +144,7 @@ public class GridBoard : MonoBehaviour
 
     public Vector3 GridToWorld(Vector2Int gridPos)
     {
+        CenterOrigin();
         return new Vector3(
             origin.x + (gridPos.x + 0.5f) * cellSize,
             origin.y + (gridPos.y + 0.5f) * cellSize,
@@ -104,6 +181,8 @@ public class GridBoard : MonoBehaviour
     {
         if (width <= 0 || height <= 0)
             return;
+
+        CenterOrigin();
 
         Gizmos.color = Color.gray;
 

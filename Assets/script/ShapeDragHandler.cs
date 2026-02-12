@@ -59,6 +59,19 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
         bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
         SetAlpha(canPlace ? validAlpha : invalidAlpha);
+
+        if (canPlace)
+        {
+            var offsets = shape.GetCells(board.cellSize);
+            var hover = new System.Collections.Generic.List<Vector2Int>(offsets.Length);
+            foreach (var o in offsets)
+                hover.Add(cell + o);
+            board.SetHoverCells(hover);
+        }
+        else
+        {
+            board.ClearHover();
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -75,6 +88,8 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             boardPlacer.PlaceShape(shape, cell);
             SetAlpha(1f);
 
+            board.ClearHover();
+
             isPlaced = true;
 
             // אופציונלי: לכבות קוליידר כדי שלא יתפסו עוד דרגים
@@ -88,6 +103,8 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         {
             transform.position = startPos;
             SetAlpha(1f);
+
+            board.ClearHover();
         }
     }
 
