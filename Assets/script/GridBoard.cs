@@ -9,17 +9,53 @@ public class GridBoard : MonoBehaviour
     [Header("Cell Settings")]
     public float cellSize = 1f;
     public Vector2 origin = Vector2.zero;
+    [Header("Cell Prefab")]
+    public GridCell cellPrefab;
 
-    private bool[,] occupied;
+    private GridCell[,] cells;
 
-    private void Awake()
+    private void Start()
     {
-        occupied = new bool[width, height];
+        BuildGrid();
     }
 
     public void Clear()
     {
-        occupied = new bool[width, height];
+        // מנקה את מצב התפוס לתאים קיימים
+        if (cells == null) return;
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (cells[x, y] != null)
+                {
+                    cells[x, y].SetOccupied(false);
+                }
+            }
+        }
+    }
+
+    private void BuildGrid()
+    {
+        if (cellPrefab == null)
+        {
+            Debug.LogError("GridBoard: cellPrefab is not assigned");
+            return;
+        }
+
+        cells = new GridCell[width, height];
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Vector3 pos = GridToWorld(new Vector2Int(x, y));
+                GridCell cell = Instantiate(cellPrefab, pos, Quaternion.identity, transform);
+                cell.gridPos = new Vector2Int(x, y);
+                cells[x, y] = cell;
+            }
+        }
     }
 
     public Vector2Int WorldToGrid(Vector3 worldPos)
@@ -47,12 +83,21 @@ public class GridBoard : MonoBehaviour
 
     public bool IsOccupied(Vector2Int cell)
     {
-        return occupied[cell.x, cell.y];
+        if (cells == null)
+            return false;
+
+        return cells[cell.x, cell.y] != null && cells[cell.x, cell.y].occupied;
     }
 
     public void SetOccupied(Vector2Int cell, bool value)
     {
-        occupied[cell.x, cell.y] = value;
+        if (cells == null)
+            return;
+
+        if (cells[cell.x, cell.y] != null)
+        {
+            cells[cell.x, cell.y].SetOccupied(value);
+        }
     }
 
     private void OnDrawGizmos()
