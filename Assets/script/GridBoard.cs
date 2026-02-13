@@ -16,6 +16,7 @@ public class GridBoard : MonoBehaviour
     public GridCell cellPrefab;
 
     private GridCell[,] cells;
+    private GameObject[,] placedBlocks;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
 
     private void Start()
@@ -106,6 +107,12 @@ public class GridBoard : MonoBehaviour
                 {
                     cells[x, y].SetOccupied(false);
                 }
+
+                if (placedBlocks != null && placedBlocks[x, y] != null)
+                {
+                    Destroy(placedBlocks[x, y]);
+                    placedBlocks[x, y] = null;
+                }
             }
         }
     }
@@ -121,6 +128,7 @@ public class GridBoard : MonoBehaviour
         CenterOrigin();
 
         cells = new GridCell[width, height];
+        placedBlocks = new GameObject[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -143,6 +151,7 @@ public class GridBoard : MonoBehaviour
     private void ClearGridObjects()
     {
         cells = null;
+        placedBlocks = null;
 
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
@@ -196,6 +205,206 @@ public class GridBoard : MonoBehaviour
         {
             cells[cell.x, cell.y].SetOccupied(value);
         }
+    }
+
+    public void SetPlacedBlock(Vector2Int cell, GameObject block)
+    {
+        if (placedBlocks == null)
+            return;
+
+        if (!IsInside(cell))
+            return;
+
+        if (placedBlocks[cell.x, cell.y] != null && placedBlocks[cell.x, cell.y] != block)
+            Destroy(placedBlocks[cell.x, cell.y]);
+
+        placedBlocks[cell.x, cell.y] = block;
+    }
+
+    public int ClearFullLines()
+    {
+        if (cells == null)
+            return 0;
+
+        bool[] fullRows = new bool[height];
+        bool[] fullCols = new bool[width];
+
+        for (int y = 0; y < height; y++)
+        {
+            bool full = true;
+            for (int x = 0; x < width; x++)
+            {
+                if (cells[x, y] == null || !cells[x, y].occupied)
+                {
+                    full = false;
+                    break;
+                }
+            }
+            fullRows[y] = full;
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            bool full = true;
+            for (int y = 0; y < height; y++)
+            {
+                if (cells[x, y] == null || !cells[x, y].occupied)
+                {
+                    full = false;
+                    break;
+                }
+            }
+            fullCols[x] = full;
+        }
+
+        bool[,] shouldClear = new bool[width, height];
+
+        for (int y = 0; y < height; y++)
+        {
+            if (!fullRows[y])
+                continue;
+
+            for (int x = 0; x < width; x++)
+                shouldClear[x, y] = true;
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            if (!fullCols[x])
+                continue;
+
+            for (int y = 0; y < height; y++)
+                shouldClear[x, y] = true;
+        }
+
+        int cleared = 0;
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (!shouldClear[x, y])
+                    continue;
+
+                if (cells[x, y] != null && cells[x, y].occupied)
+                {
+                    cells[x, y].SetOccupied(false);
+                    cleared++;
+                }
+
+                if (placedBlocks != null && placedBlocks[x, y] != null)
+                {
+                    Destroy(placedBlocks[x, y]);
+                    placedBlocks[x, y] = null;
+                }
+            }
+        }
+
+        return cleared;
+    }
+
+    public int ClearRow(int y)
+    {
+        if (cells == null)
+            return 0;
+
+        if (y < 0 || y >= height)
+            return 0;
+
+        int cleared = 0;
+
+        for (int x = 0; x < width; x++)
+        {
+            if (cells[x, y] != null && cells[x, y].occupied)
+            {
+                cells[x, y].SetOccupied(false);
+                cleared++;
+            }
+
+            if (placedBlocks != null && placedBlocks[x, y] != null)
+            {
+                Destroy(placedBlocks[x, y]);
+                placedBlocks[x, y] = null;
+            }
+        }
+
+        return cleared;
+    }
+
+    public int ClearColumn(int x)
+    {
+        if (cells == null)
+            return 0;
+
+        if (x < 0 || x >= width)
+            return 0;
+
+        int cleared = 0;
+
+        for (int y = 0; y < height; y++)
+        {
+            if (cells[x, y] != null && cells[x, y].occupied)
+            {
+                cells[x, y].SetOccupied(false);
+                cleared++;
+            }
+
+            if (placedBlocks != null && placedBlocks[x, y] != null)
+            {
+                Destroy(placedBlocks[x, y]);
+                placedBlocks[x, y] = null;
+            }
+        }
+
+        return cleared;
+    }
+
+    public int ReviveClearOneRowAndOneColumn()
+    {
+        if (cells == null)
+            return 0;
+
+        var occupiedRows = new System.Collections.Generic.List<int>(height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (cells[x, y] != null && cells[x, y].occupied)
+                {
+                    occupiedRows.Add(y);
+                    break;
+                }
+            }
+        }
+
+        var occupiedCols = new System.Collections.Generic.List<int>(width);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (cells[x, y] != null && cells[x, y].occupied)
+                {
+                    occupiedCols.Add(x);
+                    break;
+                }
+            }
+        }
+
+        int cleared = 0;
+
+        if (occupiedRows.Count > 0)
+        {
+            int y = occupiedRows[Random.Range(0, occupiedRows.Count)];
+            cleared += ClearRow(y);
+        }
+
+        if (occupiedCols.Count > 0)
+        {
+            int x = occupiedCols[Random.Range(0, occupiedCols.Count)];
+            cleared += ClearColumn(x);
+        }
+
+        return cleared;
     }
 
     private void OnDrawGizmos()

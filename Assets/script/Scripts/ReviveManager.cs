@@ -1,0 +1,40 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class ReviveManager : MonoBehaviour
+{
+    [SerializeField] private GridBoard board;
+    [SerializeField] private int maxRevives = 3;
+
+    private int usedRevives;
+
+    public int RemainingRevives => Mathf.Max(0, maxRevives - usedRevives);
+
+    public bool CanRevive => RemainingRevives > 0;
+
+    public void WatchAdAndRevive()
+    {
+        if (!CanRevive)
+            return;
+
+        if (board == null)
+            board = FindFirstObjectByType<GridBoard>();
+
+        if (board == null)
+            return;
+
+        usedRevives++;
+        board.ReviveClearOneRowAndOneColumn();
+    }
+
+    public void RestartLevel()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.name);
+    }
+
+    public void ResetRevives()
+    {
+        usedRevives = 0;
+    }
+}
