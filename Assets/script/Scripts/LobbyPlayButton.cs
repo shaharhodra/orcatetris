@@ -13,6 +13,8 @@ public class LobbyPlayButton : MonoBehaviour
 
         int levelIndex = GameManager.instance.HighestUnlockedLevel;
         // כאן אני מניח שה-Build Index של הסצנה = levelIndex
-        SceneManager.LoadScene(levelIndex);
+        int sceneIndex = Mathf.Max(1, levelIndex);
+        Debug.Log($"LobbyPlayButton -> OnPlayClicked loading scene buildIndex={sceneIndex} (HighestUnlockedLevel={levelIndex})");
+        SceneManager.LoadScene(sceneIndex);
     }
 }

@@ -6370,6 +6370,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 859730978}
   m_CullTransparentMesh: 1
+--- !u!1 &864117971
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 864117973}
+  - component: {fileID: 864117972}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &864117972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864117971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c2dd97bc8fa2584a84ed460e847777e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneLevelIndex
+  levelIndex: 38
+--- !u!4 &864117973
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864117971}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &874112152
 GameObject:
   m_ObjectHideFlags: 0
@@ -7308,7 +7353,13 @@ MonoBehaviour:
     Shapes: []
   _levelJson: 
   _levelJsonFiles: []
+  _classicLevelJsonFile: {fileID: 0}
   startLevelIndex: 1
+  useAddressablesForLevels: 0
+  adventureLevelsLabel: 
+  classicLevelsLabel: 
+  adventureLobbySceneBuildIndex: 0
+  classicGameSceneBuildIndex: 0
 --- !u!4 &951987737
 Transform:
   m_ObjectHideFlags: 0
@@ -16019,3 +16070,4 @@ SceneRoots:
   - {fileID: 365575343}
   - {fileID: 951987737}
   - {fileID: 2002892735}
+  - {fileID: 864117973}

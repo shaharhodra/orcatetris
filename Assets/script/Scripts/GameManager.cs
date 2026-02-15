@@ -17,7 +17,8 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private string _levelJson;
     [SerializeField] private TextAsset[] _levelJsonFiles;
     [SerializeField] private TextAsset _classicLevelJsonFile;
-    [SerializeField] private int startLevelIndex;
+    [Min(1)]
+    [SerializeField] private int startLevelIndex = 1;
 
     [Header("Addressables Levels")]
     [SerializeField] private bool useAddressablesForLevels;
@@ -54,7 +55,7 @@ public class GameManager : Singleton<GameManager>
 
     public LevelData CurrentLevelData { get; private set; }
 
-    public int HighestUnlockedLevel => _playerProgress != null ? _playerProgress.highestUnlockedLevel : startLevelIndex;
+    public int HighestUnlockedLevel => Mathf.Max(1, _playerProgress != null ? _playerProgress.highestUnlockedLevel : startLevelIndex);
 
     private int lastLoadedSceneHandle = -1;
 
@@ -66,6 +67,31 @@ public class GameManager : Singleton<GameManager>
     private bool addressablesClassicLoading;
     private AsyncOperationHandle<IList<TextAsset>> adventureHandle;
     private AsyncOperationHandle<IList<TextAsset>> classicHandle;
+
+    [ContextMenu("Debug/Force Reload Addressables Levels")]
+    public void DebugForceReloadAddressablesLevels()
+    {
+        if (adventureHandle.IsValid())
+            Addressables.Release(adventureHandle);
+        if (classicHandle.IsValid())
+            Addressables.Release(classicHandle);
+
+        addressableAdventureLevels.Clear();
+        addressableClassicLevel = null;
+        addressablesAdventureLoaded = false;
+        addressablesClassicLoaded = false;
+        addressablesAdventureLoading = false;
+        addressablesClassicLoading = false;
+
+        Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
+    }
+
+    [ContextMenu("Debug/Force Reload Addressables Levels And Reload Scene")]
+    public void DebugForceReloadAddressablesLevelsAndReloadScene()
+    {
+        DebugForceReloadAddressablesLevels();
+        ReloadCurrentScene();
+    }
 
     private void OnEnable()
     {
@@ -105,7 +131,7 @@ public class GameManager : Singleton<GameManager>
         {
             _playerProgress = new PlayerProgressData
             {
-                highestUnlockedLevel = startLevelIndex
+                highestUnlockedLevel = Mathf.Max(1, startLevelIndex)
             };
             return;
         }
@@ -124,7 +150,7 @@ public class GameManager : Singleton<GameManager>
         {
             _playerProgress = new PlayerProgressData
             {
-                highestUnlockedLevel = startLevelIndex
+                highestUnlockedLevel = Mathf.Max(1, startLevelIndex)
             };
         }
 
@@ -132,7 +158,7 @@ public class GameManager : Singleton<GameManager>
         {
             _playerProgress = new PlayerProgressData
             {
-                highestUnlockedLevel = startLevelIndex
+                highestUnlockedLevel = Mathf.Max(1, startLevelIndex)
             };
         }
     }
