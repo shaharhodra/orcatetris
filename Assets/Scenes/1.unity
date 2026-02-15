@@ -876,7 +876,7 @@ GameObject:
   - component: {fileID: 407927970}
   - component: {fileID: 407927969}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: levelindex
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -894,7 +894,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c2dd97bc8fa2584a84ed460e847777e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLevelIndex
-  levelIndex: 0
+  levelIndex: 1
 --- !u!4 &407927970
 Transform:
   m_ObjectHideFlags: 0

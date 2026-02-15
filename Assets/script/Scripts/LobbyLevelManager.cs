@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 public class LobbyLevelManager : MonoBehaviour
 {
@@ -8,10 +9,24 @@ public class LobbyLevelManager : MonoBehaviour
 
     private void Start()
     {
-        if (levelButtons == null || levelButtons.Length == 0)
-            return;
+        StartCoroutine(Init());
+    }
 
-        int highest = GameManager.instance != null ? GameManager.instance.HighestUnlockedLevel : 0;
+    private void OnDisable()
+    {
+        if (pointer != null)
+            pointer.DOKill();
+    }
+
+    private IEnumerator Init()
+    {
+        if (levelButtons == null || levelButtons.Length == 0)
+            yield break;
+
+        while (GameManager.instance == null)
+            yield return null;
+
+        int highest = GameManager.instance.HighestUnlockedLevel;
 
         LobbyLevelButton lastUnlockedButton = null;
 
@@ -39,7 +54,6 @@ public class LobbyLevelManager : MonoBehaviour
                 pointer.anchoredPosition = Vector2.zero;
                 pointer.localScale = Vector3.one;
 
-                // אנימציית נשימה/פמפום עדינה על הסמן
                 pointer.DOKill();
                 pointer.DOScale(1.1f, 0.5f)
                        .SetLoops(-1, LoopType.Yoyo)

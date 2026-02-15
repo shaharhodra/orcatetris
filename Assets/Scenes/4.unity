@@ -1477,7 +1477,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c2dd97bc8fa2584a84ed460e847777e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLevelIndex
-  levelIndex: 1
+  levelIndex: 4
 --- !u!4 &895252417
 Transform:
   m_ObjectHideFlags: 0

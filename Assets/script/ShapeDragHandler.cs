@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer boardPlacer;
@@ -17,6 +17,8 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     private Vector3 dragOffset;
     private bool isPlaced;
     private float startPointerY;
+    private bool pointerDown;
+    private bool beganDrag;
 
     private void Awake()
     {
@@ -26,9 +28,43 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
     public void IBeginDragHandler_OnBeginDrag(PointerEventData eventData) {}
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (isPlaced)
+            return;
+
+        pointerDown = true;
+        beganDrag = false;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        if (mainCam == null)
+            return;
+
+        float z = Mathf.Abs(transform.position.z - mainCam.transform.position.z);
+        Vector3 worldPos = mainCam.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, z));
+
+        dragOffset = transform.position - worldPos;
+        dragOffset.y = minFingerOffsetY;
+        startPointerY = eventData.position.y;
+
+        transform.position = worldPos + dragOffset;
+
+        UpdatePlacementFeedback();
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (isPlaced)
+            return;
+
+        beganDrag = true;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        if (mainCam == null)
             return;
 
         float z = Mathf.Abs(transform.position.z - mainCam.transform.position.z);
@@ -45,6 +81,12 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         if (isPlaced)
             return;
 
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        if (mainCam == null)
+            return;
+
         float z = Mathf.Abs(transform.position.z - mainCam.transform.position.z);
         // worldPos = מיקום מתחת לאצבע בעולם
         Vector3 worldPos = mainCam.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, z));
@@ -57,29 +99,32 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         Vector3 targetPos = worldPos + dragOffset + Vector3.up * dynamicOffsetY;
         transform.position = targetPos;
 
-        // לחישוב התא בגריד נשתמש במיקום של הצורה בפועל (transform.position)
-        Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
-        bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
-        SetAlpha(canPlace ? validAlpha : invalidAlpha);
+        UpdatePlacementFeedback();
+    }
 
-        if (canPlace)
-        {
-            var offsets = shape.GetCells(board.cellSize);
-            var hover = new System.Collections.Generic.List<Vector2Int>(offsets.Length);
-            foreach (var o in offsets)
-                hover.Add(cell + o);
-            board.SetHoverCells(hover);
-        }
-        else
-        {
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (isPlaced)
+            return;
+
+        pointerDown = false;
+
+        if (beganDrag)
+            return;
+
+        transform.position = startPos;
+        SetAlpha(1f);
+
+        if (board != null)
             board.ClearHover();
-        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (isPlaced)
             return;
+
+        pointerDown = false;
 
         // בסיום הגרירה נשתמש ישירות במיקום הצורה כדי לקבוע את התא
         Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
@@ -118,6 +163,29 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             var c = r.color;
             c.a = alpha;
             r.color = c;
+        }
+    }
+
+    private void UpdatePlacementFeedback()
+    {
+        if (board == null || boardPlacer == null || shape == null)
+            return;
+
+        Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
+        bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
+        SetAlpha(canPlace ? validAlpha : invalidAlpha);
+
+        if (canPlace)
+        {
+            var offsets = shape.GetCells(board.cellSize);
+            var hover = new System.Collections.Generic.List<Vector2Int>(offsets.Length);
+            foreach (var o in offsets)
+                hover.Add(cell + o);
+            board.SetHoverCells(hover);
+        }
+        else
+        {
+            board.ClearHover();
         }
     }
 }

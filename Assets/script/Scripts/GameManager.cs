@@ -12,7 +12,28 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private LevelData _levelData;
     [SerializeField] private string _levelJson;
     [SerializeField] private TextAsset[] _levelJsonFiles;
+    [SerializeField] private TextAsset _classicLevelJsonFile;
     [SerializeField] private int startLevelIndex;
+
+    [Header("Scene Navigation")]
+    [SerializeField] private int adventureLobbySceneBuildIndex = 0;
+    [SerializeField] private int classicGameSceneBuildIndex = 0;
+
+    public enum GameMode
+    {
+        Adventure = 0,
+        Classic = 1
+    }
+
+    private const string SelectedGameModeKey = "selected_game_mode";
+
+    public GameMode CurrentGameMode
+    {
+        get
+        {
+            return (GameMode)PlayerPrefs.GetInt(SelectedGameModeKey, (int)GameMode.Adventure);
+        }
+    }
 
     [Serializable]
     private class PlayerProgressData
@@ -26,7 +47,7 @@ public class GameManager : Singleton<GameManager>
 
     public int HighestUnlockedLevel => _playerProgress != null ? _playerProgress.highestUnlockedLevel : startLevelIndex;
 
-    private string lastLoadedSceneName;
+    private int lastLoadedSceneHandle = -1;
 
     private void OnEnable()
     {
@@ -95,10 +116,29 @@ public class GameManager : Singleton<GameManager>
         if (_playerProgress == null)
             return;
 
+        var path = GetProgressFilePath();
+
+        if (File.Exists(path))
+        {
+            try
+            {
+                var existingJson = File.ReadAllText(path);
+                if (!string.IsNullOrEmpty(existingJson))
+                {
+                    var existing = JsonUtility.FromJson<PlayerProgressData>(existingJson);
+                    if (existing != null && existing.highestUnlockedLevel > _playerProgress.highestUnlockedLevel)
+                        _playerProgress.highestUnlockedLevel = existing.highestUnlockedLevel;
+                }
+            }
+            catch
+            {
+                // ignore read/parse errors and keep current progress
+            }
+        }
+
         try
         {
             var json = JsonUtility.ToJson(_playerProgress);
-            var path = GetProgressFilePath();
             Debug.Log($"Saving player progress to: {path} | json: {json}");
             File.WriteAllText(path, json);
         }
@@ -106,6 +146,23 @@ public class GameManager : Singleton<GameManager>
         {
             Debug.LogError("Failed to save player progress");
         }
+    }
+
+    public void DebugResetProgressToLevel1()
+    {
+        if (_playerProgress == null)
+            _playerProgress = new PlayerProgressData();
+
+        _playerProgress.highestUnlockedLevel = 1;
+        SavePlayerProgress();
+    }
+
+    public void DebugResetProgressToLevel1AndReloadScene()
+    {
+        DebugResetProgressToLevel1();
+
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.buildIndex);
     }
 
     public void SetLevelCompleted(int levelIndex)
@@ -124,14 +181,69 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    public void SetGameModeAdventure()
+    {
+        PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Adventure);
+        PlayerPrefs.Save();
+    }
+
+    public void SetGameModeClassic()
+    {
+        PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Classic);
+        PlayerPrefs.Save();
+    }
+
+    public void LoadAdventureLobby()
+    {
+        SetGameModeAdventure();
+        SceneManager.LoadScene(adventureLobbySceneBuildIndex);
+    }
+
+    public void LoadClassicGame()
+    {
+        SetGameModeClassic();
+
+        if (_classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
+        {
+            Debug.LogError("GameManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
+            return;
+        }
+
+        SceneManager.LoadScene(classicGameSceneBuildIndex);
+    }
+
+    public void ReloadCurrentScene()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.buildIndex);
+    }
+
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (!string.IsNullOrEmpty(lastLoadedSceneName) && scene.name == lastLoadedSceneName)
+        if (scene.handle == lastLoadedSceneHandle)
             return;
 
-        lastLoadedSceneName = scene.name;
+        lastLoadedSceneHandle = scene.handle;
 
-        int index = startLevelIndex;
+        if (CurrentGameMode == GameMode.Classic)
+        {
+            if (_classicLevelJsonFile != null)
+            {
+                Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
+                LoadLevelFromJson(_classicLevelJsonFile.text);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_levelJson))
+            {
+                Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
+                LoadLevelFromJson(_levelJson);
+                return;
+            }
+
+            Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
+            return;
+        }
 
         SceneLevelIndex sceneLevel = null;
         var allSceneLevels = FindObjectsOfType<SceneLevelIndex>(true);
@@ -148,10 +260,20 @@ public class GameManager : Singleton<GameManager>
             }
         }
 
-        if (sceneLevel != null)
-            index = sceneLevel.LevelIndex;
-        else
-            ;
+        if (sceneLevel == null)
+        {
+            Debug.LogWarning($"GameManager -> scene '{scene.name}' has no SceneLevelIndex. LevelData will not be loaded and grid will rely on buildOnStart.");
+            return;
+        }
+
+        int levelNumber = sceneLevel.LevelIndex;
+        if (levelNumber <= 0)
+        {
+            Debug.LogWarning($"GameManager -> scene '{scene.name}' has invalid levelIndex={levelNumber}. Expected 1-based index (1..N).");
+            return;
+        }
+
+        int index = levelNumber - 1;
 
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
             LoadLevel(index);
@@ -165,7 +287,7 @@ public class GameManager : Singleton<GameManager>
         var json = JsonUtility.ToJson(_levelData);
 
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
-            LoadLevel(startLevelIndex);
+            LoadLevel(Mathf.Max(0, startLevelIndex - 1));
         else
             LoadLevelFromJson(_levelJson);
     }
@@ -173,7 +295,7 @@ public class GameManager : Singleton<GameManager>
     [ContextMenu("Load Selected Level Index")]
     public void LoadSelectedLevelIndex()
     {
-        LoadLevel(startLevelIndex);
+        LoadLevel(Mathf.Max(0, startLevelIndex - 1));
     }
 
     public void LoadLevel(int index)
