@@ -1,8 +1,8 @@
 {
   "Level": 1,
   "TimeInSeconds": 120,
-  "GridRows": 4,
-  "GridColumns": 4,
+  "GridRows": 8,
+  "GridColumns": 8,
   "NumberOfShapes": 0,
   "LevelName": "Level 2",
   "Shapes": []

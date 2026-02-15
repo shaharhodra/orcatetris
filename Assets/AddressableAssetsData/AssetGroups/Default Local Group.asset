@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Default Local Group
+  m_GUID: 1031ae912ffd7934cbdae4b636d122e9
+  m_SerializeEntries:
+  - m_GUID: 0cb0ecd2e3c1ae246b420b22f999c8f9
+    m_Address: Assets/cubs/shapes/shape 4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21201677d4914344cbee19a77818177d
+    m_Address: Assets/cubs/shapes/shape 1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa3605e593d747e479487e4fbbc65a64
+    m_Address: Assets/cubs/shapes/shape 3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d52b71b10b991884ea02b1d563a3e993
+    m_Address: Assets/cubs/shapes/shape 2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 15daf7d47da06c743a670df0ace27a6a, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2c962dfab9aa54542a8f9a37dbbdafb1, type: 2}
+    - {fileID: 11400000, guid: 86fa466d47f714f4ea2ad6940767d98f, type: 2}

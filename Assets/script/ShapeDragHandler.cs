@@ -26,6 +26,16 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         startPos = transform.position;
     }
 
+    public void Init(GridBoard newBoard, GridPlacer newBoardPlacer, Shape newShape)
+    {
+        board = newBoard;
+        boardPlacer = newBoardPlacer;
+        shape = newShape;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+    }
+
     public void IBeginDragHandler_OnBeginDrag(PointerEventData eventData) {}
 
     public void OnPointerDown(PointerEventData eventData)

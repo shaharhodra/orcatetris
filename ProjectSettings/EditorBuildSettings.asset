@@ -125,5 +125,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/loby.unity
     guid: e541f7f1ee617974bab2512bbb0544b6
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: fea78cfe6ac9b4a409a29794f8610da8, type: 2}
   m_UseUCBPForAssetBundles: 0

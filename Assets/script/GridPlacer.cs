@@ -1,9 +1,12 @@
 using UnityEngine;
+using System;
 
 public class GridPlacer : MonoBehaviour
 {
     [SerializeField] private GridBoard board;
     [SerializeField] private ScoreManager scoreManager;
+
+    public event Action<Shape> OnShapePlaced;
 
     [Header("Scoring")]
     [SerializeField] private int scorePerPlacedCell = 1;
@@ -64,6 +67,8 @@ public class GridPlacer : MonoBehaviour
                 board.SetPlacedBlock(cell, block.gameObject);
             }
         }
+
+        OnShapePlaced?.Invoke(shape);
 
         Destroy(shape.gameObject);
 
