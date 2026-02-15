@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 197d952b572cc9842ab329e322916de6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221810
+  packageName: UniToDo - Editor To Do List
+  packageVersion: 1.0.0
+  assetPath: Assets/UniToDo/Editor/CustomAssetPostProcessor.cs
+  uploadId: 498640

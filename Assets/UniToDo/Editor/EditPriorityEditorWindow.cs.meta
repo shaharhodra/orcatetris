@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ed158f96cb9ef55419a82b7a6fc6dc04
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221810
+  packageName: UniToDo - Editor To Do List
+  packageVersion: 1.0.0
+  assetPath: Assets/UniToDo/Editor/EditPriorityEditorWindow.cs
+  uploadId: 498640

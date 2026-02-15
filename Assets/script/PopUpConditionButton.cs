@@ -13,7 +13,6 @@ public class PopUpConditionButton : MonoBehaviour
     {
         if (targetService == null)
         {
-            Debug.LogWarning("PopUpConditionButton: targetService is not assigned.");
             return;
         }
 

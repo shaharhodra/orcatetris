@@ -18,7 +18,6 @@ public class SceneLoaderByName : MonoBehaviour
     {
         if (targetSceneIndex < 0 || targetSceneIndex >= SceneManager.sceneCountInBuildSettings)
         {
-            Debug.LogError($"Target scene index {targetSceneIndex} is out of range");
             return;
         }
 

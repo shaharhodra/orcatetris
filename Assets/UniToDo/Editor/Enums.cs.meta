@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0a37a6374485a254d9e1bb01debe2dd4
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221810
+  packageName: UniToDo - Editor To Do List
+  packageVersion: 1.0.0
+  assetPath: Assets/UniToDo/Editor/Enums.cs
+  uploadId: 498640

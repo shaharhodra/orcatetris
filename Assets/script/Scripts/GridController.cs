@@ -32,7 +32,6 @@ public class GridController : MonoBehaviour
         if (board == null)
             return;
 
-        Debug.Log($"GridController -> applying size to {board.name}: cols={levelData.GridColumns} rows={levelData.GridRows}");
         board.ApplySize(levelData.GridColumns, levelData.GridRows);
     }
 }

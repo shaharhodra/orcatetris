@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.IO;
 using UnityEngine.SceneManagement;
 
 // every manager will derive from the Singleton class - this makes sure there is only one single manager of this type in the whole app.
@@ -13,24 +14,114 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private TextAsset[] _levelJsonFiles;
     [SerializeField] private int startLevelIndex;
 
+    [Serializable]
+    private class PlayerProgressData
+    {
+        public int highestUnlockedLevel;
+    }
+
+    private PlayerProgressData _playerProgress;
+
     public LevelData CurrentLevelData { get; private set; }
+
+    public int HighestUnlockedLevel => _playerProgress != null ? _playerProgress.highestUnlockedLevel : startLevelIndex;
 
     private string lastLoadedSceneName;
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
+        LoadPlayerProgress();
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SavePlayerProgress();
     }
 
     private void Start()
     {
         if (CurrentLevelData == null)
             HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+    }
+
+    private string GetProgressFilePath()
+    {
+        return Path.Combine(Application.persistentDataPath, "player_progress.json");
+    }
+
+    private void LoadPlayerProgress()
+    {
+        var path = GetProgressFilePath();
+        if (!File.Exists(path))
+        {
+            _playerProgress = new PlayerProgressData
+            {
+                highestUnlockedLevel = startLevelIndex
+            };
+            return;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(path);
+            if (!string.IsNullOrEmpty(json))
+            {
+                var data = JsonUtility.FromJson<PlayerProgressData>(json);
+                if (data != null)
+                    _playerProgress = data;
+            }
+        }
+        catch
+        {
+            _playerProgress = new PlayerProgressData
+            {
+                highestUnlockedLevel = startLevelIndex
+            };
+        }
+
+        if (_playerProgress == null)
+        {
+            _playerProgress = new PlayerProgressData
+            {
+                highestUnlockedLevel = startLevelIndex
+            };
+        }
+    }
+
+    private void SavePlayerProgress()
+    {
+        if (_playerProgress == null)
+            return;
+
+        try
+        {
+            var json = JsonUtility.ToJson(_playerProgress);
+            var path = GetProgressFilePath();
+            Debug.Log($"Saving player progress to: {path} | json: {json}");
+            File.WriteAllText(path, json);
+        }
+        catch
+        {
+            Debug.LogError("Failed to save player progress");
+        }
+    }
+
+    public void SetLevelCompleted(int levelIndex)
+    {
+        if (_playerProgress == null)
+            LoadPlayerProgress();
+
+        if (levelIndex + 1 > _playerProgress.highestUnlockedLevel)
+        {
+            _playerProgress.highestUnlockedLevel = levelIndex + 1;
+            SavePlayerProgress();
+        }
+        else
+        {
+            Debug.Log($"Level {levelIndex} completed but highestUnlockedLevel already {HighestUnlockedLevel}, not updating.");
+        }
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -60,9 +151,7 @@ public class GameManager : Singleton<GameManager>
         if (sceneLevel != null)
             index = sceneLevel.LevelIndex;
         else
-            Debug.LogWarning($"GameManager -> scene loaded '{scene.name}' has no SceneLevelIndex, falling back to startLevelIndex={startLevelIndex}");
-
-        Debug.Log($"GameManager -> scene loaded '{scene.name}', loading levelIndex={index}");
+            ;
 
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
             LoadLevel(index);
@@ -74,7 +163,6 @@ public class GameManager : Singleton<GameManager>
     {
         // take LevelData and convert it to json string
         var json = JsonUtility.ToJson(_levelData);
-        Debug.Log("This is the level data : " + json);
 
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
             LoadLevel(startLevelIndex);
@@ -113,8 +201,6 @@ public class GameManager : Singleton<GameManager>
             return;
 
         CurrentLevelData = levelData;
-        Debug.Log("Rows = " + levelData.GridRows);
-        Debug.Log("Columns = " + levelData.GridColumns);
 
         InvokeOnDataLoaded(levelData);
     }

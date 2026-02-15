@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 54c219a6b47a5cf45a735d0a484ec228
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 221810
+  packageName: UniToDo - Editor To Do List
+  packageVersion: 1.0.0
+  assetPath: Assets/UniToDo/Editor/ToDoListEditorWindow_Methods.cs
+  uploadId: 498640

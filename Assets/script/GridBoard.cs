@@ -21,8 +21,12 @@ public class GridBoard : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"[GridBoard] Start on {gameObject.name}, buildOnStart = {buildOnStart}, size = {width}x{height}");
+
         if (buildOnStart)
+        {
             BuildGrid();
+        }
     }
 
     public void ClearHover()
@@ -67,14 +71,17 @@ public class GridBoard : MonoBehaviour
     {
         width = Mathf.Max(1, newWidth);
         height = Mathf.Max(1, newHeight);
-        Debug.Log($"GridBoard.ApplySize -> {name} width={width} height={height} (children before rebuild: {transform.childCount})");
         RebuildGrid();
     }
 
     public void RebuildGrid()
     {
+        Debug.Log("[GridBoard] RebuildGrid requested");
+
         if (Application.isPlaying)
         {
+            Debug.Log("[GridBoard] RebuildGrid (play mode) requested");
+
             StopAllCoroutines();
             StartCoroutine(RebuildGridCoroutine());
             return;
@@ -87,11 +94,11 @@ public class GridBoard : MonoBehaviour
 
     private IEnumerator RebuildGridCoroutine()
     {
+        Debug.Log("[GridBoard] RebuildGridCoroutine started");
         ClearHover();
         ClearGridObjects();
         yield return null;
         BuildGrid();
-        Debug.Log($"GridBoard.RebuildGrid -> {name} children after rebuild: {transform.childCount}");
     }
 
     public void Clear()
@@ -121,9 +128,11 @@ public class GridBoard : MonoBehaviour
     {
         if (cellPrefab == null)
         {
-            Debug.LogError("GridBoard: cellPrefab is not assigned");
+            Debug.LogWarning($"[GridBoard] cellPrefab is NULL on {gameObject.name}, cannot build grid");
             return;
         }
+
+        Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
 
         CenterOrigin();
 
@@ -150,6 +159,8 @@ public class GridBoard : MonoBehaviour
 
     private void ClearGridObjects()
     {
+        Debug.Log($"[GridBoard] ClearGridObjects on {gameObject.name}");
+
         cells = null;
         placedBlocks = null;
 

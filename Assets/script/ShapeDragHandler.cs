@@ -33,8 +33,10 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
         float z = Mathf.Abs(transform.position.z - mainCam.transform.position.z);
         Vector3 worldPos = mainCam.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, z));
-        // נשמור את ההפרש בין מיקום הצורה למיקום האצבע בתחילת הגרירה
+        // נשמור את ההפרש בין מיקום הצורה למיקום האצבע בתחילת הגרירה,
+        // אבל נכפה מרחק מינימלי בציר Y כדי ליצור "קפיצה" קטנה מעל האצבע
         dragOffset = transform.position - worldPos;
+        dragOffset.y = minFingerOffsetY;
         startPointerY = eventData.position.y;
     }
 
@@ -46,12 +48,12 @@ public class ShapeDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         float z = Mathf.Abs(transform.position.z - mainCam.transform.position.z);
         // worldPos = מיקום מתחת לאצבע בעולם
         Vector3 worldPos = mainCam.ScreenToWorldPoint(new Vector3(eventData.position.x, eventData.position.y, z));
-        // חישוב אוף־סט לגובה מעל האצבע – גדל ככל שגוררים יותר למעלה
+        // חישוב אוף־סט נוסף לגובה מעל האצבע – גדל ככל שגוררים יותר למעלה
         float deltaY = eventData.position.y - startPointerY;
         float t = Mathf.Clamp01(deltaY / verticalOffsetRangePixels);
-        float dynamicOffsetY = Mathf.Lerp(minFingerOffsetY, maxFingerOffsetY, t);
+        float dynamicOffsetY = Mathf.Lerp(0f, maxFingerOffsetY - minFingerOffsetY, t);
 
-        // מיקום הצורה נקבע יחסית לאצבע, בתוספת אוף־סט לגובה
+        // מיקום הצורה נקבע יחסית לאצבע, בתוספת אוף־סט התחלתי + אוף־סט דינמי בציר Y
         Vector3 targetPos = worldPos + dragOffset + Vector3.up * dynamicOffsetY;
         transform.position = targetPos;
 
