@@ -27,17 +27,41 @@ MonoBehaviour:
     m_SerializedLabels:
     - shape
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d8d91600d7a7b941981b62b45770170
+    m_Address: Assets/Levels/Level3.json
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - adv
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87273cfe2a99b974da4702015ce3e434
+    m_Address: Assets/Levels/Level2.json
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - adv
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aa3605e593d747e479487e4fbbc65a64
     m_Address: Assets/cubs/shapes/shape 3.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - shape
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9a4cea304d84dd49917a4e1a84bee6c
+    m_Address: Assets/Levels/Level1.json
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - adv
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d52b71b10b991884ea02b1d563a3e993
     m_Address: Assets/cubs/shapes/shape 2.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - shape
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb82d921b6aae854fa2354d4436e5135
+    m_Address: Assets/Levels/clasic.json
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - clasic
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 15daf7d47da06c743a670df0ace27a6a, type: 2}

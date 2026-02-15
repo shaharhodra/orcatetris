@@ -2,6 +2,10 @@
 using System;
 using System.IO;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 // every manager will derive from the Singleton class - this makes sure there is only one single manager of this type in the whole app.
 public class GameManager : Singleton<GameManager>
@@ -14,6 +18,11 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private TextAsset[] _levelJsonFiles;
     [SerializeField] private TextAsset _classicLevelJsonFile;
     [SerializeField] private int startLevelIndex;
+
+    [Header("Addressables Levels")]
+    [SerializeField] private bool useAddressablesForLevels;
+    [SerializeField] private string adventureLevelsLabel;
+    [SerializeField] private string classicLevelsLabel;
 
     [Header("Scene Navigation")]
     [SerializeField] private int adventureLobbySceneBuildIndex = 0;
@@ -49,6 +58,15 @@ public class GameManager : Singleton<GameManager>
 
     private int lastLoadedSceneHandle = -1;
 
+    private readonly List<TextAsset> addressableAdventureLevels = new List<TextAsset>();
+    private TextAsset addressableClassicLevel;
+    private bool addressablesAdventureLoaded;
+    private bool addressablesClassicLoaded;
+    private bool addressablesAdventureLoading;
+    private bool addressablesClassicLoading;
+    private AsyncOperationHandle<IList<TextAsset>> adventureHandle;
+    private AsyncOperationHandle<IList<TextAsset>> classicHandle;
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
@@ -59,6 +77,14 @@ public class GameManager : Singleton<GameManager>
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
         SavePlayerProgress();
+    }
+
+    private void OnDestroy()
+    {
+        if (adventureHandle.IsValid())
+            Addressables.Release(adventureHandle);
+        if (classicHandle.IsValid())
+            Addressables.Release(classicHandle);
     }
 
     private void Start()
@@ -203,7 +229,7 @@ public class GameManager : Singleton<GameManager>
     {
         SetGameModeClassic();
 
-        if (_classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
+        if (!useAddressablesForLevels && _classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
         {
             Debug.LogError("GameManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
             return;
@@ -227,6 +253,12 @@ public class GameManager : Singleton<GameManager>
 
         if (CurrentGameMode == GameMode.Classic)
         {
+            if (useAddressablesForLevels)
+            {
+                StartCoroutine(LoadClassicFromAddressablesThenInvoke(scene));
+                return;
+            }
+
             if (_classicLevelJsonFile != null)
             {
                 Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
@@ -275,15 +307,197 @@ public class GameManager : Singleton<GameManager>
 
         int index = levelNumber - 1;
 
+        if (useAddressablesForLevels)
+        {
+            StartCoroutine(LoadAdventureFromAddressablesThenLoadIndex(index));
+            return;
+        }
+
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
             LoadLevel(index);
         else
             LoadLevelFromJson(_levelJson);
     }
 
+    private IEnumerator LoadAdventureFromAddressablesThenLoadIndex(int index)
+    {
+        if (addressablesAdventureLoaded)
+        {
+            LoadAdventureLevelByIndex(index);
+            yield break;
+        }
+
+        if (addressablesAdventureLoading)
+        {
+            while (addressablesAdventureLoading)
+                yield return null;
+
+            if (addressablesAdventureLoaded)
+                LoadAdventureLevelByIndex(index);
+            yield break;
+        }
+
+        addressablesAdventureLoading = true;
+
+        if (string.IsNullOrEmpty(adventureLevelsLabel))
+        {
+            Debug.LogError("GameManager -> useAddressablesForLevels is enabled but adventureLevelsLabel is empty. Falling back to inspector levels.");
+            addressablesAdventureLoading = false;
+            if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
+                LoadLevel(index);
+            else
+                LoadLevelFromJson(_levelJson);
+            yield break;
+        }
+
+        adventureHandle = Addressables.LoadAssetsAsync<TextAsset>(adventureLevelsLabel, null);
+        yield return adventureHandle;
+
+        addressableAdventureLevels.Clear();
+        if (adventureHandle.Status == AsyncOperationStatus.Succeeded && adventureHandle.Result != null)
+        {
+            foreach (var ta in adventureHandle.Result)
+            {
+                if (ta != null)
+                    addressableAdventureLevels.Add(ta);
+            }
+
+            addressableAdventureLevels.Sort((a, b) => GetLevelNumberSafe(a).CompareTo(GetLevelNumberSafe(b)));
+            addressablesAdventureLoaded = addressableAdventureLevels.Count > 0;
+        }
+        else
+        {
+            Debug.LogError($"GameManager -> Failed to load adventure levels via Addressables label '{adventureLevelsLabel}'. Falling back to inspector levels.");
+            addressablesAdventureLoaded = false;
+        }
+
+        addressablesAdventureLoading = false;
+
+        if (addressablesAdventureLoaded)
+            LoadAdventureLevelByIndex(index);
+        else if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
+            LoadLevel(index);
+        else
+            LoadLevelFromJson(_levelJson);
+    }
+
+    private void LoadAdventureLevelByIndex(int index)
+    {
+        if (index < 0 || index >= addressableAdventureLevels.Count)
+        {
+            Debug.LogError($"GameManager -> Adventure level index out of range: {index}. Loaded addressable levels count: {addressableAdventureLevels.Count}");
+            return;
+        }
+
+        var ta = addressableAdventureLevels[index];
+        if (ta == null)
+            return;
+
+        LoadLevelFromJson(ta.text);
+    }
+
+    private IEnumerator LoadClassicFromAddressablesThenInvoke(Scene scene)
+    {
+        if (addressablesClassicLoaded)
+        {
+            if (addressableClassicLevel != null)
+            {
+                Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+                LoadLevelFromJson(addressableClassicLevel.text);
+            }
+            yield break;
+        }
+
+        if (addressablesClassicLoading)
+        {
+            while (addressablesClassicLoading)
+                yield return null;
+
+            if (addressablesClassicLoaded && addressableClassicLevel != null)
+            {
+                Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+                LoadLevelFromJson(addressableClassicLevel.text);
+            }
+            yield break;
+        }
+
+        addressablesClassicLoading = true;
+
+        if (string.IsNullOrEmpty(classicLevelsLabel))
+        {
+            Debug.LogError("GameManager -> useAddressablesForLevels is enabled but classicLevelsLabel is empty. Falling back to inspector classic json.");
+            addressablesClassicLoading = false;
+
+            if (_classicLevelJsonFile != null)
+                LoadLevelFromJson(_classicLevelJsonFile.text);
+            else
+                LoadLevelFromJson(_levelJson);
+            yield break;
+        }
+
+        classicHandle = Addressables.LoadAssetsAsync<TextAsset>(classicLevelsLabel, null);
+        yield return classicHandle;
+
+        addressableClassicLevel = null;
+        if (classicHandle.Status == AsyncOperationStatus.Succeeded && classicHandle.Result != null)
+        {
+            for (int i = 0; i < classicHandle.Result.Count; i++)
+            {
+                var ta = classicHandle.Result[i];
+                if (ta == null)
+                    continue;
+
+                addressableClassicLevel = ta;
+                break;
+            }
+
+            addressablesClassicLoaded = addressableClassicLevel != null;
+        }
+        else
+        {
+            Debug.LogError($"GameManager -> Failed to load classic levels via Addressables label '{classicLevelsLabel}'. Falling back to inspector classic json.");
+            addressablesClassicLoaded = false;
+        }
+
+        addressablesClassicLoading = false;
+
+        if (addressablesClassicLoaded && addressableClassicLevel != null)
+        {
+            Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+            LoadLevelFromJson(addressableClassicLevel.text);
+        }
+        else if (_classicLevelJsonFile != null)
+        {
+            LoadLevelFromJson(_classicLevelJsonFile.text);
+        }
+        else
+        {
+            LoadLevelFromJson(_levelJson);
+        }
+    }
+
+    private int GetLevelNumberSafe(TextAsset ta)
+    {
+        if (ta == null)
+            return int.MaxValue;
+
+        try
+        {
+            var data = JsonUtility.FromJson<LevelData>(ta.text);
+            if (data != null && data.Level > 0)
+                return data.Level;
+        }
+        catch
+        {
+        }
+
+        return int.MaxValue;
+    }
+
     public void InitData()
     {
         // take LevelData and convert it to json string
+
         var json = JsonUtility.ToJson(_levelData);
 
         if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
