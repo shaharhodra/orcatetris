@@ -50,8 +50,11 @@ MonoBehaviour:
   occupied: 0
   hasShapeOver: 0
   normalAlpha: 1
-  hoverAlpha: 0.5
+  hoverAlpha: 0.1
   useTriggerHover: 0
+  _sprite: {fileID: 3347676569184785326}
+  _colider: {fileID: 7427878456175831511}
+  _boxCollider: {fileID: 7427878456175831511}
 --- !u!61 &7427878456175831511
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -96,7 +99,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.4, y: 0.4}
+  m_Size: {x: 0.512, y: 0.512}
   m_EdgeRadius: 0
 --- !u!1 &5337424213453880000
 GameObject:
@@ -179,8 +182,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -5177388603050735206, guid: 8884154dfe85442a3a3578be807dbcdf, type: 3}
-  m_Color: {r: 0.56424373, g: 0.5526878, b: 0.5660378, a: 1}
+  m_Sprite: {fileID: 7673595411333208751, guid: 47e807bde4138d34f897008dedd6c220, type: 3}
+  m_Color: {r: 0.836478, g: 0.50241286, b: 0.836478, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
