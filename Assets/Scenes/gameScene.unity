@@ -1804,6 +1804,7 @@ GameObject:
   - component: {fileID: 842244855}
   - component: {fileID: 842244854}
   - component: {fileID: 842244853}
+  - component: {fileID: 842244856}
   m_Layer: 5
   m_Name: back
   m_TagString: Untagged
@@ -1875,9 +1876,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1328476888}
-        m_TargetAssemblyTypeName: SceneLoaderByName, Assembly-CSharp
-        m_MethodName: LoadScene
+      - m_Target: {fileID: 842244856}
+        m_TargetAssemblyTypeName: BackButton, Assembly-CSharp
+        m_MethodName: OnBackClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1925,6 +1926,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 842244851}
   m_CullTransparentMesh: 1
+--- !u!114 &842244856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842244851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4149a8aaa423b2e4e8ef4df93f2de38d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1 &855154863
 GameObject:
   m_ObjectHideFlags: 0

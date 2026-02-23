@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -12,6 +13,12 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [SerializeField] private float validAlpha = 0.8f;
     [SerializeField] private float invalidAlpha = 0.3f;
 
+    [Header("Press Scale")]
+    [SerializeField] private bool usePressScale = true;
+    [SerializeField] private float idleScaleFactor = 0.7f;      // גודל במנוחה (קטן)
+    [SerializeField] private float pressedScaleFactor = 1.0f;    // 1.0 = גודל מקורי
+    [SerializeField] private float pressScaleDuration = 0.15f;
+
     private Camera mainCam;
     private Vector3 startPos;
     private Vector3 dragOffset;
@@ -20,10 +27,20 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     private bool pointerDown;
     private bool beganDrag;
 
+    private Vector3 originalScale;
+    private Tween scaleTween;
+
     private void Awake()
     {
         mainCam = Camera.main;
         startPos = transform.position;
+        originalScale = transform.localScale;
+
+        // צורה מתחילה קטנה יותר
+        if (usePressScale && idleScaleFactor > 0f && idleScaleFactor < 1.5f)
+        {
+            transform.localScale = originalScale * idleScaleFactor;
+        }
     }
 
     public void Init(GridBoard newBoard, GridPlacer newBoardPlacer, Shape newShape)
@@ -45,6 +62,14 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         pointerDown = true;
         beganDrag = false;
+
+        if (usePressScale)
+        {
+            scaleTween?.Kill();
+            // גדילה לגודל המקורי (או מעט יותר, לפי pressedScaleFactor)
+            Vector3 targetScale = originalScale * pressedScaleFactor;
+            scaleTween = transform.DOScale(targetScale, pressScaleDuration).SetEase(Ease.OutBack);
+        }
 
         if (mainCam == null)
             mainCam = Camera.main;
@@ -125,6 +150,14 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         transform.position = startPos;
         SetAlpha(1f);
 
+        if (usePressScale)
+        {
+            scaleTween?.Kill();
+            // חזרה לגודל מנוחה קטן
+            Vector3 idleScale = originalScale * idleScaleFactor;
+            scaleTween = transform.DOScale(idleScale, pressScaleDuration).SetEase(Ease.OutQuad);
+        }
+
         if (board != null)
             board.ClearHover();
     }
@@ -160,6 +193,14 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         {
             transform.position = startPos;
             SetAlpha(1f);
+
+            if (usePressScale)
+            {
+                scaleTween?.Kill();
+                // חזרה לגודל מנוחה קטן
+                Vector3 idleScale = originalScale * idleScaleFactor;
+                scaleTween = transform.DOScale(idleScale, pressScaleDuration).SetEase(Ease.OutQuad);
+            }
 
             board.ClearHover();
         }

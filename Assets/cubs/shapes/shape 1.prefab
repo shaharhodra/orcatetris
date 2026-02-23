@@ -78,6 +78,10 @@ MonoBehaviour:
   verticalOffsetRangePixels: 200
   validAlpha: 0.8
   invalidAlpha: 0.3
+  usePressScale: 1
+  idleScaleFactor: 0.5
+  pressedScaleFactor: 1
+  pressScaleDuration: 0.15
 --- !u!50 &1264366988973758854
 Rigidbody2D:
   serializedVersion: 5
