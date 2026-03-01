@@ -286,6 +286,12 @@ public class GameManager : Singleton<GameManager>
 
         lastLoadedSceneHandle = scene.handle;
 
+        // Reset current score whenever the main gameplay scene loads, while keeping MaxScore/high score.
+        if (scene.buildIndex == classicGameSceneBuildIndex && ScoreManager.instance != null)
+        {
+            ScoreManager.instance.ResetScore();
+        }
+
         if (CurrentGameMode == GameMode.Classic)
         {
             // Classic mode: always load the single classic JSON/config for the shared GameScene

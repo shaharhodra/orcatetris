@@ -37,6 +37,12 @@ public class Shape : MonoBehaviour
 
     public Vector2Int[] GetCells(float cellSize)
     {
+        // קודם כל ננסה להשתמש בנתונים הידניים מה-inspector אם הוגדרו.
+        if (shapeData != null && shapeData.cells != null && shapeData.cells.Length > 0)
+        {
+            return shapeData.cells;
+        }
+
         int childCount = transform.childCount;
         if (childCount > 0)
         {
@@ -59,10 +65,8 @@ public class Shape : MonoBehaviour
                 return result.ToArray();
         }
 
-        if (shapeData == null)
-            return System.Array.Empty<Vector2Int>();
-
-        return shapeData.cells ?? System.Array.Empty<Vector2Int>();
+        // אם אין ילדים רלוונטיים וגם אין נתוני shapeData – מחזירים מערך ריק.
+        return System.Array.Empty<Vector2Int>();
     }
 
     [Header("Gizmo Settings")]

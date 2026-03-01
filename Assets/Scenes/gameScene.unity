@@ -515,6 +515,7 @@ GameObject:
   - component: {fileID: 235206502}
   - component: {fileID: 235206501}
   - component: {fileID: 235206505}
+  - component: {fileID: 235206506}
   m_Layer: 5
   m_Name: modeCanvas
   m_TagString: Untagged
@@ -618,6 +619,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2fc56fc8bdf9a943abc5f06614a64ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreUI
+--- !u!114 &235206506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235206500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa72deaf37428484eb30415c1978382f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UiController
+  _scoreText: {fileID: 1433654654}
+  _highScoreText: {fileID: 171392471}
 --- !u!1 &382156486
 GameObject:
   m_ObjectHideFlags: 0
@@ -1472,7 +1487,7 @@ Transform:
   m_GameObject: {fileID: 759034414}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2, y: -3.5, z: 0}
+  m_LocalPosition: {x: -1, y: -3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1979,6 +1994,7 @@ MonoBehaviour:
   - {fileID: 5013990381444744598, guid: d52b71b10b991884ea02b1d563a3e993, type: 3}
   - {fileID: 5216686327907737246, guid: aa3605e593d747e479487e4fbbc65a64, type: 3}
   - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
+  - {fileID: 5454446068728028695, guid: 243d6f81dc575b8408d2114cf70d2d53, type: 3}
   useAddressables: 0
   shapesLabel: 
 --- !u!4 &855154865
@@ -2247,7 +2263,7 @@ Transform:
   m_GameObject: {fileID: 1157930586}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: -3.5, z: 0}
+  m_LocalPosition: {x: 1, y: -3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2646,9 +2662,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridPlacer
   board: {fileID: 1414012165}
-  scoreManager: {fileID: 1936900130}
-  scorePerPlacedCell: 1
-  scorePerClearedCell: 2
+  scorePerPlacedCell: 10
+  scorePerClearedCell: 100
 --- !u!114 &1414012168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3843,8 +3858,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a489cabcbf7ed48a8689e7aefdc00b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
-  scoreText: {fileID: 1433654654}
-  maxScoreText: {fileID: 171392471}
 --- !u!4 &1936900131
 Transform:
   m_ObjectHideFlags: 0
@@ -3892,6 +3905,7 @@ MonoBehaviour:
   board: {fileID: 1414012165}
   maxRevives: 3
   revivePopup: {fileID: 1623868274}
+  shapeTrayManager: {fileID: 0}
 --- !u!4 &2006691661
 Transform:
   m_ObjectHideFlags: 0

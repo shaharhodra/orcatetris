@@ -4,7 +4,7 @@ using System;
 public class GridPlacer : MonoBehaviour
 {
     [SerializeField] private GridBoard board;
-    [SerializeField] private ScoreManager scoreManager;
+    // No need to serialize ScoreManager; use the singleton instance instead.
 
     public event Action<Shape> OnShapePlaced;
 
@@ -20,12 +20,19 @@ public class GridPlacer : MonoBehaviour
             Vector2Int cell = targetCell + offset;
 
             if (!board.IsInside(cell))
+            {
+                //Debug.Log($"[CanPlaceShape] '{shape.name}' FAIL at {targetCell}: cell {cell} is outside grid.");
                 return false;
+            }
 
             if (board.IsOccupied(cell))
+            {
+                //Debug.Log($"[CanPlaceShape] '{shape.name}' FAIL at {targetCell}: cell {cell} is occupied.");
                 return false;
+            }
         }
 
+        //Debug.Log($"[CanPlaceShape] '{shape.name}' can be placed at {targetCell}.");
         return true;
     }
 
@@ -71,6 +78,8 @@ public class GridPlacer : MonoBehaviour
         OnShapePlaced?.Invoke(shape);
 
         Destroy(shape.gameObject);
+
+        var scoreManager = ScoreManager.instance;
 
         if (scoreManager != null)
         {
