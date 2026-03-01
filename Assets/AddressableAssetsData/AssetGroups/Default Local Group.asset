@@ -51,6 +51,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - adv
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 213a32c4778402f41aff228a4b5db834
+    m_Address: Assets/cubs/shapes/4on4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 21baba00eec14dc41a4742b446a9bfda
     m_Address: Assets/Levels/Level32.json
     m_ReadOnly: 0
@@ -62,6 +68,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - adv
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 243d6f81dc575b8408d2114cf70d2d53
+    m_Address: Assets/cubs/shapes/lineof4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2522715547af7f446a2789d7ae6c3809
     m_Address: Assets/Levels/Level16.json

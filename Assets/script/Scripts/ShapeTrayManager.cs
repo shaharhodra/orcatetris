@@ -190,7 +190,12 @@ public class ShapeTrayManager : MonoBehaviour
     private bool HasAnyMove()
     {
         if (activeShapes.Count == 0)
+        {
+            Debug.Log("[HasAnyMove] activeShapes is empty -> returning true (treat as moves available)");
             return true;
+        }
+
+        bool anyMove = false;
 
         for (int i = 0; i < activeShapes.Count; i++)
         {
@@ -198,24 +203,45 @@ public class ShapeTrayManager : MonoBehaviour
             if (s == null)
                 continue;
 
-            if (HasAnyMoveForShape(s))
-                return true;
+            bool thisShapeHasMove = HasAnyMoveForShape(s);
+            Debug.Log($"[HasAnyMove] shape '{s.name}' hasMove={thisShapeHasMove}");
+
+            if (thisShapeHasMove)
+                anyMove = true;
         }
 
-        return false;
+        return anyMove;
+    }
+
+    // Public wrapper so other systems (e.g. ReviveManager) can safely query if there are any valid moves.
+    public bool HasAnyMoveAvailable()
+    {
+        return HasAnyMove();
     }
 
     private bool HasAnyMoveForShape(Shape s)
     {
+        bool found = false;
+
         for (int x = 0; x < board.width; x++)
         {
             for (int y = 0; y < board.height; y++)
             {
-                if (placer.CanPlaceShape(s, new Vector2Int(x, y)))
-                    return true;
+                var cell = new Vector2Int(x, y);
+                if (placer.CanPlaceShape(s, cell))
+                {
+                    Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' CAN be placed at {cell}");
+                    found = true;
+                    // לא שוברים את הלולאה, כדי לראות כל התאים החוקיים ללוג
+                }
             }
         }
 
-        return false;
+        if (!found)
+        {
+            Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' has NO valid placement");
+        }
+
+        return found;
     }
 }

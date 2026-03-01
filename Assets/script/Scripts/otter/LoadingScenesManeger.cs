@@ -31,7 +31,7 @@ public class LoadingScenesManeger : MonoBehaviour
             return;
         }
 
-        float duration = 8.0f;
+        float duration = 2.0f;
         float elapsed = 0f;
 
         while (elapsed < duration)
