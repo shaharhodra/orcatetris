@@ -6,7 +6,12 @@ public class GridPlacer : MonoBehaviour
     [SerializeField] private GridBoard board;
     // No need to serialize ScoreManager; use the singleton instance instead.
 
+    [Header("Debug")]
+    [SerializeField] private bool debugLogs;
+
     public event Action<Shape> OnShapePlaced;
+    public event Action<LineClearResult> OnLinesCleared;
+    public event Action OnNoLinesCleared;
 
     [Header("Scoring")]
     [SerializeField] private int scorePerPlacedCell = 1;
@@ -81,16 +86,31 @@ public class GridPlacer : MonoBehaviour
 
         var scoreManager = ScoreManager.instance;
 
+        LineClearResult clearResult;
+
         if (scoreManager != null)
         {
             scoreManager.AddScore(offsets.Length * scorePerPlacedCell);
-            int cleared = board.ClearFullLines();
-            if (cleared > 0)
-                scoreManager.AddScore(cleared * scorePerClearedCell);
+            clearResult = board.ClearFullLinesDetailed();
+            if (clearResult.CellsCleared > 0)
+                scoreManager.AddScore(clearResult.CellsCleared * scorePerClearedCell);
         }
         else
         {
-            board.ClearFullLines();
+            clearResult = board.ClearFullLinesDetailed();
+        }
+
+        if (clearResult.LinesCleared > 0)
+        {
+            if (debugLogs)
+                Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
+            OnLinesCleared?.Invoke(clearResult);
+        }
+        else
+        {
+            if (debugLogs)
+                Debug.Log("[GridPlacer] No lines cleared -> breaking combo");
+            OnNoLinesCleared?.Invoke();
         }
     }
 }

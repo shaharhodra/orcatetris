@@ -214,8 +214,11 @@ MonoBehaviour:
   board: {fileID: 0}
   boardPlacer: {fileID: 0}
   shape: {fileID: 5216686327907737246}
-  minFingerOffsetY: 2
+  minFingerOffsetX: 0
+  maxFingerOffsetX: 1.5
+  minFingerOffsetY: 1
   maxFingerOffsetY: 3
+  horizontalOffsetRangePixels: 200
   verticalOffsetRangePixels: 200
   validAlpha: 0.8
   invalidAlpha: 0.3

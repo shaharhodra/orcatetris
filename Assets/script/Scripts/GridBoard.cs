@@ -234,8 +234,13 @@ public class GridBoard : MonoBehaviour
 
     public int ClearFullLines()
     {
+        return ClearFullLinesDetailed().CellsCleared;
+    }
+
+    public LineClearResult ClearFullLinesDetailed()
+    {
         if (cells == null)
-            return 0;
+            return new LineClearResult(0, 0, 0);
 
         bool[] fullRows = new bool[height];
         bool[] fullCols = new bool[width];
@@ -289,6 +294,20 @@ public class GridBoard : MonoBehaviour
         }
 
         int cleared = 0;
+        int rowsCleared = 0;
+        int colsCleared = 0;
+
+        for (int y = 0; y < height; y++)
+        {
+            if (fullRows[y])
+                rowsCleared++;
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            if (fullCols[x])
+                colsCleared++;
+        }
 
         for (int x = 0; x < width; x++)
         {
@@ -311,7 +330,7 @@ public class GridBoard : MonoBehaviour
             }
         }
 
-        return cleared;
+        return new LineClearResult(rowsCleared, colsCleared, cleared);
     }
 
     public int ClearRow(int y)
