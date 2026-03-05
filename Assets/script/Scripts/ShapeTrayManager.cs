@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -15,6 +16,9 @@ public class ShapeTrayManager : MonoBehaviour
     [Header("Addressables")]
     [SerializeField] private bool useAddressables;
     [SerializeField] private string shapesLabel;
+
+    [Header("Revive Timing")]
+    [SerializeField] private float noMovesReviveDelay = 0.7f;
 
     private readonly List<Shape> activeShapes = new List<Shape>(3);
     private bool noMovesReviveTriggered;
@@ -183,7 +187,33 @@ public class ShapeTrayManager : MonoBehaviour
         if (reviveManager != null && reviveManager.CanRevive)
         {
             noMovesReviveTriggered = true;
+            StartCoroutine(NoMovesReviveRoutine());
+        }
+    }
+
+    private IEnumerator NoMovesReviveRoutine()
+    {
+        yield return new WaitForSeconds(noMovesReviveDelay);
+
+        if (board == null || placer == null)
+        {
+            noMovesReviveTriggered = false;
+            yield break;
+        }
+
+        if (HasAnyMove())
+        {
+            noMovesReviveTriggered = false;
+            yield break;
+        }
+
+        if (reviveManager != null && reviveManager.CanRevive)
+        {
             reviveManager.RequestRevive();
+        }
+        else
+        {
+            noMovesReviveTriggered = false;
         }
     }
 

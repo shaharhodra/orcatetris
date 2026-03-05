@@ -78,8 +78,8 @@ MonoBehaviour:
   maxFingerOffsetX: 1.5
   minFingerOffsetY: 1
   maxFingerOffsetY: 3
-  horizontalOffsetRangePixels: 200
-  verticalOffsetRangePixels: 200
+  horizontalOffsetRangePixels: 400
+  verticalOffsetRangePixels: 400
   validAlpha: 0.8
   invalidAlpha: 0.3
   usePressScale: 1

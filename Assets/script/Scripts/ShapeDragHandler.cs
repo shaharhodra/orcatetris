@@ -64,6 +64,11 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         if (isPlaced)
             return;
 
+        if (SoundManager.instance != null)
+        {
+            SoundManager.instance.PlayClickShape();
+        }
+
         pointerDown = true;
         beganDrag = false;
 
@@ -187,6 +192,12 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         if (canPlace)
         {
             boardPlacer.PlaceShape(shape, cell);
+
+            if (SoundManager.instance != null)
+            {
+                SoundManager.instance.PlayPlaceShape();
+            }
+
             SetAlpha(1f);
 
             board.ClearHover();

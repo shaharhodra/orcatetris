@@ -104,6 +104,12 @@ public class GridPlacer : MonoBehaviour
         {
             if (debugLogs)
                 Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
+
+            if (SoundManager.instance != null)
+            {
+                SoundManager.instance.PlayCombo(clearResult.LinesCleared);
+            }
+
             OnLinesCleared?.Invoke(clearResult);
         }
         else
