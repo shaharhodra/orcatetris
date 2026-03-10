@@ -10,13 +10,13 @@ public class PlayerManeger : Singleton<PlayerManeger>
     [Serializable]
     public class PlayerProgressData
     {
-        public int highestUnlockedLevel;
+        public int HighestUnlockedLevel;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        LoadPlayerProgress();
     }
 
     // Update is called once per frame
@@ -37,7 +37,7 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                highestUnlockedLevel = 1
+                HighestUnlockedLevel = 1
             };
             return;
         }
@@ -55,7 +55,7 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                highestUnlockedLevel = 1
+                HighestUnlockedLevel = 1
             };
         }
     }
@@ -75,8 +75,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
                 if (!string.IsNullOrEmpty(existingJson))
                 {
                     var existing = JsonUtility.FromJson<PlayerProgressData>(existingJson);
-                    if (existing != null && existing.highestUnlockedLevel > PlayerProgress.highestUnlockedLevel)
-                        PlayerProgress.highestUnlockedLevel = existing.highestUnlockedLevel;
+                    if (existing != null && existing.HighestUnlockedLevel > PlayerProgress.HighestUnlockedLevel)
+                        PlayerProgress.HighestUnlockedLevel = existing.HighestUnlockedLevel;
                 }
             }
             catch
