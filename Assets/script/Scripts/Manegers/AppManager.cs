@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.IO;
 using UnityEngine.SceneManagement;
@@ -8,10 +8,11 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 // every manager will derive from the Singleton class - this makes sure there is only one single manager of this type in the whole app.
-public class GameManager : Singleton<GameManager>
+public class AppManager : Singleton<AppManager>
 {
     // this is how to define an event - how the manager communicates with the rest of the app components
     public event Action<LevelData> OnDataLoaded;
+    public LevelData CurrentLevelData { get; private set; }
 
     [SerializeField] private LevelData _levelData;
     [SerializeField] private string _levelJson;
@@ -35,6 +36,11 @@ public class GameManager : Singleton<GameManager>
         Classic = 1
     }
 
+    public enum SceneType
+    {
+        Game=3,
+    }
+
     private const string SelectedGameModeKey = "selected_game_mode";
 
     public GameMode CurrentGameMode
@@ -46,12 +52,11 @@ public class GameManager : Singleton<GameManager>
     }
 
    
+
    
 
    
-    public LevelData CurrentLevelData { get; private set; }
 
-   
 
     private int lastLoadedSceneHandle = -1;
 
@@ -79,7 +84,6 @@ public class GameManager : Singleton<GameManager>
         addressablesAdventureLoading = false;
         addressablesClassicLoading = false;
 
-        Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
     }
 
     [ContextMenu("Debug/Force Reload Addressables Levels And Reload Scene")]
@@ -92,13 +96,13 @@ public class GameManager : Singleton<GameManager>
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
-   
+        PlayerManeger.instance.LoadPlayerProgress();
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
-       
+        PlayerManeger.instance.SavePlayerProgress();
     }
 
     private void OnDestroy()
@@ -109,36 +113,71 @@ public class GameManager : Singleton<GameManager>
             Addressables.Release(classicHandle);
     }
 
-    //private void Start()
-    //{
-    //    if (CurrentLevelData == null)
-    //        HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-    //}
-     public void DebugResetProgressToLevel1AndReloadScene()
+    private void Start()
     {
-        
+        HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+    }
+
+    //private string GetProgressFilePath()
+    //{
+    //    return Path.Combine(Application.persistentDataPath, "player_progress.json");
+    //}
+
+   
+
+   
+
+  
+
+    public void DebugResetProgressToLevel1AndReloadScene()
+    {
+       
 
         var scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.buildIndex);
     }
 
-    public void SetLevelCompleted(int levelIndex)
-    {
-        var playerProgress = PlayerManeger.instance.PlayerProgress;
-        if (playerProgress == null)
-          PlayerManeger.instance.LoadPlayerProgress();
+  
 
-        if (levelIndex + 1 > playerProgress.HighestUnlockedLevel)
+    public void SetGameModeAdventure()
+    {
+        PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Adventure);
+        PlayerPrefs.Save();
+    }
+
+    public void SetGameModeClassic()
+    {
+        PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Classic);
+        PlayerPrefs.Save();
+    }
+
+    public void LoadAdventureLobby()
+    {
+        SetGameModeAdventure();
+        SceneManager.LoadScene(adventureLobbySceneBuildIndex);
+    }
+
+    public void LoadClassicGame()
+    {
+        SetGameModeClassic();
+
+        if (!useAddressablesForLevels && _classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
         {
-            playerProgress.HighestUnlockedLevel = levelIndex + 1;
-            PlayerManeger.instance.SavePlayerProgress();
+            Debug.LogError("AppManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
+            return;
         }
-        else
-        {
-            Debug.Log($"Level {levelIndex} completed but highestUnlockedLevel already {PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel}, not updating.");
-        }
-    }   
-    
+
+        SceneManager.LoadScene(classicGameSceneBuildIndex);
+    }
+
+    public void StartAdventureGameFromLobby()
+    {
+        // CurrentGameMode is already Adventure when we arrive to ADV MODE via LoadAdventureLobby,
+        // so we don't change it here. We only load the shared gameplay scene.
+        Debug.Log($"AppManager -> StartAdventureGameFromLobby called. CurrentGameMode={CurrentGameMode}, loading scene buildIndex={classicGameSceneBuildIndex}");
+        SceneManager.LoadScene(classicGameSceneBuildIndex);
+    }
+
     public void ReloadCurrentScene()
     {
         var scene = SceneManager.GetActiveScene();
@@ -147,7 +186,7 @@ public class GameManager : Singleton<GameManager>
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"GameManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
+        Debug.Log($"AppManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
         if (scene.handle == lastLoadedSceneHandle)
             return;
 
@@ -170,24 +209,24 @@ public class GameManager : Singleton<GameManager>
 
             if (_classicLevelJsonFile != null)
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
+                Debug.Log($"AppManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
                 LoadLevelFromJson(_classicLevelJsonFile.text);
                 return;
             }
 
             if (!string.IsNullOrEmpty(_levelJson))
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
+                Debug.Log($"AppManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
                 LoadLevelFromJson(_levelJson);
                 return;
             }
 
-            Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
+            Debug.LogError($"AppManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
             return;
         }
 
         // Adventure mode: single shared GameScene, level is chosen purely by player progress (HighestUnlockedLevel)
-        int index = Mathf.Max(0,PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel - 1);
+        int index = Mathf.Max(0, PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel - 1);
 
         if (useAddressablesForLevels)
         {
@@ -223,7 +262,7 @@ public class GameManager : Singleton<GameManager>
 
         if (string.IsNullOrEmpty(adventureLevelsLabel))
         {
-            Debug.LogError("GameManager -> useAddressablesForLevels is enabled but adventureLevelsLabel is empty. Falling back to inspector levels.");
+            Debug.LogError("AppManager -> useAddressablesForLevels is enabled but adventureLevelsLabel is empty. Falling back to inspector levels.");
             addressablesAdventureLoading = false;
             if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
                 LoadLevel(index);
@@ -249,7 +288,7 @@ public class GameManager : Singleton<GameManager>
         }
         else
         {
-            Debug.LogError($"GameManager -> Failed to load adventure levels via Addressables label '{adventureLevelsLabel}'. Falling back to inspector levels.");
+            Debug.LogError($"AppaManager -> Failed to load adventure levels via Addressables label '{adventureLevelsLabel}'. Falling back to inspector levels.");
             addressablesAdventureLoaded = false;
         }
 

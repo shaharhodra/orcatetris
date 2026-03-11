@@ -13,8 +13,8 @@ public class MenuController : MonoBehaviour
             classicButton.onClick.RemoveAllListeners();
             classicButton.onClick.AddListener(() =>
             {
-                if (GameManager.instance != null)
-                    GameManager.instance.LoadClassicGame();
+                if (AppManager.instance != null)
+                    AppManager.instance.LoadClassicGame();
             });
         }
 
@@ -23,8 +23,8 @@ public class MenuController : MonoBehaviour
             adventureButton.onClick.RemoveAllListeners();
             adventureButton.onClick.AddListener(() =>
             {
-                if (GameManager.instance != null)
-                    GameManager.instance.LoadAdventureLobby();
+                if (AppManager.instance != null)
+                    AppManager.instance.LoadAdventureLobby();
             });
         }
     }

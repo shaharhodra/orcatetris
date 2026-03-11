@@ -23,10 +23,10 @@ public class LobbyLevelManager : MonoBehaviour
         if (levelButtons == null || levelButtons.Length == 0)
             yield break;
 
-        while (GameManager.instance == null)
+        while (PlayerManeger.instance == null)
             yield return null;
 
-        int highest = GameManager.instance.HighestUnlockedLevel;
+        int highest = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel;
 
         LobbyLevelButton lastUnlockedButton = null;
 
