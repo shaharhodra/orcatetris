@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
@@ -6,6 +8,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ShapeTrayManager : MonoBehaviour
 {
+    public event Action OnNoMovesDetected; // notify higher-level managers (PlaceManager) when no moves detected
+
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer placer;
     [SerializeField] private ReviveManager reviveManager;
@@ -19,6 +23,9 @@ public class ShapeTrayManager : MonoBehaviour
 
     [Header("Revive Timing")]
     [SerializeField] private float noMovesReviveDelay = 0.7f;
+
+    [Header("Move Threshold")]
+    [SerializeField] private int minPlaceableToConsiderMovable = 1; // set to 2 or 3 to be stricter
 
     private readonly List<Shape> activeShapes = new List<Shape>(3);
     private bool noMovesReviveTriggered;
@@ -207,25 +214,28 @@ public class ShapeTrayManager : MonoBehaviour
             yield break;
         }
 
-        if (reviveManager != null && reviveManager.CanRevive)
-        {
-            reviveManager.RequestRevive();
-        }
-        else
-        {
-            noMovesReviveTriggered = false;
-        }
+        // Notify higher-level manager instead of calling ReviveManager directly.
+        OnNoMovesDetected?.Invoke();
+        // leave noMovesReviveTriggered as true until higher-level flow resolves it
     }
 
     private bool HasAnyMove()
     {
-        if (activeShapes.Count == 0)
+        // If core refs are missing, be conservative and treat as "moves available"
+        if (board == null || placer == null)
         {
-            Debug.Log("[HasAnyMove] activeShapes is empty -> returning true (treat as moves available)");
+            Debug.LogWarning("[HasAnyMove] board or placer is null -> returning true to avoid premature revive");
             return true;
         }
 
-        bool anyMove = false;
+        if (activeShapes.Count == 0)
+        {
+            Debug.Log("[HasAnyMove] activeShapes is empty -> returning false (treat as NO moves)");
+            return false;
+        }
+
+        int placeableCount = 0;
+        int needed = Mathf.Max(1, minPlaceableToConsiderMovable);
 
         for (int i = 0; i < activeShapes.Count; i++)
         {
@@ -233,13 +243,20 @@ public class ShapeTrayManager : MonoBehaviour
             if (s == null)
                 continue;
 
-            bool thisShapeHasMove = HasAnyMoveForShape(s);
-            Debug.Log($"[HasAnyMove] shape '{s.name}' hasMove={thisShapeHasMove}");
-
-            if (thisShapeHasMove)
-                anyMove = true;
+            if (HasAnyMoveForShape(s))
+            {
+                placeableCount++;
+                // short-circuit when threshold reached
+                if (placeableCount >= needed)
+                {
+                    Debug.Log($"[HasAnyMove] reached threshold {needed} at shape {i}, short-circuiting");
+                    return true;
+                }
+            }
         }
 
+        bool anyMove = placeableCount >= needed;
+        Debug.Log($"[HasAnyMove] placeableCount={placeableCount}, threshold={needed}, anyMove={anyMove}");
         return anyMove;
     }
 
