@@ -74,7 +74,7 @@ public class ScoreManager : Singleton<ScoreManager>
         animationStartScore = Score;
         animationStartTime = Time.time;
         scoreCoroutine = StartCoroutine(AnimateScoreToTarget());
-        Debug.Log($"[ScoreManager] Animating score from {animationStartScore} to {targetScore} over {scoreAnimationDuration}s");
+       // Debug.Log($"[ScoreManager] Animating score from {animationStartScore} to {targetScore} over {scoreAnimationDuration}s");
     }
 
     public void AddScore(int amount)

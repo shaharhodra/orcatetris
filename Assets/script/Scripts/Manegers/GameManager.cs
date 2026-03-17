@@ -79,7 +79,7 @@ public class GameManager : Singleton<GameManager>
         addressablesAdventureLoading = false;
         addressablesClassicLoading = false;
 
-        Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
+       // Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
     }
 
     [ContextMenu("Debug/Force Reload Addressables Levels And Reload Scene")]
@@ -135,7 +135,7 @@ public class GameManager : Singleton<GameManager>
         }
         else
         {
-            Debug.Log($"Level {levelIndex} completed but highestUnlockedLevel already {PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel}, not updating.");
+            //Debug.Log($"Level {levelIndex} completed but highestUnlockedLevel already {PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel}, not updating.");
         }
     }   
     
@@ -147,7 +147,7 @@ public class GameManager : Singleton<GameManager>
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"GameManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
+       // Debug.Log($"GameManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
         if (scene.handle == lastLoadedSceneHandle)
             return;
 
@@ -170,19 +170,19 @@ public class GameManager : Singleton<GameManager>
 
             if (_classicLevelJsonFile != null)
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
+               // Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
                 LoadLevelFromJson(_classicLevelJsonFile.text);
                 return;
             }
 
             if (!string.IsNullOrEmpty(_levelJson))
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
+               // Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
                 LoadLevelFromJson(_levelJson);
                 return;
             }
 
-            Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
+           // Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
             return;
         }
 

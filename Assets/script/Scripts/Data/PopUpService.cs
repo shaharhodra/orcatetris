@@ -48,6 +48,12 @@ public class PopUpService : MonoBehaviour
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
         ShowPopUp(false);
     }
+    public async UniTask ShowClosePopUpSequence ()
+    {
+        ShowPopUp(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+        SetOverlayActiveState(false);
+    }
 
     public async UniTask DoSomething ()
     {

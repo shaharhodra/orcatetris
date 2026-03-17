@@ -42,17 +42,17 @@ public class PlaceManager : Singleton<PlaceManager>
 
     private void Awake()
     {
-        if (board == null)
-            board = FindObjectOfType<GridBoard>();
+        //if (board == null)
+        //    board = FindObjectOfType<GridBoard>();
 
-        if (placer == null)
-            placer = FindObjectOfType<GridPlacer>();
+        //if (placer == null)
+        //    placer = FindObjectOfType<GridPlacer>();
 
-        if (shapeTrayManager == null)
-            shapeTrayManager = FindObjectOfType<ShapeTrayManager>();
+        //if (shapeTrayManager == null)
+        //    shapeTrayManager = FindObjectOfType<ShapeTrayManager>();
 
-        if (reviveManager == null)
-            reviveManager = FindObjectOfType<ReviveManager>();
+        //if (reviveManager == null)
+            //reviveManager = FindObjectOfType<ReviveManager>();
     }
 
     private void OnEnable()
@@ -211,77 +211,20 @@ public class PlaceManager : Singleton<PlaceManager>
     /// </summary>
     public (int rowsCleared, int colsCleared, int cellsCleared) PerformSmartRevive()
     {
-        if (board == null)
+        if (board == null || shapeTrayManager == null)
         {
-            if (debugLogs) Debug.LogWarning("[PlaceManager] PerformSmartRevive called but board == null");
+            if (debugLogs) Debug.LogWarning("[PlaceManager] PerformSmartRevive called but board/shapeTray == null");
             return (0, 0, 0);
         }
 
-        if (!useSmartRevive)
-        {
-            int c = board.ReviveClearOneRowAndOneColumn();
-            // Not detailed, return as best-effort
-            return (0, 0, c);
-        }
-
-        // compute occupancy per row/col
-        var rowCounts = new int[board.height];
-        var colCounts = new int[board.width];
-
-        for (int x = 0; x < board.width; x++)
-        {
-            for (int y = 0; y < board.height; y++)
-            {
-                if (board.IsOccupied(new Vector2Int(x, y)))
-                {
-                    colCounts[x]++;
-                    rowCounts[y]++;
-                }
-            }
-        }
-
-        // choose most occupied row and column (if any)
-        int bestRow = -1;
-        int bestRowCount = 0;
-        for (int y = 0; y < rowCounts.Length; y++)
-        {
-            if (rowCounts[y] > bestRowCount)
-            {
-                bestRow = y;
-                bestRowCount = rowCounts[y];
-            }
-        }
-
-        int bestCol = -1;
-        int bestColCount = 0;
-        for (int x = 0; x < colCounts.Length; x++)
-        {
-            if (colCounts[x] > bestColCount)
-            {
-                bestCol = x;
-                bestColCount = colCounts[x];
-            }
-        }
-
-        int cleared = 0;
-        int rowsCleared = 0;
-        int colsCleared = 0;
-
-        if (bestRow >= 0 && bestRowCount > 0)
-        {
-            cleared += board.ClearRow(bestRow);
-            rowsCleared++;
-        }
-
-        if (bestCol >= 0 && bestColCount > 0)
-        {
-            cleared += board.ClearColumn(bestCol);
-            colsCleared++;
-        }
-
-        if (debugLogs) Debug.Log($"[PlaceManager] SmartRevive cleared row={bestRow} (count={bestRowCount}), col={bestCol} (count={bestColCount}), totalCleared={cleared}");
-
-        return (rowsCleared, colsCleared, cleared);
+        // ✅ קבל את הצורות הזמינות
+        var remainingShapes = shapeTrayManager.GetAvailableShapes().ToList();
+        
+        // ✅ השתמש בפונקציה החדשה!
+        int cellsCleared = board.SmartReviveWithValidation(remainingShapes);
+        
+        // נניח שזה מחק לפחות שורה ועמודה אחת
+        return (1, 1, cellsCleared);
     }
 
     /// <summary>

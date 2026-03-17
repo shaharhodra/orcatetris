@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using DG.Tweening;
 
@@ -20,14 +20,6 @@ public class ComboUIBridge : MonoBehaviour
     [SerializeField] private float baseShakeDuration = 0.15f;
     [SerializeField] private float baseShakeStrength = 0.15f;
 
-    [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip combo1Clip;
-    [SerializeField] private AudioClip combo2Clip;
-    [SerializeField] private AudioClip combo3Clip;
-    [SerializeField] private AudioClip combo4Clip;
-    [SerializeField] private AudioClip combo5PlusClip;
-
     private Tween popupTween;
     private Tween shakeTween;
     private bool subscribed;
@@ -39,9 +31,6 @@ public class ComboUIBridge : MonoBehaviour
 
         if (shakeTarget == null && Camera.main != null)
             shakeTarget = Camera.main.transform;
-
-        if (audioSource == null)
-            audioSource = FindFirstObjectByType<AudioSource>();
 
         if (popupRoot != null)
             popupRoot.gameObject.SetActive(false);
@@ -77,8 +66,8 @@ public class ComboUIBridge : MonoBehaviour
         comboController.ComboManager.OnComboEnded += HandleComboEnded;
         subscribed = true;
 
-        if (debugLogs)
-            Debug.Log("[ComboUIBridge] Subscribed to ComboManager events");
+        //if (debugLogs)
+        //    Debug.Log("[ComboUIBridge] Subscribed to ComboManager events");
     }
 
     private void TryUnsubscribe()
@@ -94,14 +83,14 @@ public class ComboUIBridge : MonoBehaviour
 
         subscribed = false;
 
-        if (debugLogs)
-            Debug.Log("[ComboUIBridge] Unsubscribed from ComboManager events");
+        //if (debugLogs)
+        //    Debug.Log("[ComboUIBridge] Unsubscribed from ComboManager events");
     }
 
     private void HandleComboStep(ComboEventArgs args)
     {
         if (debugLogs)
-            Debug.Log($"[ComboUIBridge] Combo step: combo={args.ComboCount}, linesThisStep={args.LinesClearedThisStep}, tier={args.Tier}");
+          //  Debug.Log($"[ComboUIBridge] Combo step: combo={args.ComboCount}, linesThisStep={args.LinesClearedThisStep}, tier={args.Tier}");
         ShowPopup(args);
         PlayComboSound(args.Tier);
         DoShake(args.Tier);
@@ -110,7 +99,7 @@ public class ComboUIBridge : MonoBehaviour
     private void HandleComboEnded()
     {
         if (debugLogs)
-            Debug.Log("[ComboUIBridge] Combo ended");
+         //   Debug.Log("[ComboUIBridge] Combo ended");
         HidePopupImmediate();
     }
 
@@ -119,7 +108,7 @@ public class ComboUIBridge : MonoBehaviour
         if (popupRoot == null || popupText == null)
             return;
 
-        popupText.text = $"COMBO x{args.ComboCount}";
+        popupText.text = $"x{args.ComboCount}";
 
         popupTween?.Kill();
         popupRoot.gameObject.SetActive(true);
@@ -159,26 +148,19 @@ public class ComboUIBridge : MonoBehaviour
 
     private void PlayComboSound(ComboTier tier)
     {
-        if (audioSource == null)
-            return;
-
-        var clip = GetClipForTier(tier);
-        if (clip == null)
-            return;
-
-        audioSource.PlayOneShot(clip);
-    }
-
-    private AudioClip GetClipForTier(ComboTier tier)
-    {
-        switch (tier)
+        if (SoundManager.instance != null)
         {
-            case ComboTier.Combo1: return combo1Clip;
-            case ComboTier.Combo2: return combo2Clip;
-            case ComboTier.Combo3: return combo3Clip;
-            case ComboTier.Combo4: return combo4Clip;
-            case ComboTier.Combo5Plus: return combo5PlusClip;
-            default: return null;
+            int clearedLines = tier switch
+            {
+                ComboTier.Combo1 => 1,
+                ComboTier.Combo2 => 2,
+                ComboTier.Combo3 => 3,
+                ComboTier.Combo4 => 4,
+                ComboTier.Combo5Plus => 5,
+                _ => 0
+            };
+
+            SoundManager.instance.PlayCombo(clearedLines);
         }
     }
 

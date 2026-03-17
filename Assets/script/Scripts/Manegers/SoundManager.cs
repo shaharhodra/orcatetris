@@ -2,10 +2,12 @@ using UnityEngine;
 
 // SoundManager – Singleton for global SFX control
 // Uses the generic Singleton<T> base class already in the project.
-public class SoundManager : Singleton<SoundManager>
+public class SoundManager : MonoBehaviour
 {
+    public static SoundManager instance;
+
     [Header("Audio Sources")]
-    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioSource audioSource;
 
     [Header("UI / Shapes")] 
     [SerializeField] private AudioClip clickShapeClip;      // לחיצה על צורה
@@ -14,24 +16,28 @@ public class SoundManager : Singleton<SoundManager>
     [Header("Combos")]
     [SerializeField] private AudioClip combo1Clip;          // מחיקה של שורה/עמודה אחת
     [SerializeField] private AudioClip combo2Clip;          // מחיקה של 2
-    [SerializeField] private AudioClip combo3PlusClip;      // מחיקה של 3+
+    [SerializeField] private AudioClip combo3Clip;          // מחיקה של 3
+    [SerializeField] private AudioClip combo4Clip;          // מחיקה של 4
+    [SerializeField] private AudioClip combo5PlusClip;      // מחיקה של 5+
 
-    // חשוב: לא להגדיר Awake כאן, כדי לא להסתיר את Awake שב-Singleton<T> שמגדיר את instance.
-    private void Start()
+    private void Awake()
     {
-        // אם אין אודיו סורס משויך, ננסה לקחת מהאובייקט עצמו
-        if (sfxSource == null)
+        if (instance == null)
         {
-            sfxSource = GetComponent<AudioSource>();
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
     private void PlayClip(AudioClip clip, float volume = 1f)
     {
-        if (clip == null || sfxSource == null)
+        if (clip == null || audioSource == null)
             return;
 
-        sfxSource.PlayOneShot(clip, volume);
+        audioSource.PlayOneShot(clip, volume);
     }
 
     // ===== Public API =====
@@ -59,10 +65,20 @@ public class SoundManager : Singleton<SoundManager>
         {
             PlayClip(combo2Clip);
         }
+        else if (clearedLines == 3)
+        {
+            PlayClip(combo3Clip);
+        }
+        else if (clearedLines == 4)
+        {
+            PlayClip(combo4Clip);
+        }
         else
         {
-            PlayClip(combo3PlusClip);
+            PlayClip(combo5PlusClip);
         }
+
+       // Debug.Log($"Playing combo sound for {clearedLines} lines cleared.");
     }
 
     // גנרי – אם תרצה להשמיע קליפ ספציפי מבחוץ

@@ -1858,7 +1858,6 @@ MonoBehaviour:
   shapesLabel: 
   noMovesReviveDelay: 5
   minPlaceableToConsiderMovable: 1
-  availableShapes: []
 --- !u!4 &855154865
 Transform:
   m_ObjectHideFlags: 0
@@ -2295,8 +2294,8 @@ MonoBehaviour:
   - {fileID: 5013990381444744598, guid: d52b71b10b991884ea02b1d563a3e993, type: 3}
   - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
   difficulty: 5
-  useSmartRevive: 0
-  debugLogs: 0
+  useSmartRevive: 1
+  debugLogs: 1
 --- !u!4 &1208398430
 Transform:
   m_ObjectHideFlags: 0
@@ -2668,8 +2667,6 @@ MonoBehaviour:
   cellSize: 0.5
   origin: {x: -2, y: -2}
   cellPrefab: {fileID: 7939442195821052815, guid: 66dbd45837a00dc46ba27d7481693143, type: 3}
-  shapeTrayManager: {fileID: 0}
-  board: {fileID: 0}
 --- !u!4 &1414012166
 Transform:
   m_ObjectHideFlags: 0
@@ -3479,14 +3476,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComboUIBridge
   comboController: {fileID: 1555499433}
-  debugLogs: 1
+  debugLogs: 0
   popupRoot: {fileID: 1115198039}
   popupText: {fileID: 1428142687}
   popupDuration: 0.6
   popupTweenDuration: 0.15
-  shakeTarget: {fileID: 1560363973}
+  shakeTarget: {fileID: 1368204038}
   baseShakeDuration: 0.3
-  baseShakeStrength: 0.55
+  baseShakeStrength: 0.2
 --- !u!114 &1555499433
 MonoBehaviour:
   m_ObjectHideFlags: 0

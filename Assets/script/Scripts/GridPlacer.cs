@@ -103,7 +103,7 @@ public class GridPlacer : MonoBehaviour
         if (clearResult.LinesCleared > 0)
         {
             if (debugLogs)
-                Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
+               // Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
 
             if (SoundManager.instance != null)
             {
@@ -115,7 +115,7 @@ public class GridPlacer : MonoBehaviour
         else
         {
             if (debugLogs)
-                Debug.Log("[GridPlacer] No lines cleared -> breaking combo");
+              //  Debug.Log("[GridPlacer] No lines cleared -> breaking combo");
             OnNoLinesCleared?.Invoke();
         }
     }

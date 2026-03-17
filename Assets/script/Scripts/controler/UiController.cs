@@ -33,7 +33,7 @@ public class UiController : MonoBehaviour
 
     private void HandleOnMaxScroreUpdatedEvent (int maxScore)
     {
-        Debug.Log($"[UiController] HighScore UI updated to {maxScore}");
+       // Debug.Log($"[UiController] HighScore UI updated to {maxScore}");
         _highScoreText.text = maxScore.ToString();
     }
 }

@@ -19,4 +19,12 @@ public class PopUpConditionButton : MonoBehaviour
         // שולח את המצב שהוגדר באינספקטור
         targetService.RunIfConditionMet(conditionToSend);
     }
+
+    public void TriggerOnLoseCondition()
+    {
+        if (targetService != null)
+        {
+            targetService.RunIfConditionMet(PopUpCondition.OnLose);
+        }
+    }
 }

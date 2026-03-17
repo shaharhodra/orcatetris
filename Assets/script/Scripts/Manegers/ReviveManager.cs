@@ -1,22 +1,24 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+using System;
 
 public class ReviveManager : MonoBehaviour
 {
     [SerializeField] private GridBoard board;
     [SerializeField] private int maxRevives = 3;
     [SerializeField] private GameObject revivePopup;
-    [SerializeField] private GameObject gameOverPopup;
 
     [SerializeField] private ShapeTrayManager shapeTrayManager;
     [SerializeField] private PlaceManager placeManager;
+    [SerializeField] private PopUpService popUpService;
 
     [Header("Revive countdown")]
     [SerializeField] private float reviveCountdownDuration = 5f;
     [SerializeField] private UnityEngine.UI.Text reviveCountdownText;
     [Header("Game over")]
-    [SerializeField] private float gameOverPopupDelay = 0.5f;
 
     private int usedRevives;
     private bool popupOpen;
@@ -28,52 +30,34 @@ public class ReviveManager : MonoBehaviour
 
     public bool IsPopupOpen => popupOpen;
 
-    private void Awake()
-    {
-        if (board == null)
-            board = FindObjectOfType<GridBoard>();
-
-        if (shapeTrayManager == null)
-            shapeTrayManager = FindObjectOfType<ShapeTrayManager>();
-
-        if (placeManager == null)
-            placeManager = FindObjectOfType<PlaceManager>();
-    }
-
     public void RequestRevive()
     {
-        Debug.Log($"[ReviveManager] RequestRevive called. RemainingRevives={RemainingRevives}, CanRevive={CanRevive}, popupOpen={popupOpen}");
-
         if (popupOpen)
         {
-            Debug.Log("[ReviveManager] popup already open, returning");
             return;
         }
 
         // Safety check: if there is at least one valid move available now, do not request revive.
         if (shapeTrayManager != null && shapeTrayManager.HasAnyMoveAvailable())
         {
-            Debug.Log("[ReviveManager] HasAnyMoveAvailable == true, returning");
+            return;
+        }
+
+        // ✅ תיקון: אם הגענו ל-3 revives (כלומר usedRevives == 2), לך ישר ל-OnLose
+        if (usedRevives >= 2)
+        {
+            Debug.Log("[ReviveManager] Already used 2 revives, going straight to OnLose");
+            TriggerGameOver();
             return;
         }
 
         if (!CanRevive)
         {
-            Debug.Log("[ReviveManager] CanRevive == false, restarting level");
-            RestartLevel();
-            return;
-        }
-
-        // If this is the last available revive (RemainingRevives <= 1), show game over and restart.
-        if (RemainingRevives <= 1)
-        {
-            Debug.Log($"[ReviveManager] Last revive (RemainingRevives={RemainingRevives}), showing game over");
-            StartCoroutine(ShowGameOverAndRestart());
+            TriggerGameOver();
             return;
         }
 
         // Show revive popup with countdown
-        Debug.Log("[ReviveManager] Opening revive countdown popup");
         popupOpen = true;
         if (revivePopup != null)
             revivePopup.SetActive(true);
@@ -88,11 +72,8 @@ public class ReviveManager : MonoBehaviour
     {
         if (!popupOpen)
         {
-            Debug.Log("[ReviveManager] ConfirmRevive: popup not open, returning");
             return;
         }
-
-        Debug.Log("[ReviveManager] ConfirmRevive: player confirmed");
         
         if (reviveCountdownCoroutine != null)
         {
@@ -101,18 +82,15 @@ public class ReviveManager : MonoBehaviour
         }
 
         ClosePopup();
-        WatchAdAndRevive();
+        WatchAdAndReviveAsync();
     }
 
     public void DeclineRevive()
     {
         if (!popupOpen)
         {
-            Debug.Log("[ReviveManager] DeclineRevive: popup not open, returning");
             return;
         }
-
-        Debug.Log("[ReviveManager] DeclineRevive: player declined, restarting");
 
         if (reviveCountdownCoroutine != null)
         {
@@ -121,7 +99,7 @@ public class ReviveManager : MonoBehaviour
         }
 
         ClosePopup();
-        RestartLevel();
+        TriggerGameOver();
     }
 
     public void ClosePopup()
@@ -149,11 +127,10 @@ public class ReviveManager : MonoBehaviour
                 yield break;
         }
 
-        // Countdown expired -> auto-restart
-        Debug.Log("[ReviveManager] Countdown expired, restarting level");
+        // Countdown expired -> auto game over
         reviveCountdownCoroutine = null;
         ClosePopup();
-        RestartLevel();
+        TriggerGameOver();
     }
 
     private void UpdateCountdownText(float remaining)
@@ -165,27 +142,17 @@ public class ReviveManager : MonoBehaviour
         reviveCountdownText.text = seconds.ToString();
     }
 
-    public void WatchAdAndRevive()
+    public async Task WatchAdAndReviveAsync()
     {
         if (!CanRevive)
         {
-            Debug.Log("[WatchAdAndRevive] CanRevive == false, restarting");
-            RestartLevel();
+            TriggerGameOver();
             return;
         }
 
         if (board == null)
         {
-            Debug.LogWarning("[WatchAdAndRevive] board == null, restarting");
-            RestartLevel();
-            return;
-        }
-
-        // If last revive remaining, restart directly
-        if (RemainingRevives <= 1)
-        {
-            Debug.Log("[WatchAdAndRevive] Last revive, restarting level");
-            RestartLevel();
+            TriggerGameOver();
             return;
         }
 
@@ -193,8 +160,17 @@ public class ReviveManager : MonoBehaviour
         do
         {
             usedRevives++;
-            Debug.Log($"[WatchAdAndRevive] Performing revive #{usedRevives}");
+            Debug.Log($"[WatchAdAndRevive] Used revives: {usedRevives}/{maxRevives}");
 
+            // ✅ תיקון: בדוק אם הגענו ל-3 revives אחרי ההגדלה
+            if (usedRevives >= 3)
+            {
+                Debug.Log("[WatchAdAndRevive] Reached max revives (3), triggering game over");
+                TriggerGameOver();
+                return;
+            }
+
+            // Clear cells to ensure at least one shape can fit
             if (placeManager != null)
             {
                 var result = placeManager.PerformSmartRevive();
@@ -202,8 +178,13 @@ public class ReviveManager : MonoBehaviour
             }
             else if (board != null)
             {
-                int cleared = board.ReviveClearOneRowAndOneColumn();
-                Debug.Log($"[WatchAdAndRevive] Fallback board cleared {cleared} cells");
+                bool cleared = EnsureSpaceForOneShape();
+                if (!cleared)
+                {
+                    Debug.LogWarning("[WatchAdAndRevive] Failed to clear space for at least one shape.");
+                    TriggerGameOver();
+                    return;
+                }
             }
 
             if (shapeTrayManager == null)
@@ -217,27 +198,61 @@ public class ReviveManager : MonoBehaviour
         // After revives, check if still no moves
         if (shapeTrayManager != null && !shapeTrayManager.HasAnyMoveAvailable())
         {
-            Debug.Log("[WatchAdAndRevive] Still no moves after revive, restarting");
-            RestartLevel();
+            Debug.Log("[WatchAdAndRevive] Still no moves after revive, triggering game over");
+            TriggerGameOver();
         }
     }
 
-    private IEnumerator ShowGameOverAndRestart()
+    private bool EnsureSpaceForOneShape()
     {
-        popupOpen = true;
-        if (gameOverPopup != null)
+        if (shapeTrayManager == null || board == null)
         {
-            gameOverPopup.SetActive(true);
-            Debug.Log("[ShowGameOverAndRestart] Showing game over popup");
+            Debug.LogError("[EnsureSpaceForOneShape] shapeTrayManager or board is null!");
+            return false;
         }
 
-        yield return new WaitForSeconds(gameOverPopupDelay);
+        foreach (var shape in shapeTrayManager.GetAvailableShapes())
+        {
+            if (shape == null)
+            {
+                Debug.LogWarning("[EnsureSpaceForOneShape] Found a null shape in available shapes.");
+                continue;
+            }
 
-        if (gameOverPopup != null)
-            gameOverPopup.SetActive(false);
+            for (int row = 0; row < board.Rows; row++)
+            {
+                for (int col = 0; col < board.Columns; col++)
+                {
+                    Vector2Int targetCell = new Vector2Int(col, row);
+                    if (board.CanPlaceShape(shape, targetCell))
+                    {
+                        Debug.Log($"[EnsureSpaceForOneShape] Found space for shape '{shape.name}' at {targetCell}. Clearing cells...");
+                        board.ClearCellsForShape(shape, targetCell);
+                        return true;
+                    }
+                }
+            }
+        }
 
-        popupOpen = false;
-        Debug.Log("[ShowGameOverAndRestart] Restarting level after game over");
+        Debug.LogWarning("[EnsureSpaceForOneShape] No space could be cleared for any shape.");
+        return false;
+    }
+
+    /// <summary>
+    /// ✅ פונקציה חדשה: מפעילה את OnLose popup ואז עושה Restart
+    /// </summary>
+    private async void TriggerGameOver()
+    {
+        Debug.Log("[ReviveManager] Triggering Game Over");
+
+        // הצג OnLose popup
+        if (popUpService != null)
+        {
+            popUpService.RunIfConditionMet(PopUpCondition.OnLose);
+            await UniTask.Delay(TimeSpan.FromSeconds(2)); // מחכה 2 שניות
+        }
+
+        // Restart
         RestartLevel();
     }
 

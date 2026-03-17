@@ -163,7 +163,7 @@ public class AppManager : Singleton<AppManager>
 
         if (!useAddressablesForLevels && _classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
         {
-            Debug.LogError("AppManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
+          //  Debug.LogError("AppManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
             return;
         }
 
@@ -174,7 +174,7 @@ public class AppManager : Singleton<AppManager>
     {
         // CurrentGameMode is already Adventure when we arrive to ADV MODE via LoadAdventureLobby,
         // so we don't change it here. We only load the shared gameplay scene.
-        Debug.Log($"AppManager -> StartAdventureGameFromLobby called. CurrentGameMode={CurrentGameMode}, loading scene buildIndex={classicGameSceneBuildIndex}");
+       // Debug.Log($"AppManager -> StartAdventureGameFromLobby called. CurrentGameMode={CurrentGameMode}, loading scene buildIndex={classicGameSceneBuildIndex}");
         SceneManager.LoadScene(classicGameSceneBuildIndex);
     }
 
@@ -186,7 +186,7 @@ public class AppManager : Singleton<AppManager>
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"AppManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
+       // Debug.Log($"AppManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
         if (scene.handle == lastLoadedSceneHandle)
             return;
 
@@ -209,19 +209,19 @@ public class AppManager : Singleton<AppManager>
 
             if (_classicLevelJsonFile != null)
             {
-                Debug.Log($"AppManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
+             //   Debug.Log($"AppManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
                 LoadLevelFromJson(_classicLevelJsonFile.text);
                 return;
             }
 
             if (!string.IsNullOrEmpty(_levelJson))
             {
-                Debug.Log($"AppManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
+              //  Debug.Log($"AppManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
                 LoadLevelFromJson(_levelJson);
                 return;
             }
 
-            Debug.LogError($"AppManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
+          //  Debug.LogError($"AppManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
             return;
         }
 
@@ -262,7 +262,7 @@ public class AppManager : Singleton<AppManager>
 
         if (string.IsNullOrEmpty(adventureLevelsLabel))
         {
-            Debug.LogError("AppManager -> useAddressablesForLevels is enabled but adventureLevelsLabel is empty. Falling back to inspector levels.");
+          //  Debug.LogError("AppManager -> useAddressablesForLevels is enabled but adventureLevelsLabel is empty. Falling back to inspector levels.");
             addressablesAdventureLoading = false;
             if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
                 LoadLevel(index);
@@ -288,7 +288,7 @@ public class AppManager : Singleton<AppManager>
         }
         else
         {
-            Debug.LogError($"AppaManager -> Failed to load adventure levels via Addressables label '{adventureLevelsLabel}'. Falling back to inspector levels.");
+          //  Debug.LogError($"AppaManager -> Failed to load adventure levels via Addressables label '{adventureLevelsLabel}'. Falling back to inspector levels.");
             addressablesAdventureLoaded = false;
         }
 
@@ -306,7 +306,7 @@ public class AppManager : Singleton<AppManager>
     {
         if (index < 0 || index >= addressableAdventureLevels.Count)
         {
-            Debug.LogError($"GameManager -> Adventure level index out of range: {index}. Loaded addressable levels count: {addressableAdventureLevels.Count}");
+          //  Debug.LogError($"GameManager -> Adventure level index out of range: {index}. Loaded addressable levels count: {addressableAdventureLevels.Count}");
             return;
         }
 
@@ -323,7 +323,7 @@ public class AppManager : Singleton<AppManager>
         {
             if (addressableClassicLevel != null)
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+            //    Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
                 LoadLevelFromJson(addressableClassicLevel.text);
             }
             yield break;
@@ -336,7 +336,7 @@ public class AppManager : Singleton<AppManager>
 
             if (addressablesClassicLoaded && addressableClassicLevel != null)
             {
-                Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+             //   Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
                 LoadLevelFromJson(addressableClassicLevel.text);
             }
             yield break;
@@ -346,7 +346,7 @@ public class AppManager : Singleton<AppManager>
 
         if (string.IsNullOrEmpty(classicLevelsLabel))
         {
-            Debug.LogError("GameManager -> useAddressablesForLevels is enabled but classicLevelsLabel is empty. Falling back to inspector classic json.");
+           // Debug.LogError("GameManager -> useAddressablesForLevels is enabled but classicLevelsLabel is empty. Falling back to inspector classic json.");
             addressablesClassicLoading = false;
 
             if (_classicLevelJsonFile != null)
@@ -376,7 +376,7 @@ public class AppManager : Singleton<AppManager>
         }
         else
         {
-            Debug.LogError($"GameManager -> Failed to load classic levels via Addressables label '{classicLevelsLabel}'. Falling back to inspector classic json.");
+          //  Debug.LogError($"GameManager -> Failed to load classic levels via Addressables label '{classicLevelsLabel}'. Falling back to inspector classic json.");
             addressablesClassicLoaded = false;
         }
 
@@ -384,7 +384,7 @@ public class AppManager : Singleton<AppManager>
 
         if (addressablesClassicLoaded && addressableClassicLevel != null)
         {
-            Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
+          //  Debug.Log($"GameManager -> Classic mode: loading classic json '{addressableClassicLevel.name}' via Addressables for scene '{scene.name}'.");
             LoadLevelFromJson(addressableClassicLevel.text);
         }
         else if (_classicLevelJsonFile != null)

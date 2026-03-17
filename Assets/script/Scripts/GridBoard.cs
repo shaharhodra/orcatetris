@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 public class GridBoard : MonoBehaviour
 {
@@ -18,10 +20,16 @@ public class GridBoard : MonoBehaviour
     private GridCell[,] cells;
     private GameObject[,] placedBlocks;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
+    [SerializeField] private ShapeTrayManager shapeTrayManager;
+    [SerializeField] private GridBoard board;
+
+    // ✅ תיקון: הוסף getters נכונים
+    public int Rows => height;
+    public int Columns => width;
 
     private void Start()
     {
-        Debug.Log($"[GridBoard] Start on {gameObject.name}, buildOnStart = {buildOnStart}, size = {width}x{height}");
+       // Debug.Log($"[GridBoard] Start on {gameObject.name}, buildOnStart = {buildOnStart}, size = {width}x{height}");
 
         if (buildOnStart)
         {
@@ -76,11 +84,11 @@ public class GridBoard : MonoBehaviour
 
     public void RebuildGrid()
     {
-        Debug.Log("[GridBoard] RebuildGrid requested");
+       // Debug.Log("[GridBoard] RebuildGrid requested");
 
         if (Application.isPlaying)
         {
-            Debug.Log("[GridBoard] RebuildGrid (play mode) requested");
+          //  Debug.Log("[GridBoard] RebuildGrid (play mode) requested");
 
             StopAllCoroutines();
             StartCoroutine(RebuildGridCoroutine());
@@ -94,7 +102,7 @@ public class GridBoard : MonoBehaviour
 
     private IEnumerator RebuildGridCoroutine()
     {
-        Debug.Log("[GridBoard] RebuildGridCoroutine started");
+       // Debug.Log("[GridBoard] RebuildGridCoroutine started");
         ClearHover();
         ClearGridObjects();
         yield return null;
@@ -128,11 +136,11 @@ public class GridBoard : MonoBehaviour
     {
         if (cellPrefab == null)
         {
-            Debug.LogWarning($"[GridBoard] cellPrefab is NULL on {gameObject.name}, cannot build grid");
+        //    Debug.LogWarning($"[GridBoard] cellPrefab is NULL on {gameObject.name}, cannot build grid");
             return;
         }
 
-        Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
+      //  Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
 
         CenterOrigin();
 
@@ -159,7 +167,7 @@ public class GridBoard : MonoBehaviour
 
     private void ClearGridObjects()
     {
-        Debug.Log($"[GridBoard] ClearGridObjects on {gameObject.name}");
+      //  Debug.Log($"[GridBoard] ClearGridObjects on {gameObject.name}");
 
         cells = null;
         placedBlocks = null;
@@ -389,6 +397,209 @@ public class GridBoard : MonoBehaviour
         return cleared;
     }
 
+    // ===== פונקציות REVIVE משולבות - אפשרות 1 + 2 =====
+    
+    /// <summary>
+    /// פונקציית Revive חכמה משולבת: מוחקת שורות/עמודות תפוסות ובודקת שיש מקום לצורות
+    /// </summary>
+    public int SmartReviveWithValidation(System.Collections.Generic.List<Shape> remainingShapes)
+    {
+        if (cells == null)
+        {
+            Debug.LogError("[SmartRevive] Cells array is null!");
+            return 0;
+        }
+
+        if (remainingShapes == null || remainingShapes.Count == 0)
+        {
+            Debug.LogWarning("[SmartRevive] No shapes to validate");
+            return ReviveClearMostOccupiedRowAndColumn();
+        }
+
+        int totalCleared = 0;
+        int maxAttempts = 3;
+        
+        Debug.Log($"[SmartRevive] Starting revive for {remainingShapes.Count} shapes");
+        
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            // מחק את השורה והעמודה הכי תפוסים (אפשרות 1)
+            int cleared = ReviveClearMostOccupiedRowAndColumn();
+            totalCleared += cleared;
+            
+            Debug.Log($"[SmartRevive] Attempt {attempt + 1}/{maxAttempts}: Cleared {cleared} cells (total: {totalCleared})");
+            
+            // בדוק אם יש מקום לכל הצורות (אפשרות 2)
+            bool hasSpace = ValidateSpaceForShapes(remainingShapes);
+            
+            if (hasSpace)
+            {
+                Debug.Log($"[SmartRevive] ✓ Success! Cleared {totalCleared} cells in {attempt + 1} attempts");
+                return totalCleared;
+            }
+            
+            Debug.Log($"[SmartRevive] ⚠ Attempt {attempt + 1}/{maxAttempts} - still no space, trying again...");
+        }
+        
+        Debug.LogError($"[SmartRevive] ✗ Failed after {maxAttempts} attempts! Total cleared: {totalCleared}");
+        return totalCleared;
+    }
+
+    /// <summary>
+    /// אפשרות 1: מוחק את השורה והעמודה הכי תפוסים
+    /// </summary>
+    private int ReviveClearMostOccupiedRowAndColumn()
+    {
+        if (cells == null)
+            return 0;
+
+        // מצא את השורה הכי תפוסה
+        int mostOccupiedRow = -1;
+        int maxRowOccupancy = 0;
+        
+        for (int y = 0; y < height; y++)
+        {
+            int occupancy = 0;
+            for (int x = 0; x < width; x++)
+            {
+                if (cells[x, y] != null && cells[x, y].occupied)
+                    occupancy++;
+            }
+            
+            if (occupancy > maxRowOccupancy)
+            {
+                maxRowOccupancy = occupancy;
+                mostOccupiedRow = y;
+            }
+        }
+
+        // מצא את העמודה הכי תפוסה
+        int mostOccupiedCol = -1;
+        int maxColOccupancy = 0;
+        
+        for (int x = 0; x < width; x++)
+        {
+            int occupancy = 0;
+            for (int y = 0; y < height; y++)
+            {
+                if (cells[x, y] != null && cells[x, y].occupied)
+                    occupancy++;
+            }
+            
+            if (occupancy > maxColOccupancy)
+            {
+                maxColOccupancy = occupancy;
+                mostOccupiedCol = x;
+            }
+        }
+
+        int cleared = 0;
+
+        if (mostOccupiedRow >= 0)
+        {
+            cleared += ClearRow(mostOccupiedRow);
+            Debug.Log($"[ReviveClear] Cleared most occupied row {mostOccupiedRow} ({maxRowOccupancy} cells)");
+        }
+
+        if (mostOccupiedCol >= 0)
+        {
+            cleared += ClearColumn(mostOccupiedCol);
+            Debug.Log($"[ReviveClear] Cleared most occupied column {mostOccupiedCol} ({maxColOccupancy} cells)");
+        }
+
+        return cleared;
+    }
+
+    /// <summary>
+    /// אפשרות 2: בודק אם יש מקום בגריד לכל הצורות
+    /// </summary>
+    private bool ValidateSpaceForShapes(System.Collections.Generic.List<Shape> shapes)
+    {
+        if (shapes == null || shapes.Count == 0)
+            return true;
+            
+        foreach (var shape in shapes)
+        {
+            if (shape == null)
+                continue;
+                
+            if (!HasAnyValidPlacementForShape(shape))
+            {
+                Debug.LogWarning($"[ValidateSpace] Shape '{shape.name}' has no valid placement");
+                return false;
+            }
+        }
+        
+        Debug.Log($"[ValidateSpace] ✓ All {shapes.Count} shapes have valid placements");
+        return true;
+    }
+
+    /// <summary>
+    /// בודק אם יש מיקום אפשרי לצורה בגריד
+    /// </summary>
+    private bool HasAnyValidPlacementForShape(Shape shape)
+    {
+        if (shape == null || cells == null)
+            return false;
+        
+        // קבל את הבלוקים של הצורה
+        var blocks = shape.GetComponentsInChildren<Transform>()
+            .Where(t => t != shape.transform)
+            .ToList();
+            
+        if (blocks == null || blocks.Count == 0)
+            return false;
+            
+        // נסה כל מיקום אפשרי בגריד
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Vector2Int targetPos = new Vector2Int(x, y);
+                
+                if (CanPlaceShapeAtInternal(shape, blocks, targetPos))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// בודק אם אפשר למקם צורה במיקום ספציפי (internal helper)
+    /// </summary>
+    private bool CanPlaceShapeAtInternal(Shape shape, System.Collections.Generic.List<Transform> blocks, Vector2Int position)
+    {
+        if (shape == null || blocks == null || cells == null)
+            return false;
+
+        foreach (var block in blocks)
+        {
+            if (block == null)
+                continue;
+                
+            // חשב את המיקום של הבלוק ביחס לצורה
+            Vector2 localPos = block.localPosition;
+            Vector2Int blockOffset = new Vector2Int(
+                Mathf.RoundToInt(localPos.x / cellSize),
+                Mathf.RoundToInt(localPos.y / cellSize)
+            );
+            
+            Vector2Int cellPos = position + blockOffset;
+            
+            // בדוק אם התא בתוך הגריד ופנוי
+            if (!IsInside(cellPos) || IsOccupied(cellPos))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // ===== פונקציית Revive המקורית (לתאימות לאחור) =====
     public int ReviveClearOneRowAndOneColumn()
     {
         if (cells == null)
@@ -435,6 +646,88 @@ public class GridBoard : MonoBehaviour
         }
 
         return cleared;
+    }
+
+    // ✅ תיקון: CanPlaceShape עכשיו עובד נכון!
+    public bool CanPlaceShape(Shape shape, Vector2Int targetCell)
+    {
+        if (shape == null)
+        {
+            Debug.LogError("[CanPlaceShape] Shape is null!");
+            return false;
+        }
+
+        if (!IsInside(targetCell))
+        {
+            return false;
+        }
+
+        // קבל את כל הבלוקים של הצורה
+        var blocks = shape.GetComponentsInChildren<Transform>()
+            .Where(t => t != shape.transform)
+            .ToList();
+
+        if (blocks.Count == 0)
+            return false;
+
+        // בדוק כל בלוק
+        foreach (var block in blocks)
+        {
+            Vector2 localPos = block.localPosition;
+            Vector2Int blockOffset = new Vector2Int(
+                Mathf.RoundToInt(localPos.x / cellSize),
+                Mathf.RoundToInt(localPos.y / cellSize)
+            );
+
+            Vector2Int cellPos = targetCell + blockOffset;
+
+            if (!IsInside(cellPos) || IsOccupied(cellPos))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ✅ תיקון: ClearCellsForShape עכשיו מנקה תאים!
+    public void ClearCellsForShape(Shape shape, Vector2Int targetCell)
+    {
+        if (shape == null || cells == null)
+        {
+            Debug.LogError("[ClearCellsForShape] Shape or cells is null!");
+            return;
+        }
+
+        // קבל את כל הבלוקים של הצורה
+        var blocks = shape.GetComponentsInChildren<Transform>()
+            .Where(t => t != shape.transform)
+            .ToList();
+
+        Debug.Log($"[ClearCellsForShape] Clearing {blocks.Count} cells for shape '{shape.name}' at {targetCell}");
+
+        // נקה כל תא שהצורה תופסת
+        foreach (var block in blocks)
+        {
+            Vector2 localPos = block.localPosition;
+            Vector2Int blockOffset = new Vector2Int(
+                Mathf.RoundToInt(localPos.x / cellSize),
+                Mathf.RoundToInt(localPos.y / cellSize)
+            );
+
+            Vector2Int cellPos = targetCell + blockOffset;
+
+            if (IsInside(cellPos) && IsOccupied(cellPos))
+            {
+                SetOccupied(cellPos, false);
+                
+                if (placedBlocks != null && placedBlocks[cellPos.x, cellPos.y] != null)
+                {
+                    Destroy(placedBlocks[cellPos.x, cellPos.y]);
+                    placedBlocks[cellPos.x, cellPos.y] = null;
+                }
+            }
+        }
     }
 
     private void OnDrawGizmos()
