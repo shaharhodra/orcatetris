@@ -23,9 +23,12 @@ public class ScoreManager : Singleton<ScoreManager>
 
     void Start()
     {
-        MaxScore = GetUserHighScore();
-        OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
-        targetScore = Score;
+        GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+    }
+
+    void OnDestroy()
+    {
+        GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
     }
 
     public void InvokeOnScoreUpdatedEvent(int score)
@@ -74,7 +77,7 @@ public class ScoreManager : Singleton<ScoreManager>
         animationStartScore = Score;
         animationStartTime = Time.time;
         scoreCoroutine = StartCoroutine(AnimateScoreToTarget());
-       // Debug.Log($"[ScoreManager] Animating score from {animationStartScore} to {targetScore} over {scoreAnimationDuration}s");
+        // Debug.Log($"[ScoreManager] Animating score from {animationStartScore} to {targetScore} over {scoreAnimationDuration}s");
     }
 
     public void AddScore(int amount)
@@ -189,5 +192,18 @@ public class ScoreManager : Singleton<ScoreManager>
         }
 
         scoreCoroutine = null;
+    }
+
+    public void HandleOnLevelRestartedEvent (LevelData levelData)
+    {
+        Restart();
+    }
+
+    public void Restart ()
+    {
+        ResetScore();
+        MaxScore = GetUserHighScore();
+        OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
+        targetScore = Score;
     }
 }

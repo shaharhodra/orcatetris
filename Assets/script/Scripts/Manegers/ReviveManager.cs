@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using System;
 
-public class ReviveManager : MonoBehaviour
+public class ReviveManager : Singleton<ReviveManager>
 {
     [SerializeField] private GridBoard board;
     [SerializeField] private int maxRevives = 3;
@@ -29,6 +29,16 @@ public class ReviveManager : MonoBehaviour
     public bool CanRevive => RemainingRevives > 0;
 
     public bool IsPopupOpen => popupOpen;
+
+    private void Start()
+    {
+        GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+    }
 
     public void RequestRevive()
     {
@@ -74,7 +84,7 @@ public class ReviveManager : MonoBehaviour
         {
             return;
         }
-        
+
         if (reviveCountdownCoroutine != null)
         {
             StopCoroutine(reviveCountdownCoroutine);
@@ -252,15 +262,18 @@ public class ReviveManager : MonoBehaviour
             await UniTask.Delay(TimeSpan.FromSeconds(2)); // מחכה 2 שניות
         }
 
-        // Restart
+        GameManager.instance.InvokeOnLevelRestartedEvent();
+    }
+
+    public void HandleOnLevelRestartedEvent (LevelData levelData)
+    {
         RestartLevel();
     }
 
     public void RestartLevel()
     {
         Debug.Log("[RestartLevel] Restarting current scene");
-        var scene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(scene.name);
+        ResetRevives();
     }
 
     public void ResetRevives()

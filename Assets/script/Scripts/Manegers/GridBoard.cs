@@ -20,7 +20,6 @@ public class GridBoard : MonoBehaviour
     private GridCell[,] cells;
     private GameObject[,] placedBlocks;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
-    [SerializeField] private ShapeTrayManager shapeTrayManager;
     [SerializeField] private GridBoard board;
 
     // ✅ תיקון: הוסף getters נכונים
@@ -29,12 +28,18 @@ public class GridBoard : MonoBehaviour
 
     private void Start()
     {
-       // Debug.Log($"[GridBoard] Start on {gameObject.name}, buildOnStart = {buildOnStart}, size = {width}x{height}");
+        // Debug.Log($"[GridBoard] Start on {gameObject.name}, buildOnStart = {buildOnStart}, size = {width}x{height}");
+        GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
         if (buildOnStart)
         {
             BuildGrid();
         }
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
     }
 
     public void ClearHover()
@@ -84,11 +89,11 @@ public class GridBoard : MonoBehaviour
 
     public void RebuildGrid()
     {
-       // Debug.Log("[GridBoard] RebuildGrid requested");
+        // Debug.Log("[GridBoard] RebuildGrid requested");
 
         if (Application.isPlaying)
         {
-          //  Debug.Log("[GridBoard] RebuildGrid (play mode) requested");
+            //  Debug.Log("[GridBoard] RebuildGrid (play mode) requested");
 
             StopAllCoroutines();
             StartCoroutine(RebuildGridCoroutine());
@@ -102,7 +107,7 @@ public class GridBoard : MonoBehaviour
 
     private IEnumerator RebuildGridCoroutine()
     {
-       // Debug.Log("[GridBoard] RebuildGridCoroutine started");
+        // Debug.Log("[GridBoard] RebuildGridCoroutine started");
         ClearHover();
         ClearGridObjects();
         yield return null;
@@ -136,11 +141,11 @@ public class GridBoard : MonoBehaviour
     {
         if (cellPrefab == null)
         {
-        //    Debug.LogWarning($"[GridBoard] cellPrefab is NULL on {gameObject.name}, cannot build grid");
+            //    Debug.LogWarning($"[GridBoard] cellPrefab is NULL on {gameObject.name}, cannot build grid");
             return;
         }
 
-      //  Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
+        //  Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
 
         CenterOrigin();
 
@@ -167,7 +172,7 @@ public class GridBoard : MonoBehaviour
 
     private void ClearGridObjects()
     {
-      //  Debug.Log($"[GridBoard] ClearGridObjects on {gameObject.name}");
+        //  Debug.Log($"[GridBoard] ClearGridObjects on {gameObject.name}");
 
         cells = null;
         placedBlocks = null;
@@ -398,7 +403,7 @@ public class GridBoard : MonoBehaviour
     }
 
     // ===== פונקציות REVIVE משולבות - אפשרות 1 + 2 =====
-    
+
     /// <summary>
     /// פונקציית Revive חכמה משולבת: מוחקת שורות/עמודות תפוסות ובודקת שיש מקום לצורות
     /// </summary>
@@ -418,29 +423,29 @@ public class GridBoard : MonoBehaviour
 
         int totalCleared = 0;
         int maxAttempts = 3;
-        
+
         Debug.Log($"[SmartRevive] Starting revive for {remainingShapes.Count} shapes");
-        
+
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             // מחק את השורה והעמודה הכי תפוסים (אפשרות 1)
             int cleared = ReviveClearMostOccupiedRowAndColumn();
             totalCleared += cleared;
-            
+
             Debug.Log($"[SmartRevive] Attempt {attempt + 1}/{maxAttempts}: Cleared {cleared} cells (total: {totalCleared})");
-            
+
             // בדוק אם יש מקום לכל הצורות (אפשרות 2)
             bool hasSpace = ValidateSpaceForShapes(remainingShapes);
-            
+
             if (hasSpace)
             {
                 Debug.Log($"[SmartRevive] ✓ Success! Cleared {totalCleared} cells in {attempt + 1} attempts");
                 return totalCleared;
             }
-            
+
             Debug.Log($"[SmartRevive] ⚠ Attempt {attempt + 1}/{maxAttempts} - still no space, trying again...");
         }
-        
+
         Debug.LogError($"[SmartRevive] ✗ Failed after {maxAttempts} attempts! Total cleared: {totalCleared}");
         return totalCleared;
     }
@@ -456,7 +461,7 @@ public class GridBoard : MonoBehaviour
         // מצא את השורה הכי תפוסה
         int mostOccupiedRow = -1;
         int maxRowOccupancy = 0;
-        
+
         for (int y = 0; y < height; y++)
         {
             int occupancy = 0;
@@ -465,7 +470,7 @@ public class GridBoard : MonoBehaviour
                 if (cells[x, y] != null && cells[x, y].occupied)
                     occupancy++;
             }
-            
+
             if (occupancy > maxRowOccupancy)
             {
                 maxRowOccupancy = occupancy;
@@ -476,7 +481,7 @@ public class GridBoard : MonoBehaviour
         // מצא את העמודה הכי תפוסה
         int mostOccupiedCol = -1;
         int maxColOccupancy = 0;
-        
+
         for (int x = 0; x < width; x++)
         {
             int occupancy = 0;
@@ -485,7 +490,7 @@ public class GridBoard : MonoBehaviour
                 if (cells[x, y] != null && cells[x, y].occupied)
                     occupancy++;
             }
-            
+
             if (occupancy > maxColOccupancy)
             {
                 maxColOccupancy = occupancy;
@@ -517,19 +522,19 @@ public class GridBoard : MonoBehaviour
     {
         if (shapes == null || shapes.Count == 0)
             return true;
-            
+
         foreach (var shape in shapes)
         {
             if (shape == null)
                 continue;
-                
+
             if (!HasAnyValidPlacementForShape(shape))
             {
                 Debug.LogWarning($"[ValidateSpace] Shape '{shape.name}' has no valid placement");
                 return false;
             }
         }
-        
+
         Debug.Log($"[ValidateSpace] ✓ All {shapes.Count} shapes have valid placements");
         return true;
     }
@@ -541,29 +546,29 @@ public class GridBoard : MonoBehaviour
     {
         if (shape == null || cells == null)
             return false;
-        
+
         // קבל את הבלוקים של הצורה
         var blocks = shape.GetComponentsInChildren<Transform>()
             .Where(t => t != shape.transform)
             .ToList();
-            
+
         if (blocks == null || blocks.Count == 0)
             return false;
-            
+
         // נסה כל מיקום אפשרי בגריד
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 Vector2Int targetPos = new Vector2Int(x, y);
-                
+
                 if (CanPlaceShapeAtInternal(shape, blocks, targetPos))
                 {
                     return true;
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -579,23 +584,23 @@ public class GridBoard : MonoBehaviour
         {
             if (block == null)
                 continue;
-                
+
             // חשב את המיקום של הבלוק ביחס לצורה
             Vector2 localPos = block.localPosition;
             Vector2Int blockOffset = new Vector2Int(
                 Mathf.RoundToInt(localPos.x / cellSize),
                 Mathf.RoundToInt(localPos.y / cellSize)
             );
-            
+
             Vector2Int cellPos = position + blockOffset;
-            
+
             // בדוק אם התא בתוך הגריד ופנוי
             if (!IsInside(cellPos) || IsOccupied(cellPos))
             {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -720,7 +725,7 @@ public class GridBoard : MonoBehaviour
             if (IsInside(cellPos) && IsOccupied(cellPos))
             {
                 SetOccupied(cellPos, false);
-                
+
                 if (placedBlocks != null && placedBlocks[cellPos.x, cellPos.y] != null)
                 {
                     Destroy(placedBlocks[cellPos.x, cellPos.y]);
@@ -747,5 +752,15 @@ public class GridBoard : MonoBehaviour
                 Gizmos.DrawWireCube(center, Vector3.one * cellSize * 0.95f);
             }
         }
+    }
+
+    public void HandleOnLevelRestartedEvent (LevelData levelData)
+    {
+        Restart();
+    }
+
+    public void Restart ()
+    {
+        Clear();
     }
 }

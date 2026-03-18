@@ -13,8 +13,6 @@ public class ShapeTrayManager : MonoBehaviour
 
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer placer;
-    [SerializeField] private ReviveManager reviveManager;
-
     [SerializeField] private Transform[] slots;
     [SerializeField] private Shape[] shapePrefabs;
 
@@ -37,18 +35,6 @@ public class ShapeTrayManager : MonoBehaviour
 
     [SerializeField] private List<Shape> availableShapes;
 
-    private void Awake()
-    {
-        if (board == null)
-            board = FindFirstObjectByType<GridBoard>();
-
-        if (placer == null)
-            placer = FindFirstObjectByType<GridPlacer>();
-
-        if (reviveManager == null)
-            reviveManager = FindFirstObjectByType<ReviveManager>();
-    }
-
     private void OnEnable()
     {
         if (placer != null)
@@ -63,12 +49,22 @@ public class ShapeTrayManager : MonoBehaviour
 
     private void Start()
     {
+        GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+
         if (useAddressables)
         {
             LoadAddressablesAndRefill();
             return;
         }
         RefillIfNeeded();
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+
+        if (useAddressables && loadHandle.IsValid())
+            Addressables.Release(loadHandle);
     }
 
     private void LoadAddressablesAndRefill()
@@ -81,7 +77,7 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(shapesLabel))
         {
-         //   Debug.LogError("[ShapeTrayManager] useAddressables is enabled but shapesLabel is empty.");
+            //   Debug.LogError("[ShapeTrayManager] useAddressables is enabled but shapesLabel is empty.");
             RefillIfNeeded();
             return;
         }
@@ -102,18 +98,12 @@ public class ShapeTrayManager : MonoBehaviour
             }
             else
             {
-              //  Debug.LogError($"[ShapeTrayManager] Failed to load addressables by label '{shapesLabel}'. Falling back to inspector prefabs.");
+                //  Debug.LogError($"[ShapeTrayManager] Failed to load addressables by label '{shapesLabel}'. Falling back to inspector prefabs.");
                 addressablesLoaded = false;
             }
 
             RefillIfNeeded();
         };
-    }
-
-    private void OnDestroy()
-    {
-        if (useAddressables && loadHandle.IsValid())
-            Addressables.Release(loadHandle);
     }
 
     private void HandleShapePlaced(Shape placed)
@@ -194,7 +184,7 @@ public class ShapeTrayManager : MonoBehaviour
         if (HasAnyMove())
             return;
 
-        if (reviveManager != null && reviveManager.CanRevive)
+        if (ReviveManager.instance != null && ReviveManager.instance.CanRevive)
         {
             noMovesReviveTriggered = true;
             StartCoroutine(NoMovesReviveRoutine());
@@ -227,13 +217,13 @@ public class ShapeTrayManager : MonoBehaviour
         // If core refs are missing, be conservative and treat as "moves available"
         if (board == null || placer == null)
         {
-          //  Debug.LogWarning("[HasAnyMove] board or placer is null -> returning true to avoid premature revive");
+            //  Debug.LogWarning("[HasAnyMove] board or placer is null -> returning true to avoid premature revive");
             return true;
         }
 
         if (activeShapes.Count == 0)
         {
-           // Debug.Log("[HasAnyMove] activeShapes is empty -> returning false (treat as NO moves)");
+            // Debug.Log("[HasAnyMove] activeShapes is empty -> returning false (treat as NO moves)");
             return false;
         }
 
@@ -252,14 +242,14 @@ public class ShapeTrayManager : MonoBehaviour
                 // short-circuit when threshold reached
                 if (placeableCount >= needed)
                 {
-                   // Debug.Log($"[HasAnyMove] reached threshold {needed} at shape {i}, short-circuiting");
+                    // Debug.Log($"[HasAnyMove] reached threshold {needed} at shape {i}, short-circuiting");
                     return true;
                 }
             }
         }
 
         bool anyMove = placeableCount >= needed;
-       // Debug.Log($"[HasAnyMove] placeableCount={placeableCount}, threshold={needed}, anyMove={anyMove}");
+        // Debug.Log($"[HasAnyMove] placeableCount={placeableCount}, threshold={needed}, anyMove={anyMove}");
         return anyMove;
     }
 
@@ -280,7 +270,7 @@ public class ShapeTrayManager : MonoBehaviour
                 var cell = new Vector2Int(x, y);
                 if (placer.CanPlaceShape(s, cell))
                 {
-                   // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' CAN be placed at {cell}");
+                    // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' CAN be placed at {cell}");
                     found = true;
                     // לא שוברים את הלולאה, כדי לראות כל התאים החוקיים ללוג
                 }
@@ -289,7 +279,7 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (!found)
         {
-           // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' has NO valid placement");
+            // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' has NO valid placement");
         }
 
         return found;
@@ -315,7 +305,7 @@ public class ShapeTrayManager : MonoBehaviour
                     if (board.CanPlaceShape(shape, targetCell))
                     {
                         board.ClearCellsForShape(shape, targetCell);
-                       // Debug.Log($"[EnsureSpaceForOneShape] Cleared space for shape at {targetCell}");
+                        // Debug.Log($"[EnsureSpaceForOneShape] Cleared space for shape at {targetCell}");
                         return true;
                     }
                 }
@@ -323,5 +313,25 @@ public class ShapeTrayManager : MonoBehaviour
         }
 
         return false; // No space could be cleared for any shape
+    }
+
+    public void HandleOnLevelRestartedEvent (LevelData levelData)
+    {
+        Restart();
+    }
+
+    public void Restart ()
+    {
+        if (activeShapes != null)
+        {
+            for (int i = 0; i < activeShapes.Count; i++)
+            {
+                Destroy(activeShapes[i].gameObject);
+            }
+
+            activeShapes.Clear();
+        }
+
+        RefillIfNeeded();
     }
 }

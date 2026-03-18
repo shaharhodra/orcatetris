@@ -12,6 +12,7 @@ public class GameManager : Singleton<GameManager>
 {
     // this is how to define an event - how the manager communicates with the rest of the app components
     public event Action<LevelData> OnDataLoaded;
+    public event Action<LevelData> OnLevelRestartedEvent;
 
     [SerializeField] private LevelData _levelData;
     [SerializeField] private string _levelJson;
@@ -45,13 +46,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-   
-   
-
-   
     public LevelData CurrentLevelData { get; private set; }
-
-   
 
     private int lastLoadedSceneHandle = -1;
 
@@ -79,7 +74,7 @@ public class GameManager : Singleton<GameManager>
         addressablesAdventureLoading = false;
         addressablesClassicLoading = false;
 
-       // Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
+        // Debug.Log("GameManager -> Forced reload of Addressables levels cache. Reload the scene to re-fetch assets.");
     }
 
     [ContextMenu("Debug/Force Reload Addressables Levels And Reload Scene")]
@@ -92,13 +87,13 @@ public class GameManager : Singleton<GameManager>
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
-   
+
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
-       
+
     }
 
     private void OnDestroy()
@@ -114,9 +109,9 @@ public class GameManager : Singleton<GameManager>
     //    if (CurrentLevelData == null)
     //        HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     //}
-     public void DebugResetProgressToLevel1AndReloadScene()
+    public void DebugResetProgressToLevel1AndReloadScene()
     {
-        
+
 
         var scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.buildIndex);
@@ -126,7 +121,7 @@ public class GameManager : Singleton<GameManager>
     {
         var playerProgress = PlayerManeger.instance.PlayerProgress;
         if (playerProgress == null)
-          PlayerManeger.instance.LoadPlayerProgress();
+            PlayerManeger.instance.LoadPlayerProgress();
 
         if (levelIndex + 1 > playerProgress.HighestUnlockedLevel)
         {
@@ -137,8 +132,8 @@ public class GameManager : Singleton<GameManager>
         {
             //Debug.Log($"Level {levelIndex} completed but highestUnlockedLevel already {PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel}, not updating.");
         }
-    }   
-    
+    }
+
     public void ReloadCurrentScene()
     {
         var scene = SceneManager.GetActiveScene();
@@ -147,7 +142,7 @@ public class GameManager : Singleton<GameManager>
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-       // Debug.Log($"GameManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
+        // Debug.Log($"GameManager -> HandleSceneLoaded: scene='{scene.name}' (buildIndex={scene.buildIndex}), CurrentGameMode={CurrentGameMode}");
         if (scene.handle == lastLoadedSceneHandle)
             return;
 
@@ -170,24 +165,24 @@ public class GameManager : Singleton<GameManager>
 
             if (_classicLevelJsonFile != null)
             {
-               // Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
+                // Debug.Log($"GameManager -> Classic mode: loading classic json '{_classicLevelJsonFile.name}' for scene '{scene.name}'.");
                 LoadLevelFromJson(_classicLevelJsonFile.text);
                 return;
             }
 
             if (!string.IsNullOrEmpty(_levelJson))
             {
-               // Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
+                // Debug.Log($"GameManager -> Classic mode: loading classic json from _levelJson for scene '{scene.name}'.");
                 LoadLevelFromJson(_levelJson);
                 return;
             }
 
-           // Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
+            // Debug.LogError($"GameManager -> Classic mode selected but no classic json is assigned. Assign _classicLevelJsonFile in the persistent GameManager (DontDestroyOnLoad).");
             return;
         }
 
         // Adventure mode: single shared GameScene, level is chosen purely by player progress (HighestUnlockedLevel)
-        int index = Mathf.Max(0,PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel - 1);
+        int index = Mathf.Max(0, PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel - 1);
 
         if (useAddressablesForLevels)
         {
@@ -199,6 +194,11 @@ public class GameManager : Singleton<GameManager>
             LoadLevel(index);
         else
             LoadLevelFromJson(_levelJson);
+    }
+
+    public void InvokeOnLevelRestartedEvent ()
+    {
+        OnLevelRestartedEvent?.Invoke(CurrentLevelData);
     }
 
     private IEnumerator LoadAdventureFromAddressablesThenLoadIndex(int index)

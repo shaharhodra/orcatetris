@@ -1841,7 +1841,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShapeTrayManager
   board: {fileID: 1414012165}
   placer: {fileID: 1414012167}
-  reviveManager: {fileID: 2006691660}
   slots:
   - {fileID: 759034415}
   - {fileID: 791549194}
@@ -2659,17 +2658,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1414012164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8622d93e4b427b4b9137c0b64c1bb22, type: 3}
+  m_Script: {fileID: 11500000, guid: 257b6d4aca8cd7647b0a9cbd3572df35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridBoard
-  width: 8
+  width: 6
   height: 8
-  buildOnStart: 0
+  buildOnStart: 1
   cellSize: 0.5
-  origin: {x: -2, y: -2}
+  origin: {x: -1.5, y: -2}
   cellPrefab: {fileID: 7939442195821052815, guid: 66dbd45837a00dc46ba27d7481693143, type: 3}
-  shapeTrayManager: {fileID: 0}
-  board: {fileID: 0}
+  board: {fileID: 1414012165}
 --- !u!4 &1414012166
 Transform:
   m_ObjectHideFlags: 0
