@@ -7,6 +7,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer boardPlacer;
     [SerializeField] private Shape shape;
+    [Header("Ghost Preview")]
+    [SerializeField] private Shape ghostPrefab; // אופציונלי: אם לא הוגדר, נשתמש בעותק של הצורה עצמה
+    [SerializeField] private float ghostAlpha = 0.35f;
     [SerializeField] private float minFingerOffsetX = 0f;
     [SerializeField] private float maxFingerOffsetX = 1.5f;
     [SerializeField] private float minFingerOffsetY = 0.5f;
@@ -33,6 +36,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
     private Vector3 originalScale;
     private Tween scaleTween;
+
+    private Shape currentGhost;
 
     private void Awake()
     {
@@ -97,6 +102,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         transform.position = worldPos + dragOffset;
 
+        EnsureGhostCreated();
         UpdatePlacementFeedback();
     }
 
@@ -174,8 +180,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             scaleTween = transform.DOScale(idleScale, pressScaleDuration).SetEase(Ease.OutQuad);
         }
 
-        if (board != null)
-            board.ClearHover();
+        HideAndDestroyGhost();
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -200,7 +205,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
             SetAlpha(1f);
 
-            board.ClearHover();
+            HideAndDestroyGhost();
 
             isPlaced = true;
 
@@ -224,7 +229,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
                 scaleTween = transform.DOScale(idleScale, pressScaleDuration).SetEase(Ease.OutQuad);
             }
 
-            board.ClearHover();
+            HideAndDestroyGhost();
         }
     }
 
@@ -248,17 +253,66 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
         SetAlpha(canPlace ? validAlpha : invalidAlpha);
 
-        if (canPlace)
+        UpdateGhostPreview(cell, canPlace);
+    }
+
+    private void EnsureGhostCreated()
+    {
+        if (currentGhost != null || board == null || shape == null)
+            return;
+
+        Shape source = ghostPrefab != null ? ghostPrefab : shape;
+
+        currentGhost = Instantiate(source, board.transform);
+        currentGhost.transform.localScale = shape.transform.localScale;
+
+        // לכבות קוליידרים על ה-Ghost כדי שלא ישפיעו על פיזיקה / קלט
+        var colliders = currentGhost.GetComponentsInChildren<Collider2D>();
+        foreach (var col in colliders)
         {
-            var offsets = shape.GetCells(board.cellSize);
-            var hover = new System.Collections.Generic.List<Vector2Int>(offsets.Length);
-            foreach (var o in offsets)
-                hover.Add(cell + o);
-            board.SetHoverCells(hover);
+            col.enabled = false;
         }
-        else
+
+        // להפוך את ה-Ghost לשקוף יותר
+        var renderers = currentGhost.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers)
         {
-            board.ClearHover();
+            if (r == null) continue;
+            var c = r.color;
+            c.a = Mathf.Clamp01(ghostAlpha);
+            r.color = c;
         }
+
+        currentGhost.gameObject.SetActive(false);
+    }
+
+    private void UpdateGhostPreview(Vector2Int targetCell, bool canPlace)
+    {
+        if (currentGhost == null)
+            return;
+
+        if (!canPlace)
+        {
+            currentGhost.gameObject.SetActive(false);
+            return;
+        }
+
+        // למקם את ה-Ghost כך שיהיה "מודבק" לגריד מתחת לצורה
+        Vector3 snappedWorld = board.GridToWorld(targetCell);
+        Vector3 delta = snappedWorld - transform.position;
+
+        if (!currentGhost.gameObject.activeSelf)
+            currentGhost.gameObject.SetActive(true);
+
+        currentGhost.transform.position = shape.transform.position + delta;
+    }
+
+    private void HideAndDestroyGhost()
+    {
+        if (currentGhost == null)
+            return;
+
+        Destroy(currentGhost.gameObject);
+        currentGhost = null;
     }
 }

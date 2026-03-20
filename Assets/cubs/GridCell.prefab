@@ -51,9 +51,7 @@ MonoBehaviour:
   hasShapeOver: 0
   normalAlpha: 1
   hoverAlpha: 0.1
-  useTriggerHover: 0
   _sprite: {fileID: 3347676569184785326}
-  _colider: {fileID: 7427878456175831511}
   _boxCollider: {fileID: 7427878456175831511}
 --- !u!61 &7427878456175831511
 BoxCollider2D:
