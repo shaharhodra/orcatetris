@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 using DG.Tweening;
 
 public class ComboUIBridge : MonoBehaviour
@@ -11,7 +11,9 @@ public class ComboUIBridge : MonoBehaviour
 
     [Header("Popup")]
     [SerializeField] private RectTransform popupRoot;
-    [SerializeField] private TextMeshProUGUI popupText;
+    [Tooltip("Combo images for combo 1 through 20. Index 0 = combo 1, Index 19 = combo 20.")]
+    [SerializeField] private Sprite[] comboImages = new Sprite[20];
+    [SerializeField] private Image comboImage;
     [SerializeField] private float popupDuration = 0.6f;
     [SerializeField] private float popupTweenDuration = 0.15f;
 
@@ -65,9 +67,6 @@ public class ComboUIBridge : MonoBehaviour
         comboController.ComboManager.OnComboStep += HandleComboStep;
         comboController.ComboManager.OnComboEnded += HandleComboEnded;
         subscribed = true;
-
-        //if (debugLogs)
-        //    Debug.Log("[ComboUIBridge] Subscribed to ComboManager events");
     }
 
     private void TryUnsubscribe()
@@ -82,15 +81,11 @@ public class ComboUIBridge : MonoBehaviour
         }
 
         subscribed = false;
-
-        //if (debugLogs)
-        //    Debug.Log("[ComboUIBridge] Unsubscribed from ComboManager events");
     }
 
     private void HandleComboStep(ComboEventArgs args)
     {
-        if (debugLogs)
-          //  Debug.Log($"[ComboUIBridge] Combo step: combo={args.ComboCount}, linesThisStep={args.LinesClearedThisStep}, tier={args.Tier}");
+        if (debugLogs) { }
         ShowPopup(args);
         PlayComboSound(args.Tier);
         DoShake(args.Tier);
@@ -98,17 +93,26 @@ public class ComboUIBridge : MonoBehaviour
 
     private void HandleComboEnded()
     {
-        if (debugLogs)
-         //   Debug.Log("[ComboUIBridge] Combo ended");
+        if (debugLogs) { }
         HidePopupImmediate();
     }
 
     private void ShowPopup(ComboEventArgs args)
     {
-        if (popupRoot == null || popupText == null)
+        if (popupRoot == null || comboImage == null)
             return;
 
-        popupText.text = $"x{args.ComboCount}";
+        // ComboCount is 1-based, array is 0-based. Clamp to valid range (1..20).
+        int index = Mathf.Clamp(args.ComboCount, 1, comboImages.Length) - 1;
+
+        if (comboImages[index] == null)
+        {
+            if (debugLogs)
+                Debug.LogWarning($"[ComboUIBridge] No sprite assigned for combo {args.ComboCount} (index {index})");
+            return;
+        }
+
+        comboImage.sprite = comboImages[index];
 
         popupTween?.Kill();
         popupRoot.gameObject.SetActive(true);

@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using System;
+using DG.Tweening;
 
 public class ReviveManager : Singleton<ReviveManager>
 {
@@ -17,12 +19,23 @@ public class ReviveManager : Singleton<ReviveManager>
 
     [Header("Revive countdown")]
     [SerializeField] private float reviveCountdownDuration = 5f;
-    [SerializeField] private UnityEngine.UI.Text reviveCountdownText;
+    [SerializeField] private Text reviveCountdownText;
+    [Tooltip("Circular Image (Type=Filled, Radial360) that surrounds the countdown number.")]
+    [SerializeField] private Image countdownCircle;
+
+    [Header("Countdown Shake")]
+    [Tooltip("Transform to shake each second (e.g. the countdown text or circle).")]
+    [SerializeField] private RectTransform countdownShakeTarget;
+    [SerializeField] private float shakeStrength = 5f;
+    [SerializeField] private float shakeDuration = 0.3f;
+
     [Header("Game over")]
 
     private int usedRevives;
     private bool popupOpen;
     private Coroutine reviveCountdownCoroutine;
+    private Tween countdownShakeTween;
+    private int lastDisplayedSecond = -1;
 
     public int RemainingRevives => Mathf.Max(0, maxRevives - usedRevives);
 
@@ -69,6 +82,8 @@ public class ReviveManager : Singleton<ReviveManager>
 
         // Show revive popup with countdown
         popupOpen = true;
+        lastDisplayedSecond = -1;
+
         if (revivePopup != null)
             revivePopup.SetActive(true);
 
@@ -115,23 +130,32 @@ public class ReviveManager : Singleton<ReviveManager>
     public void ClosePopup()
     {
         popupOpen = false;
+
+        countdownShakeTween?.Kill();
+        countdownShakeTween = null;
+
         if (revivePopup != null)
             revivePopup.SetActive(false);
 
         if (reviveCountdownText != null)
             reviveCountdownText.text = string.Empty;
+
+        if (countdownCircle != null)
+            countdownCircle.fillAmount = 1f;
+
+        lastDisplayedSecond = -1;
     }
 
     private IEnumerator ReviveCountdownRoutine()
     {
         float remaining = reviveCountdownDuration;
-        UpdateCountdownText(remaining);
+        UpdateCountdownUI(remaining);
 
         while (remaining > 0f)
         {
             yield return null;
             remaining -= Time.deltaTime;
-            UpdateCountdownText(remaining);
+            UpdateCountdownUI(remaining);
 
             if (!popupOpen)
                 yield break;
@@ -143,13 +167,41 @@ public class ReviveManager : Singleton<ReviveManager>
         TriggerGameOver();
     }
 
-    private void UpdateCountdownText(float remaining)
+    private void UpdateCountdownUI(float remaining)
     {
-        if (reviveCountdownText == null)
+        float clamped = Mathf.Max(0f, remaining);
+        int seconds = Mathf.CeilToInt(clamped);
+
+        if (reviveCountdownText != null)
+        {
+            reviveCountdownText.text = seconds.ToString();
+        }
+
+        if (countdownCircle != null)
+        {
+            countdownCircle.fillAmount = clamped / reviveCountdownDuration;
+        }
+
+        // Shake each time the displayed second changes
+        if (seconds != lastDisplayedSecond)
+        {
+            lastDisplayedSecond = seconds;
+            DoCountdownShake();
+        }
+    }
+
+    private void DoCountdownShake()
+    {
+        if (countdownShakeTarget == null)
             return;
 
-        int seconds = Mathf.CeilToInt(Mathf.Max(0f, remaining));
-        reviveCountdownText.text = seconds.ToString();
+        countdownShakeTween?.Kill();
+        countdownShakeTarget.localScale = Vector3.one;
+
+        countdownShakeTween = countdownShakeTarget
+            .DOShakeScale(shakeDuration, shakeStrength * 0.05f, 10, 90f)
+            .SetUpdate(true)
+            .OnComplete(() => countdownShakeTarget.localScale = Vector3.one);
     }
 
     public async Task WatchAdAndReviveAsync()

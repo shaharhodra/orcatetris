@@ -11,7 +11,8 @@ public class ComboController : MonoBehaviour
 
     private void Awake()
     {
-        ComboManager = new ComboManager();
+        // מעבירים את עצמנו כ-MonoBehaviour שירוץ קורוטינים
+        ComboManager = new ComboManager(this);
 
         if (gridPlacer == null)
             gridPlacer = FindFirstObjectByType<GridPlacer>();
@@ -23,7 +24,7 @@ public class ComboController : MonoBehaviour
             return;
 
         gridPlacer.OnLinesCleared += HandleLinesCleared;
-        gridPlacer.OnNoLinesCleared += HandleNoLinesCleared;
+        // הסרנו את ההרשמה ל-OnNoLinesCleared כי עכשיו הקומבו מבוסס על זמן
 
         if (debugLogs)
             Debug.Log("[ComboController] Subscribed to GridPlacer events");
@@ -35,7 +36,7 @@ public class ComboController : MonoBehaviour
             return;
 
         gridPlacer.OnLinesCleared -= HandleLinesCleared;
-        gridPlacer.OnNoLinesCleared -= HandleNoLinesCleared;
+        // הסרנו את ביטול ההרשמה ל-OnNoLinesCleared כי עכשיו הקומבו מבוסס על זמן
 
         if (debugLogs)
             Debug.Log("[ComboController] Unsubscribed from GridPlacer events");
@@ -50,12 +51,5 @@ public class ComboController : MonoBehaviour
                 Debug.Log($"[ComboController] HandleLinesCleared: lines={lines} (rows={result.RowsCleared}, cols={result.ColumnsCleared})");
             ComboManager.RegisterClear(lines);
         }
-    }
-
-    private void HandleNoLinesCleared()
-    {
-        if (debugLogs)
-            Debug.Log("[ComboController] HandleNoLinesCleared -> BreakCombo");
-        ComboManager.BreakCombo();
     }
 }
