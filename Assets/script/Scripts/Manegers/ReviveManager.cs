@@ -227,7 +227,7 @@ public class ReviveManager : Singleton<ReviveManager>
             // ✅ תיקון: בדוק אם הגענו ל-3 revives אחרי ההגדלה
             if (usedRevives >= 3)
             {
-                Debug.Log("[WatchAdAndRevive] Reached max revives (3), triggering game over");
+              //  Debug.Log("[WatchAdAndRevive] Reached max revives (3), triggering game over");
                 TriggerGameOver();
                 return;
             }
@@ -324,13 +324,13 @@ public class ReviveManager : Singleton<ReviveManager>
 
     public void RestartLevel()
     {
-        Debug.Log("[RestartLevel] Restarting current scene");
+       // Debug.Log("[RestartLevel] Restarting current scene");
         ResetRevives();
     }
 
     public void ResetRevives()
     {
         usedRevives = 0;
-        Debug.Log("[ResetRevives] Revives reset to 0");
+        // Debug.Log("[ResetRevives] Revives reset to 0");
     }
 }

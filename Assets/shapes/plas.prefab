@@ -499,7 +499,7 @@ MonoBehaviour:
   validAlpha: 1
   invalidAlpha: 0.3
   usePressScale: 1
-  idleScaleFactor: 1
+  idleScaleFactor: 0.5
   pressedScaleFactor: 1
   pressScaleDuration: 0.15
 --- !u!50 &117577582166367335

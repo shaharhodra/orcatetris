@@ -499,7 +499,7 @@ MonoBehaviour:
   validAlpha: 1
   invalidAlpha: 0.3
   usePressScale: 1
-  idleScaleFactor: 1
+  idleScaleFactor: 0.5
   pressedScaleFactor: 1
   pressScaleDuration: 0.15
 --- !u!50 &1000531581917550428
@@ -563,7 +563,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.010591507, y: 0.25281048}
+  m_Offset: {x: 0.20312929, y: 0.057980657}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -573,7 +573,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.0125546, y: 1.940659}
+  m_Size: {x: 1.4899521, y: 1.9544117}
   m_EdgeRadius: 0
 --- !u!1 &7985917410334564776
 GameObject:

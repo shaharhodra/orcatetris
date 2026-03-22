@@ -264,7 +264,10 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         Shape source = ghostPrefab != null ? ghostPrefab : shape;
 
         currentGhost = Instantiate(source, board.transform);
-        currentGhost.transform.localScale = shape.transform.localScale;
+        
+        // Use the target scale (full size) instead of current scale
+        Vector3 targetScale = usePressScale ? originalScale * pressedScaleFactor : originalScale;
+        currentGhost.transform.localScale = targetScale;
 
         // לכבות קוליידרים על ה-Ghost כדי שלא ישפיעו על פיזיקה / קלט
         var colliders = currentGhost.GetComponentsInChildren<Collider2D>();

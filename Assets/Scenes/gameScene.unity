@@ -1339,7 +1339,7 @@ Transform:
   m_GameObject: {fileID: 759034414}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1, y: -3.5, z: 0}
+  m_LocalPosition: {x: -1.5, y: -3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1841,27 +1841,30 @@ MonoBehaviour:
   - {fileID: 791549194}
   - {fileID: 1157930587}
   shapePrefabs:
-  - {fileID: 468442592156601434, guid: 50f6cb1b91ee35d4cb5432cc02cc5976, type: 3}
-  - {fileID: 6209137391354102695, guid: 960829f437f434f43b597ceedae1e3cb, type: 3}
-  - {fileID: 2966608712451570766, guid: ca23aea20943d6345924eac5712c2cdb, type: 3}
+  - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
   - {fileID: 7671165921191882579, guid: 213a32c4778402f41aff228a4b5db834, type: 3}
-  - {fileID: 5216686327907737246, guid: aa3605e593d747e479487e4fbbc65a64, type: 3}
   - {fileID: 6849865853973081051, guid: 3a9d6ce6dd36bbf46ba5fa43d30fdd6f, type: 3}
   - {fileID: 3563352411413407747, guid: 336c555b2095a2e43bd8e40e19a5e8a7, type: 3}
   - {fileID: 3668488296882935676, guid: c3b4fc6ed060f064883e8f5168096bab, type: 3}
-  - {fileID: 7246744021484295054, guid: 930a888f3791d7e4eb565a4be8d28cd1, type: 3}
   - {fileID: 5924376386551647683, guid: 0ea0d2b5dd05e47418d9c4765e62a3c0, type: 3}
   - {fileID: 5454446068728028695, guid: 243d6f81dc575b8408d2114cf70d2d53, type: 3}
   - {fileID: 5013990381444744598, guid: d52b71b10b991884ea02b1d563a3e993, type: 3}
   - {fileID: 6846608915720579813, guid: 6948d055226540945ae8a2f5205d5804, type: 3}
   - {fileID: 6580873580862860536, guid: b74bed24c5ca39c46ba26899cb3f7a0f, type: 3}
   - {fileID: 7701140568180262024, guid: 2ce56daf19b1f3c4db1af3009764681d, type: 3}
-  - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
-  useAddressables: 0
-  shapesLabel: 
+  - {fileID: 468442592156601434, guid: 50f6cb1b91ee35d4cb5432cc02cc5976, type: 3}
+  - {fileID: 6209137391354102695, guid: 960829f437f434f43b597ceedae1e3cb, type: 3}
+  - {fileID: 7246744021484295054, guid: 930a888f3791d7e4eb565a4be8d28cd1, type: 3}
+  - {fileID: 5216686327907737246, guid: aa3605e593d747e479487e4fbbc65a64, type: 3}
+  - {fileID: 2966608712451570766, guid: ca23aea20943d6345924eac5712c2cdb, type: 3}
+  useAddressables: 1
+  shapesLabel: shape
   noMovesReviveDelay: 5
   minPlaceableToConsiderMovable: 1
-  availableShapes: []
+  difficulty: 1
+  pointsPerDifficultyLevel: 10000
+  useSpaceAwareDifficulty: 1
+  minSpaceRatioForComplexShapes: 0.4
 --- !u!4 &855154865
 Transform:
   m_ObjectHideFlags: 0
@@ -2359,7 +2362,7 @@ Transform:
   m_GameObject: {fileID: 1157930586}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: -3.5, z: 0}
+  m_LocalPosition: {x: 1.5, y: -3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2460,8 +2463,8 @@ MonoBehaviour:
   - {fileID: 6580873580862860536, guid: b74bed24c5ca39c46ba26899cb3f7a0f, type: 3}
   - {fileID: 7701140568180262024, guid: 2ce56daf19b1f3c4db1af3009764681d, type: 3}
   - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
-  difficulty: 5
-  useSmartRevive: 0
+  difficulty: 1
+  useSmartRevive: 1
   debugLogs: 0
 --- !u!4 &1208398430
 Transform:

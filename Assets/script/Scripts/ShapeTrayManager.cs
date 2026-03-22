@@ -26,6 +26,12 @@ public class ShapeTrayManager : MonoBehaviour
     [Header("Move Threshold")]
     [SerializeField] private int minPlaceableToConsiderMovable = 1; // set to 2 or 3 to be stricter
 
+    [Header("Difficulty Settings")]
+    [SerializeField] private int difficulty = 1;
+    [SerializeField] private int pointsPerDifficultyLevel = 10000;
+    [SerializeField] private bool useSpaceAwareDifficulty = true;
+    [SerializeField] private float minSpaceRatioForComplexShapes = 0.4f;
+
     private readonly List<Shape> activeShapes = new List<Shape>();
     private bool noMovesReviveTriggered;
 
@@ -33,7 +39,7 @@ public class ShapeTrayManager : MonoBehaviour
     private AsyncOperationHandle<IList<GameObject>> loadHandle;
     private bool addressablesLoaded;
 
-    [SerializeField] private List<Shape> availableShapes;
+   // [SerializeField] private List<Shape> availableShapes;
 
     private void OnEnable()
     {
@@ -51,6 +57,12 @@ public class ShapeTrayManager : MonoBehaviour
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
+        // Subscribe to score updates to calculate difficulty
+        if (ScoreManager.instance != null)
+        {
+            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdated;
+        }
+
         if (useAddressables)
         {
             LoadAddressablesAndRefill();
@@ -59,9 +71,136 @@ public class ShapeTrayManager : MonoBehaviour
         RefillIfNeeded();
     }
 
+    private void HandleScoreUpdated(int newScore)
+    {
+        // Calculate difficulty based on score (1-100)
+        int newDifficulty = (newScore / pointsPerDifficultyLevel) + 1;
+        newDifficulty = Mathf.Min(newDifficulty, 100); // Cap at 100
+        
+        if (newDifficulty != difficulty)
+        {
+            difficulty = newDifficulty;
+            Debug.Log($"[ShapeTrayManager] Difficulty increased to {difficulty} at score {newScore}");
+        }
+    }
+
+    private void UpdateDifficultyBasedOnGridSpace()
+    {
+        if (board == null)
+            return;
+
+        int totalCells = board.width * board.height;
+        int occupiedCells = 0;
+        
+        // Count occupied cells
+        for (int x = 0; x < board.width; x++)
+        {
+            for (int y = 0; y < board.height; y++)
+            {
+                var cell = new Vector2Int(x, y);
+                if (board.IsOccupied(cell))
+                {
+                    occupiedCells++;
+                }
+            }
+        }
+        
+        float occupiedPercentage = (float)occupiedCells / totalCells;
+        int newDifficulty;
+        
+        // Higher difficulty when grid is more full
+        if (occupiedPercentage < 0.3f)
+            newDifficulty = 1; // Lots of space - easy
+        else if (occupiedPercentage < 0.5f)
+            newDifficulty = 2; // Some space - medium
+        else if (occupiedPercentage < 0.7f)
+            newDifficulty = 3; // Limited space - hard
+        else
+            newDifficulty = 4; // Very little space - very hard
+            
+        if (newDifficulty != difficulty)
+        {
+            difficulty = newDifficulty;
+            Debug.Log($"[ShapeTrayManager] Difficulty set to {newDifficulty} based on {occupiedPercentage:P1} grid occupation");
+        }
+    }
+
+    private float GetAvailableSpaceRatio()
+    {
+        if (board == null)
+            return 1.0f;
+
+        int totalCells = board.width * board.height;
+        int occupiedCells = 0;
+        
+        for (int x = 0; x < board.width; x++)
+        {
+            for (int y = 0; y < board.height; y++)
+            {
+                var cell = new Vector2Int(x, y);
+                if (board.IsOccupied(cell))
+                {
+                    occupiedCells++;
+                }
+            }
+        }
+        
+        return 1.0f - ((float)occupiedCells / totalCells);
+    }
+
+    private int GetShapeComplexity(GameObject shapePrefab)
+    {
+        if (shapePrefab == null)
+            return 1;
+
+        var shape = shapePrefab.GetComponent<Shape>();
+        if (shape == null)
+            return 1;
+
+        var cells = shape.GetCells(1f); // Assuming cell size of 1 for complexity calculation
+        if (cells == null || cells.Length == 0)
+            return 1;
+
+        // Complexity based on number of cells
+        if (cells.Length <= 2)
+            return 1; // Very simple (1-2 blocks)
+        else if (cells.Length <= 4)
+            return 2; // Simple (3-4 blocks)
+        else if (cells.Length <= 6)
+            return 3; // Medium (5-6 blocks)
+        else
+            return 4; // Complex (7+ blocks)
+    }
+
+    private int GetShapeComplexity(Shape shapePrefab)
+    {
+        if (shapePrefab == null)
+            return 1;
+
+        var cells = shapePrefab.GetCells(1f); // Assuming cell size of 1 for complexity calculation
+        if (cells == null || cells.Length == 0)
+            return 1;
+
+        // Complexity based on number of cells
+        if (cells.Length <= 2)
+            return 1; // Very simple (1-2 blocks)
+        else if (cells.Length <= 4)
+            return 2; // Simple (3-4 blocks)
+        else if (cells.Length <= 6)
+            return 3; // Medium (5-6 blocks)
+        else
+            return 4; // Complex (7+ blocks)
+    }
+
     private void OnDestroy()
     {
         GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+
+        // Unsubscribe from score updates
+        if (ScoreManager.instance != null)
+        {
+            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdated;
+        }
 
         if (useAddressables && loadHandle.IsValid())
             Addressables.Release(loadHandle);
@@ -133,6 +272,12 @@ public class ShapeTrayManager : MonoBehaviour
             && (!useAddressables || !addressablesLoaded || loadedPrefabs.Count == 0))
             return;
 
+        // Update difficulty based on current grid space if space-aware difficulty is enabled
+        if (useSpaceAwareDifficulty)
+        {
+            UpdateDifficultyBasedOnGridSpace();
+        }
+
         for (int i = 0; i < 3; i++)
         {
             var slot = slots[i];
@@ -143,7 +288,7 @@ public class ShapeTrayManager : MonoBehaviour
 
             if (useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
             {
-                var goPrefab = loadedPrefabs[Random.Range(0, loadedPrefabs.Count)];
+                var goPrefab = GetShapePrefabBySpaceAwareDifficulty(loadedPrefabs);
                 var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
                 shape = go != null ? go.GetComponent<Shape>() : null;
             }
@@ -153,7 +298,7 @@ public class ShapeTrayManager : MonoBehaviour
                 if (shapePrefabs == null || shapePrefabs.Length == 0)
                     continue;
 
-                var prefab = shapePrefabs[Random.Range(0, shapePrefabs.Length)];
+                var prefab = GetShapePrefabBySpaceAwareDifficulty(shapePrefabs);
                 if (prefab == null)
                     continue;
 
@@ -333,5 +478,111 @@ public class ShapeTrayManager : MonoBehaviour
         }
 
         RefillIfNeeded();
+    }
+
+    private GameObject GetShapePrefabBySpaceAwareDifficulty(List<GameObject> prefabs)
+    {
+        if (prefabs == null || prefabs.Count == 0)
+            return null;
+
+        float availableSpaceRatio = GetAvailableSpaceRatio();
+        
+        // Filter shapes by complexity based on available space
+        var suitableShapes = new List<GameObject>();
+        int maxComplexity = GetMaxComplexityForSpace(availableSpaceRatio);
+        
+        foreach (var prefab in prefabs)
+        {
+            if (prefab == null) continue;
+            
+            int complexity = GetShapeComplexity(prefab);
+            if (complexity <= maxComplexity)
+            {
+                suitableShapes.Add(prefab);
+            }
+        }
+        
+        // If no suitable shapes found, fall back to all shapes
+        if (suitableShapes.Count == 0)
+        {
+            suitableShapes = prefabs.Where(p => p != null).ToList();
+        }
+        
+        // Add some randomness but bias towards simpler shapes when space is limited
+        if (availableSpaceRatio < 0.3f) // Very limited space
+        {
+            // Strong bias towards simple shapes
+            var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 2).ToList();
+            if (simpleShapes.Count > 0 && Random.value < 0.8f)
+                return simpleShapes[Random.Range(0, simpleShapes.Count)];
+        }
+        else if (availableSpaceRatio < 0.5f) // Limited space
+        {
+            // Moderate bias towards simpler shapes
+            var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 3).ToList();
+            if (simpleShapes.Count > 0 && Random.value < 0.6f)
+                return simpleShapes[Random.Range(0, simpleShapes.Count)];
+        }
+        
+        return suitableShapes[Random.Range(0, suitableShapes.Count)];
+    }
+
+    private Shape GetShapePrefabBySpaceAwareDifficulty(Shape[] prefabs)
+    {
+        if (prefabs == null || prefabs.Length == 0)
+            return null;
+
+        float availableSpaceRatio = GetAvailableSpaceRatio();
+        
+        // Filter shapes by complexity based on available space
+        var suitableShapes = new List<Shape>();
+        int maxComplexity = GetMaxComplexityForSpace(availableSpaceRatio);
+        
+        foreach (var prefab in prefabs)
+        {
+            if (prefab == null) continue;
+            
+            int complexity = GetShapeComplexity(prefab);
+            if (complexity <= maxComplexity)
+            {
+                suitableShapes.Add(prefab);
+            }
+        }
+        
+        // If no suitable shapes found, fall back to all shapes
+        if (suitableShapes.Count == 0)
+        {
+            suitableShapes = prefabs.Where(p => p != null).ToList();
+        }
+        
+        // Add some randomness but bias towards simpler shapes when space is limited
+        if (availableSpaceRatio < 0.3f) // Very limited space
+        {
+            // Strong bias towards simple shapes
+            var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 2).ToList();
+            if (simpleShapes.Count > 0 && Random.value < 0.8f)
+                return simpleShapes[Random.Range(0, simpleShapes.Count)];
+        }
+        else if (availableSpaceRatio < 0.5f) // Limited space
+        {
+            // Moderate bias towards simpler shapes
+            var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 3).ToList();
+            if (simpleShapes.Count > 0 && Random.value < 0.6f)
+                return simpleShapes[Random.Range(0, simpleShapes.Count)];
+        }
+        
+        return suitableShapes[Random.Range(0, suitableShapes.Count)];
+    }
+
+    private int GetMaxComplexityForSpace(float spaceRatio)
+    {
+        if (spaceRatio >= 0.7f)
+            return 4; // Lots of space - allow complex shapes
+        else if (spaceRatio >= 0.5f)
+            return 3; // Some space - allow medium complexity
+        else if (spaceRatio >= 0.3f)
+            return 2; // Limited space - allow simple shapes
+        else
+            return 1; // Very little space - only very simple shapes
     }
 }
