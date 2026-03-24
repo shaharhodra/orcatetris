@@ -368,13 +368,13 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (activeShapes.Count == 0)
         {
-            // Debug.Log("[HasAnyMove] activeShapes is empty -> returning false (treat as NO moves)");
-            return false;
+            // מצב שבו המגש ריק לרגע (למשל בזמן Refill) – עדיף להיות שמרני ולא להפעיל Revive.
+            // נחזיר true כדי לציין שיש "מהלכים" פוטנציאליים, עד שהצורות החדשות יווצרו.
+            // Debug.Log("[HasAnyMove] activeShapes is empty -> returning true (avoid premature revive)");
+            return true;
         }
 
-        int placeableCount = 0;
-        int needed = Mathf.Max(1, minPlaceableToConsiderMovable);
-
+        // לוגיקה מפושטת: אם יש אפילו צורה אחת עם מיקום חוקי אחד – יש מהלכים.
         for (int i = 0; i < activeShapes.Count; i++)
         {
             var s = activeShapes[i];
@@ -383,19 +383,14 @@ public class ShapeTrayManager : MonoBehaviour
 
             if (HasAnyMoveForShape(s))
             {
-                placeableCount++;
-                // short-circuit when threshold reached
-                if (placeableCount >= needed)
-                {
-                    // Debug.Log($"[HasAnyMove] reached threshold {needed} at shape {i}, short-circuiting");
-                    return true;
-                }
+                // Debug.Log($"[HasAnyMove] shape {i} has at least one valid move -> returning true");
+                return true;
             }
         }
 
-        bool anyMove = placeableCount >= needed;
-        // Debug.Log($"[HasAnyMove] placeableCount={placeableCount}, threshold={needed}, anyMove={anyMove}");
-        return anyMove;
+        // אף צורה לא יכולה להיכנס לשום מקום -> אין מהלכים
+        // Debug.Log("[HasAnyMove] no shapes have any valid placement -> returning false");
+        return false;
     }
 
     // Public wrapper so other systems (e.g. ReviveManager) can safely query if there are any valid moves.

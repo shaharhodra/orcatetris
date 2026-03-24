@@ -80,10 +80,6 @@ public class GridPlacer : MonoBehaviour
             }
         }
 
-        OnShapePlaced?.Invoke(shape);
-
-        Destroy(shape.gameObject);
-
         var scoreManager = ScoreManager.instance;
 
         LineClearResult clearResult;
@@ -118,5 +114,11 @@ public class GridPlacer : MonoBehaviour
               //  Debug.Log("[GridPlacer] No lines cleared -> breaking combo");
             OnNoLinesCleared?.Invoke();
         }
+
+        // אחרי שהלוח עודכן וקווים נמחקו, נודיע על הצבת הצורה.
+        OnShapePlaced?.Invoke(shape);
+
+        // כעת אפשר להשמיד את אובייקט הצורה המקורי
+        Destroy(shape.gameObject);
     }
 }

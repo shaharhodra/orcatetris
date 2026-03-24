@@ -5,9 +5,14 @@ public class GridCell : MonoBehaviour
     public Vector2Int gridPos;
     public bool occupied;
     public bool hasShapeOver;
+    public bool previewClear;
 
     [SerializeField] private float normalAlpha = 1f;
     [SerializeField] private float hoverAlpha = 0.5f;
+    [SerializeField] private float previewClearAlpha = 0.7f;
+    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Color previewClearColor = Color.yellow;
+
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private BoxCollider2D _boxCollider;
 
@@ -51,15 +56,35 @@ public class GridCell : MonoBehaviour
         UpdateVisual();
     }
 
+    public void SetPreviewClear(bool value)
+    {
+        previewClear = value;
+        UpdateVisual();
+    }
+
     private void UpdateVisual()
     {
-        float targetAlpha = (!occupied && hasShapeOver) ? hoverAlpha : normalAlpha;
+        float targetAlpha;
+
+        if (previewClear)
+        {
+            targetAlpha = previewClearAlpha;
+        }
+        else if (!occupied && hasShapeOver)
+        {
+            targetAlpha = hoverAlpha;
+        }
+        else
+        {
+            targetAlpha = normalAlpha;
+        }
 
         if (_sprite == null)
             return;
 
-        var c = _sprite.color;
-        c.a = targetAlpha;
-        _sprite.color = c;
+        // בוחרים צבע בסיס לפי מצב התא
+        Color baseColor = previewClear ? previewClearColor : normalColor;
+        baseColor.a = targetAlpha;
+        _sprite.color = baseColor;
     }
 }

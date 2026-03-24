@@ -354,12 +354,13 @@ MonoBehaviour:
   shape: {fileID: 6849865853973081051}
   ghostPrefab: {fileID: 6849865853973081051}
   ghostAlpha: 0.9
+  ghostSnapRadius: 1
   minFingerOffsetX: 0
   maxFingerOffsetX: 1.5
   minFingerOffsetY: 1
   maxFingerOffsetY: 3
-  horizontalOffsetRangePixels: 400
-  verticalOffsetRangePixels: 400
+  horizontalOffsetRangePixels: 600
+  verticalOffsetRangePixels: 600
   validAlpha: 1
   invalidAlpha: 0.3
   usePressScale: 1

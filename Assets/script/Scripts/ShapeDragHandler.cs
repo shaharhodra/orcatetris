@@ -10,6 +10,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [Header("Ghost Preview")]
     [SerializeField] private Shape ghostPrefab; // אופציונלי: אם לא הוגדר, נשתמש בעותק של הצורה עצמה
     [SerializeField] private float ghostAlpha = 0.35f;
+    [SerializeField, Min(0)] private int ghostSnapRadius = 0; // כמה תאים סביב התא המרכזי לחפש מיקום חוקי
     [SerializeField] private float minFingerOffsetX = 0f;
     [SerializeField] private float maxFingerOffsetX = 1.5f;
     [SerializeField] private float minFingerOffsetY = 0.5f;
@@ -38,6 +39,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     private Tween scaleTween;
 
     private Shape currentGhost;
+    private Vector2Int? lastValidCell;
+    private System.Collections.Generic.List<Vector2Int> previewBuffer;
 
     private void Awake()
     {
@@ -181,6 +184,11 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         }
 
         HideAndDestroyGhost();
+
+        if (board != null)
+        {
+            board.ClearPreviewClear();
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -190,8 +198,10 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         pointerDown = false;
 
-        // בסיום הגרירה נשתמש ישירות במיקום הצורה כדי לקבוע את התא
-        Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
+        // נשתמש בתא החוקי האחרון שנמצא (עם הרדיוס), ואם אין – בתא מתחת לצורה
+        Vector2Int cell = lastValidCell.HasValue
+            ? lastValidCell.Value
+            : board.WorldToGrid((Vector2)transform.position);
 
         bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
         if (canPlace)
@@ -215,6 +225,11 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             {
                 col.enabled = false;
             }
+
+            if (board != null)
+            {
+                board.ClearPreviewClear();
+            }
         }
         else
         {
@@ -230,6 +245,11 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             }
 
             HideAndDestroyGhost();
+
+            if (board != null)
+            {
+                board.ClearPreviewClear();
+            }
         }
     }
 
@@ -249,11 +269,84 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         if (board == null || boardPlacer == null || shape == null)
             return;
 
-        Vector2Int cell = board.WorldToGrid((Vector2)transform.position);
-        bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
+        Vector2Int baseCell = board.WorldToGrid((Vector2)transform.position);
+
+        // חיפוש תא חוקי בטווח רדיוס מסביב לתא הבסיס
+        Vector2Int chosenCell = baseCell;
+        bool canPlace = TryFindPlacementCell(baseCell, out chosenCell);
+
+        if (canPlace)
+            lastValidCell = chosenCell;
+        else
+            lastValidCell = null;
+
         SetAlpha(canPlace ? validAlpha : invalidAlpha);
 
-        UpdateGhostPreview(cell, canPlace);
+        UpdateGhostPreview(chosenCell, canPlace);
+
+        // עדכון היילייט של שורות/עמודות שעומדות להימחק
+        if (board != null)
+        {
+            if (canPlace && lastValidCell.HasValue)
+            {
+                if (previewBuffer == null)
+                    previewBuffer = new System.Collections.Generic.List<Vector2Int>();
+
+                var cellsToClear = board.GetPreviewClearCells(shape, lastValidCell.Value, previewBuffer);
+                board.SetPreviewClearCells(cellsToClear);
+            }
+            else
+            {
+                board.ClearPreviewClear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// מחפש תא חוקי להצבת הצורה, החל מהתא הנתון ובטווח רדיוס ghostSnapRadius מסביבו.
+    /// אם הרדיוס 0 – בודק רק את התא הנתון (התנהגות ישנה).
+    /// </summary>
+    private bool TryFindPlacementCell(Vector2Int baseCell, out Vector2Int chosenCell)
+    {
+        chosenCell = baseCell;
+
+        int radius = Mathf.Max(ghostSnapRadius, 0);
+        if (radius == 0)
+        {
+            bool canPlaceBase = boardPlacer.CanPlaceShape(shape, baseCell);
+            return canPlaceBase;
+        }
+
+        bool foundAny = false;
+        float bestDistSq = float.MaxValue;
+        Vector3 shapePos = transform.position;
+
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                Vector2Int testCell = new Vector2Int(baseCell.x + dx, baseCell.y + dy);
+
+                if (!board.IsInside(testCell))
+                    continue;
+
+                if (!boardPlacer.CanPlaceShape(shape, testCell))
+                    continue;
+
+                // מודדים מרחק בין מרכז התא למיקום הצורה כדי לבחור את התא הקרוב ביותר
+                Vector3 cellWorld = board.GridToWorld(testCell);
+                float distSq = (cellWorld - shapePos).sqrMagnitude;
+
+                if (!foundAny || distSq < bestDistSq)
+                {
+                    foundAny = true;
+                    bestDistSq = distSq;
+                    chosenCell = testCell;
+                }
+            }
+        }
+
+        return foundAny;
     }
 
     private void EnsureGhostCreated()

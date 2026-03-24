@@ -20,6 +20,7 @@ public class GridBoard : MonoBehaviour
     private GridCell[,] cells;
     private GameObject[,] placedBlocks;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
+    private System.Collections.Generic.HashSet<Vector2Int> previewClearCells;
     [SerializeField] private GridBoard board;
 
     // ✅ תיקון: הוסף getters נכונים
@@ -56,6 +57,20 @@ public class GridBoard : MonoBehaviour
         hoveredCells.Clear();
     }
 
+    public void ClearPreviewClear()
+    {
+        if (previewClearCells == null || previewClearCells.Count == 0 || cells == null)
+            return;
+
+        foreach (var pos in previewClearCells)
+        {
+            if (IsInside(pos) && cells[pos.x, pos.y] != null)
+                cells[pos.x, pos.y].SetPreviewClear(false);
+        }
+
+        previewClearCells.Clear();
+    }
+
     public void SetHoverCells(System.Collections.Generic.IEnumerable<Vector2Int> positions)
     {
         if (cells == null)
@@ -80,6 +95,30 @@ public class GridBoard : MonoBehaviour
         }
     }
 
+    public void SetPreviewClearCells(System.Collections.Generic.IEnumerable<Vector2Int> positions)
+    {
+        if (cells == null)
+            return;
+
+        if (previewClearCells == null)
+            previewClearCells = new System.Collections.Generic.HashSet<Vector2Int>();
+
+        ClearPreviewClear();
+
+        foreach (var pos in positions)
+        {
+            if (!IsInside(pos))
+                continue;
+
+            var cell = cells[pos.x, pos.y];
+            if (cell == null)
+                continue;
+
+            cell.SetPreviewClear(true);
+            previewClearCells.Add(pos);
+        }
+    }
+
     public void ApplySize(int newWidth, int newHeight)
     {
         width = Mathf.Max(1, newWidth);
@@ -101,6 +140,7 @@ public class GridBoard : MonoBehaviour
         }
 
         ClearHover();
+        ClearPreviewClear();
         ClearGridObjects();
         BuildGrid();
     }
@@ -109,6 +149,7 @@ public class GridBoard : MonoBehaviour
     {
         // Debug.Log("[GridBoard] RebuildGridCoroutine started");
         ClearHover();
+        ClearPreviewClear();
         ClearGridObjects();
         yield return null;
         BuildGrid();
@@ -118,6 +159,9 @@ public class GridBoard : MonoBehaviour
     {
         // מנקה את מצב התפוס לתאים קיימים
         if (cells == null) return;
+
+        // ודא שניקוי לוח מוחק גם כל היילייט של preview
+        ClearPreviewClear();
 
         for (int x = 0; x < width; x++)
         {
@@ -255,6 +299,9 @@ public class GridBoard : MonoBehaviour
         if (cells == null)
             return new LineClearResult(0, 0, 0);
 
+        // לפני ניקוי בפועל של שורות/עמודות – הסר היילייט preview, כי עכשיו זה כבר קורה באמת
+        ClearPreviewClear();
+
         bool[] fullRows = new bool[height];
         bool[] fullCols = new bool[width];
 
@@ -344,6 +391,99 @@ public class GridBoard : MonoBehaviour
         }
 
         return new LineClearResult(rowsCleared, colsCleared, cleared);
+    }
+
+    /// <summary>
+    /// מחזיר את כל התאים שהיו נמחקים אם היינו ממקמים את הצורה בתא הנתון, ללא שינוי בפועל של הגריד.
+    /// משתמש באותה לוגיקת שורות/עמודות מלאות כמו ClearFullLinesDetailed, אבל על בסיס מצב היפותטי.
+    /// </summary>
+    public System.Collections.Generic.List<Vector2Int> GetPreviewClearCells(Shape shape, Vector2Int targetCell, System.Collections.Generic.List<Vector2Int> buffer = null)
+    {
+        var result = buffer ?? new System.Collections.Generic.List<Vector2Int>();
+        result.Clear();
+
+        if (shape == null || cells == null)
+            return result;
+
+        // בניית סט של תאים שהצורה תתפוס אם נמקם אותה ב-targetCell
+        var shapeCells = new System.Collections.Generic.HashSet<Vector2Int>();
+
+        var blocks = shape.GetComponentsInChildren<Transform>()
+            .Where(t => t != shape.transform)
+            .ToList();
+
+        if (blocks.Count == 0)
+            return result;
+
+        foreach (var block in blocks)
+        {
+            if (block == null)
+                continue;
+
+            Vector2 localPos = block.localPosition;
+            Vector2Int blockOffset = new Vector2Int(
+                Mathf.RoundToInt(localPos.x / cellSize),
+                Mathf.RoundToInt(localPos.y / cellSize)
+            );
+
+            Vector2Int cellPos = targetCell + blockOffset;
+
+            if (IsInside(cellPos))
+                shapeCells.Add(cellPos);
+        }
+
+        bool[] fullRows = new bool[height];
+        bool[] fullCols = new bool[width];
+
+        // בדיקת שורות מלאות היפותטיות
+        for (int y = 0; y < height; y++)
+        {
+            bool full = true;
+            for (int x = 0; x < width; x++)
+            {
+                bool occupiedNow = cells[x, y] != null && cells[x, y].occupied;
+                bool occupiedWithShape = occupiedNow || shapeCells.Contains(new Vector2Int(x, y));
+
+                if (!occupiedWithShape)
+                {
+                    full = false;
+                    break;
+                }
+            }
+            fullRows[y] = full;
+        }
+
+        // בדיקת עמודות מלאות היפותטיות
+        for (int x = 0; x < width; x++)
+        {
+            bool full = true;
+            for (int y = 0; y < height; y++)
+            {
+                bool occupiedNow = cells[x, y] != null && cells[x, y].occupied;
+                bool occupiedWithShape = occupiedNow || shapeCells.Contains(new Vector2Int(x, y));
+
+                if (!occupiedWithShape)
+                {
+                    full = false;
+                    break;
+                }
+            }
+            fullCols[x] = full;
+        }
+
+        // איסוף כל התאים שיימחקו (בשורות ובעמודות המלאות)
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (!fullRows[y] && !fullCols[x])
+                    continue;
+
+                result.Add(new Vector2Int(x, y));
+            }
+        }
+
+        return result;
     }
 
     public int ClearRow(int y)

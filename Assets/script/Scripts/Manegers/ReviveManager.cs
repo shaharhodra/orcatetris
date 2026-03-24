@@ -232,9 +232,16 @@ public class ReviveManager : Singleton<ReviveManager>
                 return;
             }
 
-            // Clear cells to ensure at least one shape can fit
+            // Clear cells to ensure that the tray shapes have valid placements
             if (placeManager != null)
             {
+                // קודם נמלא את המגש מחדש ל-3 צורות חדשות
+                if (shapeTrayManager != null)
+                {
+                    shapeTrayManager.Restart();
+                }
+
+                // PerformSmartRevive משתמש ב-ShapeTrayManager.GetAvailableShapes + SmartReviveWithValidation
                 var result = placeManager.PerformSmartRevive();
                 Debug.Log($"[WatchAdAndRevive] SmartRevive: rowsCleared={result.rowsCleared}, colsCleared={result.colsCleared}, cellsCleared={result.cellsCleared}");
             }
