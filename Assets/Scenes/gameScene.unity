@@ -663,13 +663,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _levelData:
+    GameType: 0
+    LevelName: 
     Level: 0
-    TimeInSeconds: 0
     GridRows: 0
     GridColumns: 0
     NumberOfShapes: 0
-    LevelName: 
-    Shapes: []
+    DifficultyLevel: 0
+    DifficultyThreshold: 0
+    ScorePerPlaceCell: 0
+    ScorePerClearCell: 0
+    ColorLevels: []
   _levelJson: 
   _levelJsonFiles:
   - {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
@@ -2424,7 +2428,7 @@ GameObject:
   - component: {fileID: 1208398430}
   - component: {fileID: 1208398429}
   m_Layer: 0
-  m_Name: placer
+  m_Name: placerManeger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2463,7 +2467,7 @@ MonoBehaviour:
   - {fileID: 6580873580862860536, guid: b74bed24c5ca39c46ba26899cb3f7a0f, type: 3}
   - {fileID: 7701140568180262024, guid: 2ce56daf19b1f3c4db1af3009764681d, type: 3}
   - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
-  difficulty: 1
+  _difficulty: 1
   useSmartRevive: 1
   debugLogs: 0
 --- !u!4 &1208398430
@@ -3480,7 +3484,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1553505498
 SpriteRenderer:
   serializedVersion: 2
@@ -4015,7 +4019,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1749635186
 RectTransform:
   m_ObjectHideFlags: 0

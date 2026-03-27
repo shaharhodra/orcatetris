@@ -217,7 +217,7 @@ MonoBehaviour:
   boardPlacer: {fileID: 0}
   shape: {fileID: 468442592156601434}
   ghostPrefab: {fileID: 468442592156601434}
-  ghostAlpha: 0.6
+  ghostAlpha: 0.2
   ghostSnapRadius: 1
   minFingerOffsetX: 0
   maxFingerOffsetX: 1.5

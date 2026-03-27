@@ -19,14 +19,16 @@ public class PlaceManager : Singleton<PlaceManager>
     [SerializeField] private ShapeTrayManager shapeTrayManager;
     [SerializeField] private ReviveManager reviveManager;
 
-    [Header("Shape selection")]
+    private int _difficultyMin = 1;
+	private int _difficultyMax = 5;
+
+
+	[Header("Shape selection")]
     [Tooltip("Inspector prefabs used as candidates to give to the tray / player.")]
     [SerializeField] private Shape[] candidatePrefabs;
 
-    [Header("Difficulty")]
-    [Tooltip("1 = easiest (prefer large shapes), higher = harder (prefer smaller shapes)")]
-    [Range(1, 5)]
-    [SerializeField] private int difficulty = 1;
+   
+    [SerializeField] private int _difficulty = 1;
 
     [Header("Revive policy")]
     [Tooltip("If true, PlaceManager will choose the most-occupied row+column to clear on revive. Otherwise uses GridBoard.ReviveClearOneRowAndOneColumn().")]
@@ -40,22 +42,16 @@ public class PlaceManager : Singleton<PlaceManager>
     public event Action<int, int> OnReviveWillClearRowCol; // (row, col) indices planned to clear (or -1 if random/default)
     public event Func<Shape> OnChooseShapePrefab; // optional override: if set, used instead of internal selection
 
-    private void Awake()
-    {
-        //if (board == null)
-        //    board = FindObjectOfType<GridBoard>();
+	private void Start()
+	{
+		GameManager.instance.OnDataLoaded += HandleLevelDataLoaded;
 
-        //if (placer == null)
-        //    placer = FindObjectOfType<GridPlacer>();
-
-        //if (shapeTrayManager == null)
-        //    shapeTrayManager = FindObjectOfType<ShapeTrayManager>();
-
-        //if (reviveManager == null)
-            //reviveManager = FindObjectOfType<ReviveManager>();
-    }
-
-    private void OnEnable()
+	}
+	private void OnDestroy()
+	{
+		GameManager.instance.OnDataLoaded -= HandleLevelDataLoaded;
+	}
+	private void OnEnable()
     {
         if (placer != null)
             placer.OnShapePlaced += HandleShapePlaced;
@@ -168,7 +164,7 @@ public class PlaceManager : Singleton<PlaceManager>
         for (int i = 0; i < list.Count; i++)
         {
             float inv = 1f / list[i].size; // smaller shapes -> larger inv
-            float w = Mathf.Pow(inv, difficulty); // difficulty controls skew
+            float w = Mathf.Pow(inv, _difficulty); // difficulty controls skew
             weights[i] = w;
             total += w;
         }
@@ -268,6 +264,13 @@ public class PlaceManager : Singleton<PlaceManager>
     // Optional API: set difficulty at runtime
     public void SetDifficulty(int newDifficulty)
     {
-        difficulty = Mathf.Clamp(newDifficulty, 1, 5);
+        _difficulty = Mathf.Clamp(newDifficulty,_difficultyMin, _difficultyMax);
     }
+
+    public void HandleLevelDataLoaded(LevelData levelData)
+    {
+        _difficultyMin = levelData.DifficultyLevel;
+        _difficultyMax = levelData.DifficultyThreshold; 
+        SetDifficulty(levelData.DifficultyLevel);
+	}
 }

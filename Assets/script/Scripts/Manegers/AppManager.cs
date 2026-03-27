@@ -96,13 +96,13 @@ public class AppManager : Singleton<AppManager>
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
-        PlayerManeger.instance.LoadPlayerProgress();
+     
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
-        PlayerManeger.instance.SavePlayerProgress();
+       
     }
 
     private void OnDestroy()

@@ -13,16 +13,15 @@ public class PlayerManeger : Singleton<PlayerManeger>
         public int HighestUnlockedLevel;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         LoadPlayerProgress();
     }
-
-    // Update is called once per frame
-    void Update()
+     
+   
+    void OnDestroy()
     {
-        
+        SavePlayerProgress();
     }
 
     public string GetProgressFilePath()

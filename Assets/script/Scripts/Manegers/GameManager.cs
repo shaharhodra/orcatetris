@@ -46,8 +46,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    public LevelData CurrentLevelData { get; private set; }
-
+    public LevelData CurrentLevelData => AppManager.instance.CurrentLevelData;
     private int lastLoadedSceneHandle = -1;
 
     private readonly List<TextAsset> addressableAdventureLevels = new List<TextAsset>();
@@ -418,7 +417,7 @@ public class GameManager : Singleton<GameManager>
         if (levelData == null)
             return;
 
-        CurrentLevelData = levelData;
+      
 
         InvokeOnDataLoaded(levelData);
     }
