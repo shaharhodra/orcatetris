@@ -24,7 +24,7 @@ public class ComboController : MonoBehaviour
             return;
 
         gridPlacer.OnLinesCleared += HandleLinesCleared;
-        // הסרנו את ההרשמה ל-OnNoLinesCleared כי עכשיו הקומבו מבוסס על זמן
+        gridPlacer.OnNoLinesCleared += HandleNoLinesCleared;
 
         if (debugLogs)
             Debug.Log("[ComboController] Subscribed to GridPlacer events");
@@ -36,7 +36,7 @@ public class ComboController : MonoBehaviour
             return;
 
         gridPlacer.OnLinesCleared -= HandleLinesCleared;
-        // הסרנו את ביטול ההרשמה ל-OnNoLinesCleared כי עכשיו הקומבו מבוסס על זמן
+        gridPlacer.OnNoLinesCleared -= HandleNoLinesCleared;
 
         if (debugLogs)
             Debug.Log("[ComboController] Unsubscribed from GridPlacer events");
@@ -51,5 +51,13 @@ public class ComboController : MonoBehaviour
                 Debug.Log($"[ComboController] HandleLinesCleared: lines={lines} (rows={result.RowsCleared}, cols={result.ColumnsCleared})");
             ComboManager.RegisterClear(lines);
         }
+    }
+
+    private void HandleNoLinesCleared()
+    {
+        if (debugLogs)
+            Debug.Log("[ComboController] HandleNoLinesCleared -> RegisterFailedAttempt");
+
+        ComboManager.RegisterFailedAttempt();
     }
 }

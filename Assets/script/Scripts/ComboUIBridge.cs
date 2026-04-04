@@ -17,12 +17,18 @@ public class ComboUIBridge : MonoBehaviour
     [SerializeField] private float popupDuration = 0.6f;
     [SerializeField] private float popupTweenDuration = 0.15f;
 
+    // תמונה נוספת שמופיעה כאשר מנקים יותר משורה אחת בצעד אחד ("מדהים")
+    [SerializeField] private Image amazingImage;
+    [SerializeField] private float amazingDuration = 2f;
+    [SerializeField] private float amazingTweenDuration = 0.15f;
+
     [Header("Screen Shake")]
     [SerializeField] private Transform shakeTarget;
     [SerializeField] private float baseShakeDuration = 0.15f;
     [SerializeField] private float baseShakeStrength = 0.15f;
 
     private Tween popupTween;
+    private Tween amazingTween;
     private Tween shakeTween;
     private bool subscribed;
 
@@ -36,6 +42,12 @@ public class ComboUIBridge : MonoBehaviour
 
         if (popupRoot != null)
             popupRoot.gameObject.SetActive(false);
+
+        if (amazingImage != null)
+        {
+            amazingImage.gameObject.SetActive(false);
+            amazingImage.rectTransform.localScale = Vector3.zero;
+        }
     }
 
     private void Start()
@@ -129,6 +141,28 @@ public class ComboUIBridge : MonoBehaviour
                     .SetEase(Ease.InBack)
                     .OnComplete(() => popupRoot.gameObject.SetActive(false));
             });
+
+        // אם נמחקו יותר משורה אחת בצעד הזה, נציג אנימציה נפרדת של תמונת "מדהים"
+        bool showAmazing = args.LinesClearedThisStep > 1 && amazingImage != null;
+        if (showAmazing)
+        {
+            amazingTween?.Kill();
+
+            amazingImage.gameObject.SetActive(true);
+            amazingImage.rectTransform.localScale = Vector3.zero;
+
+            amazingTween = amazingImage.rectTransform
+                .DOScale(1f, amazingTweenDuration)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() =>
+                {
+                    amazingTween = amazingImage.rectTransform
+                        .DOScale(0f, amazingTweenDuration)
+                        .SetDelay(amazingDuration)
+                        .SetEase(Ease.InBack)
+                        .OnComplete(() => amazingImage.gameObject.SetActive(false));
+                });
+        }
     }
 
     private void HidePopupImmediate()
@@ -136,6 +170,13 @@ public class ComboUIBridge : MonoBehaviour
         popupTween?.Kill();
         if (popupRoot != null)
             popupRoot.gameObject.SetActive(false);
+
+        amazingTween?.Kill();
+        if (amazingImage != null)
+        {
+            amazingImage.gameObject.SetActive(false);
+            amazingImage.rectTransform.localScale = Vector3.zero;
+        }
     }
 
     private void DoShake(ComboTier tier)

@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.36, y: 0.36, z: 0.36}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3617645633001786815}
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6397954313239356524, guid: dd2042246fc00014aa62bd0549b18eea, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.46540874, g: 0.46394518, b: 0.46394518, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -188,7 +188,7 @@ MonoBehaviour:
   shapeData:
     cells:
     - {x: 0, y: 0}
-  gizmoColor: {r: 0.43961373, g: 0.8396226, b: 0.44768676, a: 1}
+  gizmoColor: {r: 0.0047466173, g: 0.3018868, b: 0.011068784, a: 1}
   gizmoCellSize: 0.5
 --- !u!114 &2990860589251098150
 MonoBehaviour:
@@ -206,7 +206,7 @@ MonoBehaviour:
   boardPlacer: {fileID: 0}
   shape: {fileID: 5468497852076923241}
   ghostPrefab: {fileID: 5468497852076923241}
-  ghostAlpha: 0.2
+  ghostAlpha: 0.5
   ghostSnapRadius: 1
   minFingerOffsetX: 0
   maxFingerOffsetX: 1.5

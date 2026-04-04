@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.517, z: 0}
-  m_LocalScale: {x: 0.38000003, y: 0.38000003, z: 0.38000003}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6014810322968284781}
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 6617327198931238950, guid: 756965dea230bce4c8fff197f2d701c4, type: 3}
-  m_Color: {r: 0.24313724, g: 1, b: 0.8597303, a: 1}
+  m_Color: {r: 0, g: 0.6855345, b: 0.5576628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -166,7 +166,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.029, z: 0}
-  m_LocalScale: {x: 0.38000003, y: 0.38000003, z: 0.38000003}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6014810322968284781}
@@ -221,7 +221,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 6617327198931238950, guid: 756965dea230bce4c8fff197f2d701c4, type: 3}
-  m_Color: {r: 0.24313724, g: 1, b: 0.8597303, a: 1}
+  m_Color: {r: 0, g: 0.6855345, b: 0.5576628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -304,7 +304,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.38000003, y: 0.38000003, z: 0.38000003}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6014810322968284781}
@@ -359,7 +359,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 6617327198931238950, guid: 756965dea230bce4c8fff197f2d701c4, type: 3}
-  m_Color: {r: 0.24313724, g: 1, b: 0.8597303, a: 1}
+  m_Color: {r: 0, g: 0.6855345, b: 0.5576628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -489,7 +489,7 @@ MonoBehaviour:
   boardPlacer: {fileID: 0}
   shape: {fileID: 5924376386551647683}
   ghostPrefab: {fileID: 5924376386551647683}
-  ghostAlpha: 0.2
+  ghostAlpha: 0.5
   ghostSnapRadius: 1
   minFingerOffsetX: 0
   maxFingerOffsetX: 1.5
@@ -604,7 +604,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.521, z: 0}
-  m_LocalScale: {x: 0.38000003, y: 0.38000003, z: 0.38000003}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6014810322968284781}
@@ -659,7 +659,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 6617327198931238950, guid: 756965dea230bce4c8fff197f2d701c4, type: 3}
-  m_Color: {r: 0.24313724, g: 1, b: 0.8597303, a: 1}
+  m_Color: {r: 0, g: 0.6855345, b: 0.5576628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

@@ -22,6 +22,9 @@ public class PopUpService : MonoBehaviour
     public bool IsActive;
     [SerializeField] public const float popUPDuretion= 1f;
     [SerializeField] public const float TWEEN_DURATION = 0.5f;
+
+    // אירוע שנשלח כשהשחקן סוגר את הפופאפ ידנית (בלחיצת כפתור)
+    public event Action OnPopupDismissed;
     public void SetOverlayActiveState (bool isActive)
     {
         _overlay.gameObject.SetActive(true);
@@ -65,6 +68,8 @@ public class PopUpService : MonoBehaviour
     {
         ShowPopUp(false);
         SetOverlayActiveState(false);
+        IsActive = false;
+        OnPopupDismissed?.Invoke();
     }
 
     // מפעיל את רצף הפתיחה-סגירה רק אם הטריגר שהתקבל מתאים ל-condition שמוגדר באינספקטור
@@ -74,6 +79,22 @@ public class PopUpService : MonoBehaviour
         {
             RunPopupSequenceAsync().Forget();
         }
+    }
+
+    // פותח את הפופאפ ומשאיר אותו פתוח עד שהשחקן לוחץ כפתור
+    public void RunIfConditionMetAndStay(PopUpCondition trigger)
+    {
+        if (trigger == condition)
+        {
+            ShowAndStay();
+        }
+    }
+
+    public void ShowAndStay()
+    {
+        IsActive = true;
+        SetOverlayActiveState(true);
+        ShowPopUp(true);
     }
 
     public async UniTask RunPopupSequenceAsync ()

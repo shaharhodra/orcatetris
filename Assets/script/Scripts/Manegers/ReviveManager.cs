@@ -308,18 +308,27 @@ public class ReviveManager : Singleton<ReviveManager>
     }
 
     /// <summary>
-    /// ✅ פונקציה חדשה: מפעילה את OnLose popup ואז עושה Restart
+    /// מפעילה את OnLose popup – הפופאפ נשאר פתוח עד שהשחקן לוחץ כפתור
     /// </summary>
-    private async void TriggerGameOver()
+    private void TriggerGameOver()
     {
         Debug.Log("[ReviveManager] Triggering Game Over");
 
-        // הצג OnLose popup
         if (popUpService != null)
         {
-            popUpService.RunIfConditionMet(PopUpCondition.OnLose);
-            await UniTask.Delay(TimeSpan.FromSeconds(2)); // מחכה 2 שניות
+            popUpService.OnPopupDismissed += OnGameOverPopupDismissed;
+            popUpService.RunIfConditionMetAndStay(PopUpCondition.OnLose);
         }
+        else
+        {
+            GameManager.instance.InvokeOnLevelRestartedEvent();
+        }
+    }
+
+    private void OnGameOverPopupDismissed()
+    {
+        if (popUpService != null)
+            popUpService.OnPopupDismissed -= OnGameOverPopupDismissed;
 
         GameManager.instance.InvokeOnLevelRestartedEvent();
     }

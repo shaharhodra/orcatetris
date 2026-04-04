@@ -46,7 +46,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    public LevelData CurrentLevelData => AppManager.instance.CurrentLevelData;
+    public LevelData CurrentLevelData => AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
     private int lastLoadedSceneHandle = -1;
 
     private readonly List<TextAsset> addressableAdventureLevels = new List<TextAsset>();
