@@ -16,6 +16,13 @@ public class ScoreManager : Singleton<ScoreManager>
     [Tooltip("Duration (seconds) to animate each score change from the current displayed value to the new target.")]
     [SerializeField] private float scoreAnimationDuration = 1f; // seconds per animation
 
+    [Header("Coins")]
+    [Tooltip("Every this many points awards coinsPerThreshold coins.")]
+    [SerializeField] private int scorePerCoinThreshold = 1000;
+    [SerializeField] private int coinsPerThreshold = 10;
+
+    private int lastAwardedThreshold;
+
     private Coroutine scoreCoroutine;
     private int targetScore;
     private float animationStartTime;
@@ -24,6 +31,9 @@ public class ScoreManager : Singleton<ScoreManager>
     void Start()
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+
+        MaxScore = GetUserHighScore();
+        OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
     }
 
     void OnDestroy()
@@ -43,6 +53,7 @@ public class ScoreManager : Singleton<ScoreManager>
         Score = score;
         targetScore = Score;
         OnScoreUpdatedEvent?.Invoke(score);
+        CheckAndAwardCoins(Score);
 
         if (Score > MaxScore)
         {
@@ -95,7 +106,27 @@ public class ScoreManager : Singleton<ScoreManager>
 
         Score = 0;
         targetScore = 0;
+        lastAwardedThreshold = 0;
         OnScoreUpdatedEvent?.Invoke(Score);
+    }
+
+    private void CheckAndAwardCoins(int currentScore)
+    {
+        if (scorePerCoinThreshold <= 0)
+            return;
+
+        int currentThreshold = currentScore / scorePerCoinThreshold;
+        int previousThreshold = lastAwardedThreshold;
+
+        if (currentThreshold > previousThreshold)
+        {
+            int newThresholds = currentThreshold - previousThreshold;
+            int coinsToAward = newThresholds * coinsPerThreshold;
+            lastAwardedThreshold = currentThreshold;
+
+            if (PlayerManeger.instance != null)
+                PlayerManeger.instance.AddCoins(coinsToAward);
+        }
     }
 
     public void UpdateMaxScore(int addedScore)
@@ -184,6 +215,7 @@ public class ScoreManager : Singleton<ScoreManager>
         // ensure final exact value
         Score = targetScore;
         OnScoreUpdatedEvent?.Invoke(Score);
+        CheckAndAwardCoins(Score);
         if (Score > MaxScore)
         {
             MaxScore = Score;

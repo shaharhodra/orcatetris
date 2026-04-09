@@ -3878,13 +3878,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AppManager
   _levelData:
+    GameType: 0
+    LevelName: 
     Level: 0
-    TimeInSeconds: 0
     GridRows: 0
     GridColumns: 0
     NumberOfShapes: 0
-    LevelName: 
-    Shapes: []
+    DifficultyLevel: 0
+    DifficultyThreshold: 0
+    ScorePerPlaceCell: 0
+    ScorePerClearCell: 0
+    ColorLevels: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}
@@ -4129,6 +4133,7 @@ GameObject:
   - component: {fileID: 1973575553}
   - component: {fileID: 1973575552}
   - component: {fileID: 1973575551}
+  - component: {fileID: 1973575555}
   m_Layer: 5
   m_Name: TopCanvas
   m_TagString: Untagged
@@ -4219,6 +4224,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1973575555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1973575550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d7720c2454753408e60d123d2daeb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CoinUIController
+  _coinsText: {fileID: 1441462628}
 --- !u!1 &1976814377
 GameObject:
   m_ObjectHideFlags: 0
@@ -4773,13 +4791,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _levelData:
+    GameType: 0
+    LevelName: 
     Level: 0
-    TimeInSeconds: 0
     GridRows: 0
     GridColumns: 0
     NumberOfShapes: 0
-    LevelName: 
-    Shapes: []
+    DifficultyLevel: 0
+    DifficultyThreshold: 0
+    ScorePerPlaceCell: 0
+    ScorePerClearCell: 0
+    ColorLevels: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}

@@ -30,6 +30,7 @@ public class PopUpGameManager : MonoBehaviour
             }
         }
     }
+   
 
     // דוגמאות נוספות לאירועים, אם תרצה להשתמש בהמשך
     public void OnPlayerWin()

@@ -11,7 +11,10 @@ public class PlayerManeger : Singleton<PlayerManeger>
     public class PlayerProgressData
     {
         public int HighestUnlockedLevel;
+        public int Coins;
     }
+
+    public event Action<int> OnCoinsUpdatedEvent;
 
     void Start()
     {
@@ -57,6 +60,21 @@ public class PlayerManeger : Singleton<PlayerManeger>
                 HighestUnlockedLevel = 1
             };
         }
+    }
+
+    public int GetCoins()
+    {
+        return PlayerProgress != null ? PlayerProgress.Coins : 0;
+    }
+
+    public void AddCoins(int amount)
+    {
+        if (PlayerProgress == null || amount <= 0)
+            return;
+
+        PlayerProgress.Coins += amount;
+        SavePlayerProgress();
+        OnCoinsUpdatedEvent?.Invoke(PlayerProgress.Coins);
     }
 
     public void SavePlayerProgress()
