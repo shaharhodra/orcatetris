@@ -433,6 +433,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 409212566}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!224 &409212566
 RectTransform:
@@ -589,7 +594,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.19182372, b: 0.74256575, a: 0.050980393}
+  m_Color: {r: 1, g: 0.19182372, b: 0.74256575, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -748,7 +753,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93980944, g: 0.15408784, b: 1, a: 0.047058824}
+  m_Color: {r: 0.93980944, g: 0.15408784, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1526,6 +1531,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 760896612}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!224 &760896612
 RectTransform:
@@ -3889,6 +3899,9 @@ MonoBehaviour:
     ScorePerPlaceCell: 0
     ScorePerClearCell: 0
     ColorLevels: []
+    ScorePerCoinThreshold: 0
+    CoinsPerThreshold: 0
+    LevelTargets: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}
@@ -4018,6 +4031,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 1887066882}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!1 &1925910321
 GameObject:
@@ -4237,6 +4255,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinUIController
   _coinsText: {fileID: 1441462628}
+  punchScale: 0.3
+  punchDuration: 0.3
 --- !u!1 &1976814377
 GameObject:
   m_ObjectHideFlags: 0
@@ -4802,6 +4822,15 @@ MonoBehaviour:
     ScorePerPlaceCell: 0
     ScorePerClearCell: 0
     ColorLevels: []
+    ScorePerCoinThreshold: 0
+    CoinsPerThreshold: 0
+    LevelTargets:
+    - Target: 5
+      Color: {r: 0.0141509175, g: 1, b: 0.029131023, a: 1}
+      TargetItem: 0
+    - Target: 10
+      Color: {r: 1, g: 0.19339621, b: 0.19339621, a: 1}
+      TargetItem: 1
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}

@@ -7,5 +7,9 @@
   "LevelName": "classic",
   "Shapes": [],
   "DifficultyLevel": 3,
-  "DifficultyThreshold": 10
+  "DifficultyThreshold": 10,
+  "ScorePerCoinThreshold": 1000,
+  "CoinsPerThreshold": 5
+
+
 }

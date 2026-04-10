@@ -674,13 +674,15 @@ MonoBehaviour:
     ScorePerPlaceCell: 0
     ScorePerClearCell: 0
     ColorLevels: []
+    ScorePerCoinThreshold: 0
+    CoinsPerThreshold: 0
   _levelJson: 
   _levelJsonFiles:
   - {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
   - {fileID: 4900000, guid: c9a4cea304d84dd49917a4e1a84bee6c, type: 3}
   - {fileID: 4900000, guid: 87273cfe2a99b974da4702015ce3e434, type: 3}
   - {fileID: 4900000, guid: 6d8d91600d7a7b941981b62b45770170, type: 3}
-  _classicLevelJsonFile: {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
+  _classicLevelJsonFile: {fileID: 4900000, guid: c9a4cea304d84dd49917a4e1a84bee6c, type: 3}
   startLevelIndex: 0
   useAddressablesForLevels: 0
   adventureLevelsLabel: 
@@ -1919,8 +1921,6 @@ MonoBehaviour:
   shapesLabel: shape
   noMovesReviveDelay: 5
   minPlaceableToConsiderMovable: 1
-  difficulty: 1
-  pointsPerDifficultyLevel: 10000
   useSpaceAwareDifficulty: 1
   minSpaceRatioForComplexShapes: 0.4
 --- !u!4 &855154865
@@ -5108,8 +5108,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
   scoreAnimationDuration: 1
-  scorePerCoinThreshold: 1000
-  coinsPerThreshold: 10
 --- !u!4 &1936900131
 Transform:
   m_ObjectHideFlags: 0

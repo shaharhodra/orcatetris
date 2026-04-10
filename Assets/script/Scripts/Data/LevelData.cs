@@ -17,6 +17,10 @@ public class LevelData
 	public int ScorePerPlaceCell;
 	public int ScorePerClearCell;
 	public List<ColorLevels> ColorLevels;
+	public int ScorePerCoinThreshold;
+	public int CoinsPerThreshold;
+	public List<LevelTargetData> LevelTargets;
+
 	//public List<ShapeData> Shapes;
 }
 
@@ -27,8 +31,29 @@ public class ColorLevels
 	public Color Color;
 }
 
+public enum ColectionTypes
+{
+	Circles = 0,
+	Squares = 1,	
+	Stars = 2,
+	Triangles = 3,
+
+}
+
 public enum GameTypes
 {
 	Classic = 0,
 	Adventure = 1,
 }
+
+[Serializable]
+public class LevelTargetData
+{
+	
+	public int Target;
+	public Color Color;
+	public ColectionTypes TargetItem;
+
+}
+
+

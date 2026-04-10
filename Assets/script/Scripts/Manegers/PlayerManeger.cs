@@ -16,6 +16,7 @@ public class PlayerManeger : Singleton<PlayerManeger>
 
     public event Action<int> OnCoinsUpdatedEvent;
 
+
     void Start()
     {
         LoadPlayerProgress();
@@ -59,6 +60,11 @@ public class PlayerManeger : Singleton<PlayerManeger>
             {
                 HighestUnlockedLevel = 1
             };
+        }
+
+        if (PlayerProgress.HighestUnlockedLevel <= 0)
+        {
+            PlayerProgress.HighestUnlockedLevel = 1;
         }
     }
 

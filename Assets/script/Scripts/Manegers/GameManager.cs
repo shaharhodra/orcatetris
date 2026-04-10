@@ -380,8 +380,8 @@ public class GameManager : Singleton<GameManager>
         // take LevelData and convert it to json string
 
         var json = JsonUtility.ToJson(_levelData);
-
-        if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
+        Debug.Log(json);
+		if (_levelJsonFiles != null && _levelJsonFiles.Length > 0)
             LoadLevel(Mathf.Max(0, startLevelIndex - 1));
         else
             LoadLevelFromJson(_levelJson);

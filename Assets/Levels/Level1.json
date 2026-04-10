@@ -1,9 +1,31 @@
 {
   "Level": 1,
+  "LevelType": "adventure",
   "TimeInSeconds": 120,
   "GridRows": 6,
   "GridColumns": 6,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
-  "Shapes": []
+  "Shapes": [],
+  "DifficultyLevel": 1,
+  "DifficultyThreshold": 5,
+  "ScorePerCoinThreshold": 500,
+  "CoinsPerThreshold": 3,
+  "LevelTargets": [
+    {
+      "Target": 30,
+      "TargetItem": 0,
+      "Color":"FF7F00FF"
+    },
+    {
+      "Target": 30,
+      "TargetItem": 1,
+      "Color":"FF7F00FF"
+    },
+    {
+      "Target": 30,
+      "TargetItem": 2,
+      "Color":"FF7F00FF"
+    }
+  ]
 }

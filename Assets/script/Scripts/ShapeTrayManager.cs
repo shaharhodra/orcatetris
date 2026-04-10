@@ -27,8 +27,8 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private int minPlaceableToConsiderMovable = 1; // set to 2 or 3 to be stricter
 
     [Header("Difficulty Settings")]
-    [SerializeField] private int difficulty = 1;
-    [SerializeField] private int pointsPerDifficultyLevel = 10000;
+    //[SerializeField] private int difficulty = 1;
+    //[SerializeField] private int pointsPerDifficultyLevel = 10000;
     [SerializeField] private bool useSpaceAwareDifficulty = true;
     [SerializeField] private float minSpaceRatioForComplexShapes = 0.4f;
 
@@ -57,12 +57,7 @@ public class ShapeTrayManager : MonoBehaviour
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
-        // Subscribe to score updates to calculate difficulty
-        if (ScoreManager.instance != null)
-        {
-            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdated;
-        }
-
+      
         if (useAddressables)
         {
             LoadAddressablesAndRefill();
@@ -71,18 +66,7 @@ public class ShapeTrayManager : MonoBehaviour
         RefillIfNeeded();
     }
 
-    private void HandleScoreUpdated(int newScore)
-    {
-        // Calculate difficulty based on score (1-100)
-        int newDifficulty = (newScore / pointsPerDifficultyLevel) + 1;
-        newDifficulty = Mathf.Min(newDifficulty, 100); // Cap at 100
-        
-        if (newDifficulty != difficulty)
-        {
-            difficulty = newDifficulty;
-            Debug.Log($"[ShapeTrayManager] Difficulty increased to {difficulty} at score {newScore}");
-        }
-    }
+   
 
     private void UpdateDifficultyBasedOnGridSpace()
     {
@@ -105,24 +89,7 @@ public class ShapeTrayManager : MonoBehaviour
             }
         }
         
-        float occupiedPercentage = (float)occupiedCells / totalCells;
-        int newDifficulty;
-        
-        // Higher difficulty when grid is more full
-        if (occupiedPercentage < 0.3f)
-            newDifficulty = 1; // Lots of space - easy
-        else if (occupiedPercentage < 0.5f)
-            newDifficulty = 2; // Some space - medium
-        else if (occupiedPercentage < 0.7f)
-            newDifficulty = 3; // Limited space - hard
-        else
-            newDifficulty = 4; // Very little space - very hard
-            
-        if (newDifficulty != difficulty)
-        {
-            difficulty = newDifficulty;
-            Debug.Log($"[ShapeTrayManager] Difficulty set to {newDifficulty} based on {occupiedPercentage:P1} grid occupation");
-        }
+      
     }
 
     private float GetAvailableSpaceRatio()
@@ -196,12 +163,7 @@ public class ShapeTrayManager : MonoBehaviour
     {
         GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
 
-        // Unsubscribe from score updates
-        if (ScoreManager.instance != null)
-        {
-            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdated;
-        }
-
+       
         if (useAddressables && loadHandle.IsValid())
             Addressables.Release(loadHandle);
     }

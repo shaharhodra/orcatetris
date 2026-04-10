@@ -13,6 +13,8 @@ using UnityEngine;
 /// </summary>
 public class PlaceManager : Singleton<PlaceManager>
 {
+    public LevelData CurrentLevelData => AppManager.instance.CurrentLevelData;
+
     [Header("References")]
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer placer;
@@ -44,13 +46,10 @@ public class PlaceManager : Singleton<PlaceManager>
 
 	private void Start()
 	{
-		GameManager.instance.OnDataLoaded += HandleLevelDataLoaded;
+        HandleLevelDataLoaded();
 
 	}
-	private void OnDestroy()
-	{
-		GameManager.instance.OnDataLoaded -= HandleLevelDataLoaded;
-	}
+	
 	private void OnEnable()
     {
         if (placer != null)
@@ -267,10 +266,10 @@ public class PlaceManager : Singleton<PlaceManager>
         _difficulty = Mathf.Clamp(newDifficulty,_difficultyMin, _difficultyMax);
     }
 
-    public void HandleLevelDataLoaded(LevelData levelData)
+    public void HandleLevelDataLoaded()
     {
-        _difficultyMin = levelData.DifficultyLevel;
-        _difficultyMax = levelData.DifficultyThreshold; 
-        SetDifficulty(levelData.DifficultyLevel);
+        _difficultyMin = CurrentLevelData.DifficultyLevel;
+        _difficultyMax = CurrentLevelData.DifficultyThreshold; 
+        SetDifficulty(CurrentLevelData.DifficultyLevel);
 	}
 }

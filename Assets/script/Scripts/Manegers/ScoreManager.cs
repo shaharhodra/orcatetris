@@ -6,6 +6,8 @@ public class ScoreManager : Singleton<ScoreManager>
     public event Action<int> OnScoreUpdatedEvent;
     public event Action<int> OnMaxScoreUpdatedEvent;
 
+    public LevelData CurentLevelData => AppManager.instance.CurrentLevelData;
+
     public int Score { get; private set; }
     public int MaxScore { get; private set; }
 
@@ -18,8 +20,8 @@ public class ScoreManager : Singleton<ScoreManager>
 
     [Header("Coins")]
     [Tooltip("Every this many points awards coinsPerThreshold coins.")]
-    [SerializeField] private int scorePerCoinThreshold = 1000;
-    [SerializeField] private int coinsPerThreshold = 10;
+    private int scorePerCoinThreshold;
+    private int coinsPerThreshold;
 
     private int lastAwardedThreshold;
 
@@ -32,13 +34,15 @@ public class ScoreManager : Singleton<ScoreManager>
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
-        MaxScore = GetUserHighScore();
+        HandleLevelDataLoaded();
+		MaxScore = GetUserHighScore();
         OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
     }
 
     void OnDestroy()
     {
-        GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+
+		GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
     }
 
     public void InvokeOnScoreUpdatedEvent(int score)
@@ -225,8 +229,15 @@ public class ScoreManager : Singleton<ScoreManager>
 
         scoreCoroutine = null;
     }
+	public void HandleLevelDataLoaded()
+	{
+        scorePerCoinThreshold = CurentLevelData.ScorePerCoinThreshold; 
+        coinsPerThreshold = CurentLevelData.CoinsPerThreshold;
 
-    public void HandleOnLevelRestartedEvent (LevelData levelData)
+
+	}
+
+	public void HandleOnLevelRestartedEvent (LevelData levelData)
     {
         Restart();
     }
@@ -238,4 +249,5 @@ public class ScoreManager : Singleton<ScoreManager>
         OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
         targetScore = Score;
     }
+
 }
