@@ -3929,7 +3929,7 @@ MonoBehaviour:
     ShapeWaves: []
   _levelJson: 
   _levelJsonFiles: []
-  _classicLevelJsonFile: {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
+  _classicLevelJsonFile: {fileID: 0}
   startLevelIndex: 1
   useAddressablesForLevels: 1
   adventureLevelsLabel: adv

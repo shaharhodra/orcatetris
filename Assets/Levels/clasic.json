@@ -1,15 +1,15 @@
 {
   "Level": 1,
   "TimeInSeconds": 120,
-  "GridRows": 6,
-  "GridColumns": 6,
+  "GridRows": 10,
+  "GridColumns": 10,
   "NumberOfShapes": 0,
   "LevelName": "classic",
   "Shapes": [],
   "DifficultyLevel": 3,
   "DifficultyThreshold": 10,
   "ScorePerCoinThreshold": 1000,
-  "CoinsPerThreshold": 5
-
+  "CoinsPerThreshold": 5,
+  "LevelType": "classic"
 
 }

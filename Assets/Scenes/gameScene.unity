@@ -663,7 +663,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _levelData:
-    GameType: 0
+    GameType: 1
     LevelName: 
     Level: 0
     GridRows: 0
@@ -1317,68 +1317,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 99833132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &776097257
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 776097259}
-  - component: {fileID: 776097258}
-  m_Layer: 0
-  m_Name: TargetContainer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &776097258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 776097257}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
---- !u!224 &776097259
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 776097257}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 2.43}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &776254350
 GameObject:
   m_ObjectHideFlags: 0
@@ -3390,10 +3328,9 @@ MonoBehaviour:
   targetItemPrefab: {fileID: 6272467978193749909, guid: 274944324d395ec4aaa61153586e24fc, type: 3}
   container: {fileID: 1813750231}
   symbolSprites:
-  - {fileID: -7839563484146654795, guid: 32b4941996ea5c447902095c4868ef24, type: 3}
-  - {fileID: 6586461156150141773, guid: 4d5d9996350346f46b644721dfdbc65f, type: 3}
   - {fileID: 7081165454689379139, guid: 9d358a5d8d5138447aa3555b0cf4a4ac, type: 3}
   - {fileID: 7661166536348862405, guid: a6971ec1820b12d4d9609b3c854089d5, type: 3}
+  - {fileID: -7839563484146654795, guid: 32b4941996ea5c447902095c4868ef24, type: 3}
   punchScale: 0.2
   punchDuration: 0.25
 --- !u!1 &1414012164
@@ -5106,12 +5043,12 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 0
+    m_Top: 400
     m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
+  m_ChildAlignment: 1
+  m_Spacing: 100
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
@@ -5146,7 +5083,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -5601,6 +5538,5 @@ SceneRoots:
   - {fileID: 1208398430}
   - {fileID: 1733081600}
   - {fileID: 579939639}
-  - {fileID: 776097259}
   - {fileID: 1391310333}
   - {fileID: 1813750231}
