@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class GridPlacer : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class GridPlacer : MonoBehaviour
     public event Action<Shape> OnShapePlaced;
     public event Action<LineClearResult> OnLinesCleared;
     public event Action OnNoLinesCleared;
+    public event Action<List<Vector2Int>> OnBlocksPlacedBeforeClear;
 
     [Header("Scoring")]
     [SerializeField] private int scorePerPlacedCell = 1;
@@ -67,18 +69,34 @@ public class GridPlacer : MonoBehaviour
                 childBlocks.Add(key, child);
         }
 
+        var placedCells = new List<Vector2Int>(offsets.Length);
+
         foreach (var offset in offsets)
         {
             Vector2Int cell = targetCell + offset;
             board.SetOccupied(cell, true);
+            placedCells.Add(cell);
 
             if (childBlocks.TryGetValue(offset, out var block) && block != null)
             {
                 block.SetParent(board.transform, true);
                 block.position = board.GridToWorld(cell);
                 board.SetPlacedBlock(cell, block.gameObject);
+
+                // If the block has a predefined symbol, register it on the grid
+                var blockSymbol = block.GetComponent<BlockSymbol>();
+                if (blockSymbol != null && blockSymbol.HasSymbol)
+                {
+                    var icon = blockSymbol.DetachIcon();
+                    if (icon != null)
+                        icon.transform.SetParent(board.transform, true);
+                    board.SetSymbol(cell, blockSymbol.SymbolType, icon);
+                }
             }
         }
+
+        // Fire before line clearing so Adventure symbols can be assigned to just-placed blocks
+        OnBlocksPlacedBeforeClear?.Invoke(placedCells);
 
         var scoreManager = ScoreManager.instance;
 

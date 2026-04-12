@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 
 [Serializable]
-public readonly struct LineClearResult
+public struct LineClearResult
 {
     public int RowsCleared { get; }
     public int ColumnsCleared { get; }
@@ -9,10 +10,14 @@ public readonly struct LineClearResult
 
     public int LinesCleared => RowsCleared + ColumnsCleared;
 
-    public LineClearResult(int rowsCleared, int columnsCleared, int cellsCleared)
+    // Adventure mode: symbols cleared per ColectionTypes
+    public Dictionary<ColectionTypes, int> ClearedSymbols { get; }
+
+    public LineClearResult(int rowsCleared, int columnsCleared, int cellsCleared, Dictionary<ColectionTypes, int> clearedSymbols = null)
     {
         RowsCleared = rowsCleared;
         ColumnsCleared = columnsCleared;
         CellsCleared = cellsCleared;
+        ClearedSymbols = clearedSymbols;
     }
 }

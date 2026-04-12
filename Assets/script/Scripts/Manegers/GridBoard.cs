@@ -19,6 +19,8 @@ public class GridBoard : MonoBehaviour
 
     private GridCell[,] cells;
     private GameObject[,] placedBlocks;
+    private int[,] cellSymbolTypes;
+    private GameObject[,] symbolIcons;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
     private System.Collections.Generic.HashSet<Vector2Int> previewClearCells;
     [SerializeField] private GridBoard board;
@@ -177,6 +179,8 @@ public class GridBoard : MonoBehaviour
                     Destroy(placedBlocks[x, y]);
                     placedBlocks[x, y] = null;
                 }
+
+                ClearSymbolAt(x, y);
             }
         }
     }
@@ -195,6 +199,11 @@ public class GridBoard : MonoBehaviour
 
         cells = new GridCell[width, height];
         placedBlocks = new GameObject[width, height];
+        cellSymbolTypes = new int[width, height];
+        symbolIcons = new GameObject[width, height];
+        for (int sx = 0; sx < width; sx++)
+            for (int sy = 0; sy < height; sy++)
+                cellSymbolTypes[sx, sy] = -1;
 
         for (int x = 0; x < width; x++)
         {
@@ -289,6 +298,42 @@ public class GridBoard : MonoBehaviour
         placedBlocks[cell.x, cell.y] = block;
     }
 
+    // ===== Symbol tracking for Adventure mode =====
+
+    public void SetSymbol(Vector2Int cell, ColectionTypes symbolType, GameObject iconObj)
+    {
+        if (!IsInside(cell) || cellSymbolTypes == null)
+            return;
+
+        cellSymbolTypes[cell.x, cell.y] = (int)symbolType;
+
+        if (symbolIcons != null)
+        {
+            if (symbolIcons[cell.x, cell.y] != null)
+                Destroy(symbolIcons[cell.x, cell.y]);
+            symbolIcons[cell.x, cell.y] = iconObj;
+        }
+    }
+
+    public int GetSymbolType(Vector2Int cell)
+    {
+        if (!IsInside(cell) || cellSymbolTypes == null)
+            return -1;
+        return cellSymbolTypes[cell.x, cell.y];
+    }
+
+    private void ClearSymbolAt(int x, int y)
+    {
+        if (cellSymbolTypes != null)
+            cellSymbolTypes[x, y] = -1;
+
+        if (symbolIcons != null && symbolIcons[x, y] != null)
+        {
+            Destroy(symbolIcons[x, y]);
+            symbolIcons[x, y] = null;
+        }
+    }
+
     public int ClearFullLines()
     {
         return ClearFullLinesDetailed().CellsCleared;
@@ -369,12 +414,26 @@ public class GridBoard : MonoBehaviour
                 colsCleared++;
         }
 
+        Dictionary<ColectionTypes, int> clearedSymbols = null;
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 if (!shouldClear[x, y])
                     continue;
+
+                // Collect symbol data before clearing
+                if (cellSymbolTypes != null && cellSymbolTypes[x, y] >= 0)
+                {
+                    var st = (ColectionTypes)cellSymbolTypes[x, y];
+                    if (clearedSymbols == null)
+                        clearedSymbols = new Dictionary<ColectionTypes, int>();
+                    if (clearedSymbols.ContainsKey(st))
+                        clearedSymbols[st]++;
+                    else
+                        clearedSymbols[st] = 1;
+                }
 
                 if (cells[x, y] != null && cells[x, y].occupied)
                 {
@@ -387,10 +446,12 @@ public class GridBoard : MonoBehaviour
                     Destroy(placedBlocks[x, y]);
                     placedBlocks[x, y] = null;
                 }
+
+                ClearSymbolAt(x, y);
             }
         }
 
-        return new LineClearResult(rowsCleared, colsCleared, cleared);
+        return new LineClearResult(rowsCleared, colsCleared, cleared, clearedSymbols);
     }
 
     /// <summary>

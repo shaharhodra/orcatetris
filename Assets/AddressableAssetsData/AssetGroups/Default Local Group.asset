@@ -141,6 +141,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - adv
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 56f1cf6f3d4d9ec4bbc58da677244992
+    m_Address: Assets/shapes/adv/3x3Adv.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6948d055226540945ae8a2f5205d5804
     m_Address: Assets/shapes/plasDowne.prefab
     m_ReadOnly: 0

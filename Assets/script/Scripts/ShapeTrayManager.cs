@@ -3,13 +3,13 @@ using System;
 using Random = UnityEngine.Random;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using System.Linq;
 
 public class ShapeTrayManager : MonoBehaviour
 {
-    public event Action OnNoMovesDetected; // notify higher-level managers (PlaceManager) when no moves detected
+    public event Action OnNoMovesDetected;
 
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer placer;
@@ -24,11 +24,9 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private float noMovesReviveDelay = 0.7f;
 
     [Header("Move Threshold")]
-    [SerializeField] private int minPlaceableToConsiderMovable = 1; // set to 2 or 3 to be stricter
+    [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
     [Header("Difficulty Settings")]
-    //[SerializeField] private int difficulty = 1;
-    //[SerializeField] private int pointsPerDifficultyLevel = 10000;
     [SerializeField] private bool useSpaceAwareDifficulty = true;
     [SerializeField] private float minSpaceRatioForComplexShapes = 0.4f;
 
@@ -39,7 +37,10 @@ public class ShapeTrayManager : MonoBehaviour
     private AsyncOperationHandle<IList<GameObject>> loadHandle;
     private bool addressablesLoaded;
 
-   // [SerializeField] private List<Shape> availableShapes;
+    // ===== Adventure predefined waves =====
+    private List<ShapeWave> shapeWaves;
+    private int currentWaveIndex;
+    private bool useAdventureWaves;
 
     private void OnEnable()
     {
@@ -57,7 +58,8 @@ public class ShapeTrayManager : MonoBehaviour
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
-      
+        InitAdventureWaves();
+
         if (useAddressables)
         {
             LoadAddressablesAndRefill();
@@ -66,7 +68,29 @@ public class ShapeTrayManager : MonoBehaviour
         RefillIfNeeded();
     }
 
-   
+    private void InitAdventureWaves()
+    {
+        useAdventureWaves = false;
+        currentWaveIndex = 0;
+        shapeWaves = null;
+
+        if (AppManager.instance == null)
+            return;
+
+        // Only use waves in Adventure mode
+        if (AppManager.instance.CurrentGameMode != AppManager.GameMode.Adventure)
+            return;
+
+        var levelData = AppManager.instance.CurrentLevelData;
+        if (levelData == null || levelData.ShapeWaves == null || levelData.ShapeWaves.Count == 0)
+            return;
+
+        shapeWaves = levelData.ShapeWaves;
+        useAdventureWaves = true;
+        currentWaveIndex = 0;
+
+        Debug.Log($"[ShapeTrayManager] Adventure mode: {shapeWaves.Count} predefined waves loaded.");
+    }
 
     private void UpdateDifficultyBasedOnGridSpace()
     {
@@ -76,7 +100,6 @@ public class ShapeTrayManager : MonoBehaviour
         int totalCells = board.width * board.height;
         int occupiedCells = 0;
         
-        // Count occupied cells
         for (int x = 0; x < board.width; x++)
         {
             for (int y = 0; y < board.height; y++)
@@ -88,8 +111,6 @@ public class ShapeTrayManager : MonoBehaviour
                 }
             }
         }
-        
-      
     }
 
     private float GetAvailableSpaceRatio()
@@ -124,19 +145,18 @@ public class ShapeTrayManager : MonoBehaviour
         if (shape == null)
             return 1;
 
-        var cells = shape.GetCells(1f); // Assuming cell size of 1 for complexity calculation
+        var cells = shape.GetCells(1f);
         if (cells == null || cells.Length == 0)
             return 1;
 
-        // Complexity based on number of cells
         if (cells.Length <= 2)
-            return 1; // Very simple (1-2 blocks)
+            return 1;
         else if (cells.Length <= 4)
-            return 2; // Simple (3-4 blocks)
+            return 2;
         else if (cells.Length <= 6)
-            return 3; // Medium (5-6 blocks)
+            return 3;
         else
-            return 4; // Complex (7+ blocks)
+            return 4;
     }
 
     private int GetShapeComplexity(Shape shapePrefab)
@@ -144,26 +164,24 @@ public class ShapeTrayManager : MonoBehaviour
         if (shapePrefab == null)
             return 1;
 
-        var cells = shapePrefab.GetCells(1f); // Assuming cell size of 1 for complexity calculation
+        var cells = shapePrefab.GetCells(1f);
         if (cells == null || cells.Length == 0)
             return 1;
 
-        // Complexity based on number of cells
         if (cells.Length <= 2)
-            return 1; // Very simple (1-2 blocks)
+            return 1;
         else if (cells.Length <= 4)
-            return 2; // Simple (3-4 blocks)
+            return 2;
         else if (cells.Length <= 6)
-            return 3; // Medium (5-6 blocks)
+            return 3;
         else
-            return 4; // Complex (7+ blocks)
+            return 4;
     }
 
     private void OnDestroy()
     {
         GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
 
-       
         if (useAddressables && loadHandle.IsValid())
             Addressables.Release(loadHandle);
     }
@@ -178,7 +196,6 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(shapesLabel))
         {
-            //   Debug.LogError("[ShapeTrayManager] useAddressables is enabled but shapesLabel is empty.");
             RefillIfNeeded();
             return;
         }
@@ -199,7 +216,6 @@ public class ShapeTrayManager : MonoBehaviour
             }
             else
             {
-                //  Debug.LogError($"[ShapeTrayManager] Failed to load addressables by label '{shapesLabel}'. Falling back to inspector prefabs.");
                 addressablesLoaded = false;
             }
 
@@ -230,11 +246,28 @@ public class ShapeTrayManager : MonoBehaviour
         if (slots == null || slots.Length < 3)
             return;
 
+        // ===== Adventure predefined waves (only in Adventure mode) =====
+        if (useAdventureWaves && shapeWaves != null)
+        {
+            if (currentWaveIndex < shapeWaves.Count)
+            {
+                RefillFromWave(shapeWaves[currentWaveIndex]);
+                currentWaveIndex++;
+            }
+            else
+            {
+                Debug.Log("[ShapeTrayManager] All adventure waves used. No more shapes to spawn.");
+            }
+
+            CheckNoMovesAndMaybeRevive();
+            return;
+        }
+
+        // ===== Classic / random mode (unchanged) =====
         if ((shapePrefabs == null || shapePrefabs.Length == 0)
             && (!useAddressables || !addressablesLoaded || loadedPrefabs.Count == 0))
             return;
 
-        // Update difficulty based on current grid space if space-aware difficulty is enabled
         if (useSpaceAwareDifficulty)
         {
             UpdateDifficultyBasedOnGridSpace();
@@ -280,6 +313,64 @@ public class ShapeTrayManager : MonoBehaviour
         CheckNoMovesAndMaybeRevive();
     }
 
+    /// <summary>
+    /// Spawns shapes defined in a ShapeWave by matching names to loaded prefabs.
+    /// Used only in Adventure mode.
+    /// </summary>
+    private void RefillFromWave(ShapeWave wave)
+    {
+        if (wave == null || wave.ShapeNames == null)
+            return;
+
+        int count = Mathf.Min(wave.ShapeNames.Count, slots.Length);
+
+        for (int i = 0; i < count; i++)
+        {
+            var slot = slots[i];
+            if (slot == null)
+                continue;
+
+            string shapeName = wave.ShapeNames[i];
+            if (string.IsNullOrEmpty(shapeName))
+                continue;
+
+            Shape shape = null;
+
+            // Try Addressables first
+            if (useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
+            {
+                var goPrefab = loadedPrefabs.Find(p => p != null && p.name == shapeName);
+                if (goPrefab != null)
+                {
+                    var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
+                    shape = go != null ? go.GetComponent<Shape>() : null;
+                }
+            }
+
+            // Fallback to inspector prefabs
+            if (shape == null && shapePrefabs != null)
+            {
+                var prefab = shapePrefabs.FirstOrDefault(p => p != null && p.name == shapeName);
+                if (prefab != null)
+                    shape = Instantiate(prefab, slot.position, slot.rotation, slot);
+            }
+
+            if (shape == null)
+            {
+                Debug.LogWarning($"[ShapeTrayManager] Wave shape '{shapeName}' not found in any prefab source!");
+                continue;
+            }
+
+            activeShapes.Add(shape);
+
+            var handler = shape.GetComponent<ShapeDragHandler>();
+            if (handler != null)
+                handler.Init(board, placer, shape);
+        }
+
+        Debug.Log($"[ShapeTrayManager] Adventure wave {currentWaveIndex + 1}/{shapeWaves.Count}: spawned {activeShapes.Count} shapes.");
+    }
+
     private void CheckNoMovesAndMaybeRevive()
     {
         if (noMovesReviveTriggered)
@@ -314,29 +405,23 @@ public class ShapeTrayManager : MonoBehaviour
             yield break;
         }
 
-        // Notify higher-level manager instead of calling ReviveManager directly.
         OnNoMovesDetected?.Invoke();
-        // leave noMovesReviveTriggered as true until higher-level flow resolves it
     }
 
     private bool HasAnyMove()
     {
-        // If core refs are missing, be conservative and treat as "moves available"
         if (board == null || placer == null)
-        {
-            //  Debug.LogWarning("[HasAnyMove] board or placer is null -> returning true to avoid premature revive");
             return true;
-        }
 
         if (activeShapes.Count == 0)
         {
-            // מצב שבו המגש ריק לרגע (למשל בזמן Refill) – עדיף להיות שמרני ולא להפעיל Revive.
-            // נחזיר true כדי לציין שיש "מהלכים" פוטנציאליים, עד שהצורות החדשות יווצרו.
-            // Debug.Log("[HasAnyMove] activeShapes is empty -> returning true (avoid premature revive)");
+            // Adventure mode: if all waves are exhausted and no shapes left, there are truly no moves.
+            if (useAdventureWaves && shapeWaves != null && currentWaveIndex >= shapeWaves.Count)
+                return false;
+
             return true;
         }
 
-        // לוגיקה מפושטת: אם יש אפילו צורה אחת עם מיקום חוקי אחד – יש מהלכים.
         for (int i = 0; i < activeShapes.Count; i++)
         {
             var s = activeShapes[i];
@@ -344,18 +429,12 @@ public class ShapeTrayManager : MonoBehaviour
                 continue;
 
             if (HasAnyMoveForShape(s))
-            {
-                // Debug.Log($"[HasAnyMove] shape {i} has at least one valid move -> returning true");
                 return true;
-            }
         }
 
-        // אף צורה לא יכולה להיכנס לשום מקום -> אין מהלכים
-        // Debug.Log("[HasAnyMove] no shapes have any valid placement -> returning false");
         return false;
     }
 
-    // Public wrapper so other systems (e.g. ReviveManager) can safely query if there are any valid moves.
     public bool HasAnyMoveAvailable()
     {
         return HasAnyMove();
@@ -363,28 +442,17 @@ public class ShapeTrayManager : MonoBehaviour
 
     private bool HasAnyMoveForShape(Shape s)
     {
-        bool found = false;
-
         for (int x = 0; x < board.width; x++)
         {
             for (int y = 0; y < board.height; y++)
             {
                 var cell = new Vector2Int(x, y);
                 if (placer.CanPlaceShape(s, cell))
-                {
-                    // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' CAN be placed at {cell}");
-                    found = true;
-                    // לא שוברים את הלולאה, כדי לראות כל התאים החוקיים ללוג
-                }
+                    return true;
             }
         }
 
-        if (!found)
-        {
-            // Debug.Log($"[HasAnyMoveForShape] shape '{s.name}' has NO valid placement");
-        }
-
-        return found;
+        return false;
     }
 
     public IEnumerable<Shape> GetAvailableShapes()
@@ -407,22 +475,21 @@ public class ShapeTrayManager : MonoBehaviour
                     if (board.CanPlaceShape(shape, targetCell))
                     {
                         board.ClearCellsForShape(shape, targetCell);
-                        // Debug.Log($"[EnsureSpaceForOneShape] Cleared space for shape at {targetCell}");
                         return true;
                     }
                 }
             }
         }
 
-        return false; // No space could be cleared for any shape
+        return false;
     }
 
-    public void HandleOnLevelRestartedEvent (LevelData levelData)
+    public void HandleOnLevelRestartedEvent(LevelData levelData)
     {
         Restart();
     }
 
-    public void Restart ()
+    public void Restart()
     {
         if (activeShapes != null)
         {
@@ -434,6 +501,9 @@ public class ShapeTrayManager : MonoBehaviour
             activeShapes.Clear();
         }
 
+        currentWaveIndex = 0;
+        InitAdventureWaves();
+
         RefillIfNeeded();
     }
 
@@ -444,7 +514,6 @@ public class ShapeTrayManager : MonoBehaviour
 
         float availableSpaceRatio = GetAvailableSpaceRatio();
         
-        // Filter shapes by complexity based on available space
         var suitableShapes = new List<GameObject>();
         int maxComplexity = GetMaxComplexityForSpace(availableSpaceRatio);
         
@@ -454,28 +523,20 @@ public class ShapeTrayManager : MonoBehaviour
             
             int complexity = GetShapeComplexity(prefab);
             if (complexity <= maxComplexity)
-            {
                 suitableShapes.Add(prefab);
-            }
         }
         
-        // If no suitable shapes found, fall back to all shapes
         if (suitableShapes.Count == 0)
-        {
             suitableShapes = prefabs.Where(p => p != null).ToList();
-        }
         
-        // Add some randomness but bias towards simpler shapes when space is limited
-        if (availableSpaceRatio < 0.3f) // Very limited space
+        if (availableSpaceRatio < 0.3f)
         {
-            // Strong bias towards simple shapes
             var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 2).ToList();
             if (simpleShapes.Count > 0 && Random.value < 0.8f)
                 return simpleShapes[Random.Range(0, simpleShapes.Count)];
         }
-        else if (availableSpaceRatio < 0.5f) // Limited space
+        else if (availableSpaceRatio < 0.5f)
         {
-            // Moderate bias towards simpler shapes
             var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 3).ToList();
             if (simpleShapes.Count > 0 && Random.value < 0.6f)
                 return simpleShapes[Random.Range(0, simpleShapes.Count)];
@@ -491,7 +552,6 @@ public class ShapeTrayManager : MonoBehaviour
 
         float availableSpaceRatio = GetAvailableSpaceRatio();
         
-        // Filter shapes by complexity based on available space
         var suitableShapes = new List<Shape>();
         int maxComplexity = GetMaxComplexityForSpace(availableSpaceRatio);
         
@@ -501,28 +561,20 @@ public class ShapeTrayManager : MonoBehaviour
             
             int complexity = GetShapeComplexity(prefab);
             if (complexity <= maxComplexity)
-            {
                 suitableShapes.Add(prefab);
-            }
         }
         
-        // If no suitable shapes found, fall back to all shapes
         if (suitableShapes.Count == 0)
-        {
             suitableShapes = prefabs.Where(p => p != null).ToList();
-        }
         
-        // Add some randomness but bias towards simpler shapes when space is limited
-        if (availableSpaceRatio < 0.3f) // Very limited space
+        if (availableSpaceRatio < 0.3f)
         {
-            // Strong bias towards simple shapes
             var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 2).ToList();
             if (simpleShapes.Count > 0 && Random.value < 0.8f)
                 return simpleShapes[Random.Range(0, simpleShapes.Count)];
         }
-        else if (availableSpaceRatio < 0.5f) // Limited space
+        else if (availableSpaceRatio < 0.5f)
         {
-            // Moderate bias towards simpler shapes
             var simpleShapes = suitableShapes.Where(p => GetShapeComplexity(p) <= 3).ToList();
             if (simpleShapes.Count > 0 && Random.value < 0.6f)
                 return simpleShapes[Random.Range(0, simpleShapes.Count)];
@@ -534,12 +586,12 @@ public class ShapeTrayManager : MonoBehaviour
     private int GetMaxComplexityForSpace(float spaceRatio)
     {
         if (spaceRatio >= 0.7f)
-            return 4; // Lots of space - allow complex shapes
+            return 4;
         else if (spaceRatio >= 0.5f)
-            return 3; // Some space - allow medium complexity
+            return 3;
         else if (spaceRatio >= 0.3f)
-            return 2; // Limited space - allow simple shapes
+            return 2;
         else
-            return 1; // Very little space - only very simple shapes
+            return 1;
     }
 }

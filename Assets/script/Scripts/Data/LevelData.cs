@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +20,20 @@ public class LevelData
 	public int CoinsPerThreshold;
 	public List<LevelTargetData> LevelTargets;
 
-	//public List<ShapeData> Shapes;
+	/// <summary>
+	/// Adventure only: predefined shape waves.
+	/// Each wave has shape prefab names spawned in order.
+	/// </summary>
+	public List<ShapeWave> ShapeWaves;
+}
+
+/// <summary>
+/// A single wave of shapes for Adventure mode.
+/// </summary>
+[Serializable]
+public class ShapeWave
+{
+	public List<string> ShapeNames;
 }
 
 [Serializable]
@@ -37,7 +49,6 @@ public enum ColectionTypes
 	Squares = 1,	
 	Stars = 2,
 	Triangles = 3,
-
 }
 
 public enum GameTypes
@@ -49,11 +60,9 @@ public enum GameTypes
 [Serializable]
 public class LevelTargetData
 {
-	
 	public int Target;
 	public Color Color;
 	public ColectionTypes TargetItem;
-
 }
 
 

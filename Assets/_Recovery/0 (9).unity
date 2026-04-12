@@ -580,19 +580,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 501609867}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1872564980}
-        m_TargetAssemblyTypeName: AppManager, Assembly-CSharp
-        m_MethodName: SetGameModeAdventure
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &501609867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -751,19 +739,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 525948274}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1872564980}
-        m_TargetAssemblyTypeName: AppManager, Assembly-CSharp
-        m_MethodName: SetGameModeClassic
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &525948274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3926,7 +3902,6 @@ MonoBehaviour:
     ScorePerCoinThreshold: 0
     CoinsPerThreshold: 0
     LevelTargets: []
-    ShapeWaves: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
@@ -4856,7 +4831,6 @@ MonoBehaviour:
     - Target: 10
       Color: {r: 1, g: 0.19339621, b: 0.19339621, a: 1}
       TargetItem: 1
-    ShapeWaves: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}
