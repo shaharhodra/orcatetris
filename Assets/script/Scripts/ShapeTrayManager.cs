@@ -319,10 +319,10 @@ public class ShapeTrayManager : MonoBehaviour
     /// </summary>
     private void RefillFromWave(ShapeWave wave)
     {
-        if (wave == null || wave.ShapeNames == null)
+        if (wave == null || wave.Shapes == null)
             return;
 
-        int count = Mathf.Min(wave.ShapeNames.Count, slots.Length);
+        int count = Mathf.Min(wave.Shapes.Count, slots.Length);
 
         for (int i = 0; i < count; i++)
         {
@@ -330,7 +330,7 @@ public class ShapeTrayManager : MonoBehaviour
             if (slot == null)
                 continue;
 
-            string shapeName = wave.ShapeNames[i];
+            string shapeName = wave.Shapes[i].Name;
             if (string.IsNullOrEmpty(shapeName))
                 continue;
 

@@ -116,7 +116,9 @@ public class AppManager : Singleton<AppManager>
     private void Start()
     {
         HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-    }
+        
+        
+	}
 
     //private string GetProgressFilePath()
     //{

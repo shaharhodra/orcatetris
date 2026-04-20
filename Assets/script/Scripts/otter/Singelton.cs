@@ -2,7 +2,8 @@
 
 public class Singleton<T> : MonoBehaviour where T : Singleton<T>
 {
-    public static T instance { get; protected set; }
+    public bool IsDestroyOnLoad = true;
+	public static T instance { get; protected set; }
 
     void Awake()
     {
@@ -14,7 +15,10 @@ public class Singleton<T> : MonoBehaviour where T : Singleton<T>
         else
         {
             instance = (T)this;
-            DontDestroyOnLoad(gameObject);
+            if (!IsDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
         }
     }
 }

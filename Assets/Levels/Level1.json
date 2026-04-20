@@ -31,7 +31,7 @@
 
   "ShapeWaves": [
     { "ShapeNames": ["3x3Adv", "J", "3x3Adv"] },
-    { "ShapeNames": ["T_Shape", "Line_2", "Square_1x1"] },
+    { "ShapeNames": ["3x3Adv", "J", "3x3Adv"] },
     { "ShapeNames": ["Z_Shape", "Line_4", "L_Shape_Flip"] }
   ]
 }
