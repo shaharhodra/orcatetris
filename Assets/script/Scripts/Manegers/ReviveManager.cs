@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System;
 using DG.Tweening;
 
-public class ReviveManager : Singleton<ReviveManager>
+public class ReviveManager : MonoBehaviour
 {
     [SerializeField] private GridBoard board;
     [SerializeField] private int maxRevives = 3;
@@ -39,13 +39,58 @@ public class ReviveManager : Singleton<ReviveManager>
 
     public int RemainingRevives => Mathf.Max(0, maxRevives - usedRevives);
 
-    public bool CanRevive => RemainingRevives > 0;
+    // Revive is only allowed in Classic mode.
+    public bool CanRevive
+    {
+        get
+        {
+            var app = AppManager.instance;
+            if (app == null || app.CurrentGameMode != AppManager.GameMode.Classic)
+                return false;
+
+            return RemainingRevives > 0;
+        }
+    }
 
     public bool IsPopupOpen => popupOpen;
 
     private void Start()
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+
+        // Ensure references are wired when entering the gameplay scene even if this
+        // Singleton instance was created earlier (e.g. in the menu scene).
+        AutoWireReferencesIfNeeded();
+    }
+
+    /// <summary>
+    /// Try to automatically locate core references (board, tray, place manager)
+    /// in the currently loaded gameplay scene. This is important because the
+    /// ReviveManager Singleton can be created in the menu scene and survive
+    /// into the game scene, where all these objects are different instances.
+    /// </summary>
+    private void AutoWireReferencesIfNeeded()
+    {
+        // Only try to auto-wire once we are in a gameplay scene where a board exists.
+
+        if (board == null)
+        {
+            board = FindObjectOfType<GridBoard>();
+        }
+
+        if (shapeTrayManager == null)
+        {
+            shapeTrayManager = FindObjectOfType<ShapeTrayManager>();
+        }
+
+        if (placeManager == null)
+        {
+            placeManager = FindObjectOfType<PlaceManager>();
+        }
+
+        // UI references (revivePopup, reviveCountdownText, countdownCircle,
+        // countdownShakeTarget) אתה יכול לחבר ידנית באינספקטור על האינסטנס
+        // של הסצנת המשחק. אין כאן Auto-Wire כי השמות/היררכיה יכולים להשתנות.
     }
 
     private void OnDestroy()
@@ -55,6 +100,11 @@ public class ReviveManager : Singleton<ReviveManager>
 
     public void RequestRevive()
     {
+        // Revive can only be requested in Classic mode.
+        var app = AppManager.instance;
+        if (app == null || app.CurrentGameMode != AppManager.GameMode.Classic)
+            return;
+
         if (popupOpen)
         {
             return;
@@ -206,6 +256,14 @@ public class ReviveManager : Singleton<ReviveManager>
 
     public async Task WatchAdAndReviveAsync()
     {
+        // Extra safety: do not perform revive logic outside Classic mode.
+        var app = AppManager.instance;
+        if (app == null || app.CurrentGameMode != AppManager.GameMode.Classic)
+        {
+            TriggerGameOver();
+            return;
+        }
+
         if (!CanRevive)
         {
             TriggerGameOver();
@@ -229,18 +287,6 @@ public class ReviveManager : Singleton<ReviveManager>
             {
               //  Debug.Log("[WatchAdAndRevive] Reached max revives (3), triggering game over");
                 TriggerGameOver();
-                return;
-            }
-
-            // Clear cells to ensure that the tray shapes have valid placements
-            if (placeManager != null)
-            {
-                // קודם נמלא את המגש מחדש ל-3 צורות חדשות
-                if (shapeTrayManager != null)
-                {
-                    shapeTrayManager.Restart();
-                }
-
                 // PerformSmartRevive משתמש ב-ShapeTrayManager.GetAvailableShapes + SmartReviveWithValidation
                 var result = placeManager.PerformSmartRevive();
                 Debug.Log($"[WatchAdAndRevive] SmartRevive: rowsCleared={result.rowsCleared}, colsCleared={result.colsCleared}, cellsCleared={result.cellsCleared}");

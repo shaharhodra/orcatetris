@@ -2924,6 +2924,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 409212566}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!224 &409212566
 RectTransform:
@@ -3235,9 +3240,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 501609869}
-        m_TargetAssemblyTypeName: LobbyPlayButton, Assembly-CSharp
-        m_MethodName: OnPlayClicked
+      - m_Target: {fileID: 1643912721}
+        m_TargetAssemblyTypeName: MenuButtons, Assembly-CSharp
+        m_MethodName: OnAdventureStartFromLobby
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4972,6 +4977,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 760896612}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!224 &760896612
 RectTransform:
@@ -12237,6 +12247,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1637112472}
   m_CullTransparentMesh: 1
+--- !u!1 &1643912720
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1643912722}
+  - component: {fileID: 1643912721}
+  m_Layer: 0
+  m_Name: MenuController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1643912721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643912720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8812ed408953efa428e0e331fdda2222, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!4 &1643912722
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643912720}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -119.31094, y: 182.96492, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1649000169
 GameObject:
   m_ObjectHideFlags: 0
@@ -13878,6 +13932,11 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 1887066882}
   condition: 0
+  _scoreText: {fileID: 0}
+  _maxScoreText: {fileID: 0}
+  _restartButton: {fileID: 0}
+  scoreCountDuration: 1.5
+  elementTweenDuration: 0.35
   IsActive: 0
 --- !u!1 &1894013239
 GameObject:
@@ -16026,13 +16085,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   _levelData:
+    GameType: 0
+    LevelName: 
     Level: 0
-    TimeInSeconds: 0
     GridRows: 0
     GridColumns: 0
     NumberOfShapes: 0
-    LevelName: 
-    Shapes: []
+    DifficultyLevel: 0
+    DifficultyThreshold: 0
+    ScorePerPlaceCell: 0
+    ScorePerClearCell: 0
+    ColorLevels: []
+    ScorePerCoinThreshold: 0
+    CoinsPerThreshold: 0
+    LevelTargets: []
+    ShapeWaves: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}
@@ -16071,3 +16138,4 @@ SceneRoots:
   - {fileID: 2002892735}
   - {fileID: 864117973}
   - {fileID: 8007397881427582130}
+  - {fileID: 1643912722}

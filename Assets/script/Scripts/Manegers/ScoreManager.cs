@@ -47,6 +47,11 @@ public class ScoreManager : Singleton<ScoreManager>
 
     public void InvokeOnScoreUpdatedEvent(int score)
     {
+        // In Adventure mode we do not track score or coins at all.
+        if (AppManager.instance != null &&
+            AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure)
+            return;
+
         // Immediate set and cancel any running animation
         if (scoreCoroutine != null)
         {
@@ -76,6 +81,11 @@ public class ScoreManager : Singleton<ScoreManager>
     // Public API: will animate the displayed score from current value to the new target over scoreAnimationDuration seconds.
     public void UpdateScore(int addedScore)
     {
+        // In Adventure mode we do not update score.
+        if (AppManager.instance != null &&
+            AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure)
+            return;
+
         if (addedScore <= 0)
             return;
 
@@ -116,6 +126,11 @@ public class ScoreManager : Singleton<ScoreManager>
 
     private void CheckAndAwardCoins(int currentScore)
     {
+        // In Adventure mode there are no coins rewards.
+        if (AppManager.instance != null &&
+            AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure)
+            return;
+
         if (scorePerCoinThreshold <= 0)
             return;
 
@@ -231,10 +246,16 @@ public class ScoreManager : Singleton<ScoreManager>
     }
 	public void HandleLevelDataLoaded()
 	{
-        scorePerCoinThreshold = CurentLevelData.ScorePerCoinThreshold; 
-        coinsPerThreshold = CurentLevelData.CoinsPerThreshold;
+	    var app = AppManager.instance;
+	    if (app == null || CurentLevelData == null)
+	        return;
 
+	    // In Adventure mode we do not use score/coins thresholds at all.
+	    if (app.CurrentGameMode == AppManager.GameMode.Adventure)
+	        return;
 
+	    scorePerCoinThreshold = CurentLevelData.ScorePerCoinThreshold; 
+	    coinsPerThreshold = CurentLevelData.CoinsPerThreshold;
 	}
 
 	public void HandleOnLevelRestartedEvent (LevelData levelData)

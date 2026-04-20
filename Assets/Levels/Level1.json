@@ -2,8 +2,8 @@
   "Level": 1,
   "LevelType": "adventure",
   "TimeInSeconds": 120,
-  "GridRows": 8,
-  "GridColumns": 8,
+  "GridRows": 4,
+  "GridColumns": 4,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
   "Shapes": [],
@@ -30,7 +30,7 @@
   ],
 
   "ShapeWaves": [
-    { "ShapeNames": ["3x3Adv", "J", "3x3Adv"] },
+    { "ShapeNames": ["3x3Adv", "3x2upAdv", "lineof4adv"] },
     { "ShapeNames": ["T_Shape", "Line_2", "Square_1x1"] },
     { "ShapeNames": ["Z_Shape", "Line_4", "L_Shape_Flip"] }
   ]

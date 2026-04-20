@@ -268,6 +268,14 @@ public class PlaceManager : Singleton<PlaceManager>
 
     public void HandleLevelDataLoaded()
     {
+        // In Adventure mode or when there is no level data, do nothing.
+        var app = AppManager.instance;
+        if (app == null || app.CurrentLevelData == null)
+            return;
+
+        if (app.CurrentGameMode == AppManager.GameMode.Adventure)
+            return;
+
         _difficultyMin = CurrentLevelData.DifficultyLevel;
         _difficultyMax = CurrentLevelData.DifficultyThreshold; 
         SetDifficulty(CurrentLevelData.DifficultyLevel);

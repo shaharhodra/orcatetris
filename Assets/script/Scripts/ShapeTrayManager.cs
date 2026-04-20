@@ -14,6 +14,11 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer placer;
     [SerializeField] private Transform[] slots;
+
+    // Classic random shapes (used only in Classic mode)
+    [SerializeField] private Shape[] classicShapePrefabs;
+
+    // Adventure shapes (used only for matching names from ShapeWaves in Adventure mode)
     [SerializeField] private Shape[] shapePrefabs;
 
     [Header("Addressables")]
@@ -33,6 +38,9 @@ public class ShapeTrayManager : MonoBehaviour
     private readonly List<Shape> activeShapes = new List<Shape>();
     private bool noMovesReviveTriggered;
 
+    [Header("Revive")]
+    [SerializeField] private ReviveManager reviveManager;
+
     private readonly List<GameObject> loadedPrefabs = new List<GameObject>();
     private AsyncOperationHandle<IList<GameObject>> loadHandle;
     private bool addressablesLoaded;
@@ -41,6 +49,7 @@ public class ShapeTrayManager : MonoBehaviour
     private List<ShapeWave> shapeWaves;
     private int currentWaveIndex;
     private bool useAdventureWaves;
+    private bool waitingForAdventureLevelData;
 
     private void OnEnable()
     {
@@ -56,9 +65,32 @@ public class ShapeTrayManager : MonoBehaviour
 
     private void Start()
     {
+        
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
+        // Reset revive state whenever the tray is created
+        noMovesReviveTriggered = false;
+
+        // Always reset waves state on scene start
         InitAdventureWaves();
+
+        var app = AppManager.instance;
+
+        // In Adventure mode we always wait for LevelData via OnDataLoaded,
+        // then InitAdventureWaves + refill will be called from the handler.
+        if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
+        {
+            waitingForAdventureLevelData = true;
+            app.OnDataLoaded -= HandleLevelDataLoadedForTray; // avoid double subscription
+            app.OnDataLoaded += HandleLevelDataLoadedForTray;
+            return;
+        }
+
+        // Classic (or no AppManager): ignore waves and use random refill immediately.
+        useAdventureWaves = false;
+        shapeWaves = null;
+        currentWaveIndex = 0;
+        noMovesReviveTriggered = false;
 
         if (useAddressables)
         {
@@ -66,6 +98,31 @@ public class ShapeTrayManager : MonoBehaviour
             return;
         }
         RefillIfNeeded();
+    }
+
+    private void HandleLevelDataLoadedForTray(LevelData levelData)
+    {
+        var app = AppManager.instance;
+        if (app == null || app.CurrentGameMode != AppManager.GameMode.Adventure)
+            return;
+
+        if (!waitingForAdventureLevelData)
+            return;
+
+        waitingForAdventureLevelData = false;
+        app.OnDataLoaded -= HandleLevelDataLoadedForTray;
+
+        // Now that CurrentLevelData is available, initialize waves and refill using them.
+        InitAdventureWaves();
+
+        if (useAddressables)
+        {
+            LoadAddressablesAndRefill();
+        }
+        else
+        {
+            RefillIfNeeded();
+        }
     }
 
     private void InitAdventureWaves()
@@ -182,6 +239,9 @@ public class ShapeTrayManager : MonoBehaviour
     {
         GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
 
+        if (AppManager.instance != null)
+            AppManager.instance.OnDataLoaded -= HandleLevelDataLoadedForTray;
+
         if (useAddressables && loadHandle.IsValid())
             Addressables.Release(loadHandle);
     }
@@ -263,9 +323,11 @@ public class ShapeTrayManager : MonoBehaviour
             return;
         }
 
-        // ===== Classic / random mode (unchanged) =====
-        if ((shapePrefabs == null || shapePrefabs.Length == 0)
-            && (!useAddressables || !addressablesLoaded || loadedPrefabs.Count == 0))
+        // ===== Classic / random mode (only classicShapePrefabs, no adventure shapes) =====
+        bool isClassicMode = AppManager.instance != null &&
+                             AppManager.instance.CurrentGameMode == AppManager.GameMode.Classic;
+
+        if ((classicShapePrefabs == null || classicShapePrefabs.Length == 0) && isClassicMode)
             return;
 
         if (useSpaceAwareDifficulty)
@@ -281,7 +343,9 @@ public class ShapeTrayManager : MonoBehaviour
 
             Shape shape = null;
 
-            if (useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
+            // In Classic mode we do NOT use addressables for random shapes,
+            // to avoid accidentally spawning adventure-only prefabs.
+            if (!isClassicMode && useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
             {
                 var goPrefab = GetShapePrefabBySpaceAwareDifficulty(loadedPrefabs);
                 var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
@@ -290,10 +354,10 @@ public class ShapeTrayManager : MonoBehaviour
 
             if (shape == null)
             {
-                if (shapePrefabs == null || shapePrefabs.Length == 0)
+                if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
                     continue;
 
-                var prefab = GetShapePrefabBySpaceAwareDifficulty(shapePrefabs);
+                var prefab = GetShapePrefabBySpaceAwareDifficulty(classicShapePrefabs);
                 if (prefab == null)
                     continue;
 
@@ -373,6 +437,11 @@ public class ShapeTrayManager : MonoBehaviour
 
     private void CheckNoMovesAndMaybeRevive()
     {
+        // Revive is only available in Classic mode.
+        var app = AppManager.instance;
+        if (app == null || app.CurrentGameMode != AppManager.GameMode.Classic)
+            return;
+
         if (noMovesReviveTriggered)
             return;
 
@@ -382,7 +451,7 @@ public class ShapeTrayManager : MonoBehaviour
         if (HasAnyMove())
             return;
 
-        if (ReviveManager.instance != null && ReviveManager.instance.CanRevive)
+        if (reviveManager != null && reviveManager.CanRevive)
         {
             noMovesReviveTriggered = true;
             StartCoroutine(NoMovesReviveRoutine());
@@ -502,9 +571,37 @@ public class ShapeTrayManager : MonoBehaviour
         }
 
         currentWaveIndex = 0;
-        InitAdventureWaves();
 
-        RefillIfNeeded();
+        var app = AppManager.instance;
+
+        // If we are in Adventure mode, re-init waves and refill from them once LevelData is ready.
+        if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
+        {
+            InitAdventureWaves();
+
+            if (app.CurrentLevelData == null)
+            {
+                waitingForAdventureLevelData = true;
+                app.OnDataLoaded -= HandleLevelDataLoadedForTray;
+                app.OnDataLoaded += HandleLevelDataLoadedForTray;
+                return;
+            }
+
+            if (useAddressables)
+                LoadAddressablesAndRefill();
+            else
+                RefillIfNeeded();
+            return;
+        }
+
+        // Classic: ensure we are in pure random mode.
+        useAdventureWaves = false;
+        shapeWaves = null;
+
+        if (useAddressables)
+            LoadAddressablesAndRefill();
+        else
+            RefillIfNeeded();
     }
 
     private GameObject GetShapePrefabBySpaceAwareDifficulty(List<GameObject> prefabs)

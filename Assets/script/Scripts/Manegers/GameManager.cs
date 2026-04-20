@@ -147,6 +147,9 @@ public class GameManager : Singleton<GameManager>
 
         lastLoadedSceneHandle = scene.handle;
 
+        if (scene.buildIndex != classicGameSceneBuildIndex)
+            return;
+
         // Reset current score whenever the main gameplay scene loads, while keeping MaxScore/high score.
         if (scene.buildIndex == classicGameSceneBuildIndex && ScoreManager.instance != null)
         {

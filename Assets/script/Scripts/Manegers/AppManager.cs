@@ -51,10 +51,7 @@ public class AppManager : Singleton<AppManager>
         }
     }
 
-   
-
-   
-
+    public int ClassicGameSceneBuildIndex => classicGameSceneBuildIndex;
    
 
 
@@ -115,7 +112,8 @@ public class AppManager : Singleton<AppManager>
 
     private void Start()
     {
-        HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+        // Intentionally left empty: we now rely solely on the SceneManager.sceneLoaded
+        // callback (HandleSceneLoaded) to load level JSON when the gameplay scene loads.
     }
 
     //private string GetProgressFilePath()
@@ -191,6 +189,12 @@ public class AppManager : Singleton<AppManager>
             return;
 
         lastLoadedSceneHandle = scene.handle;
+
+        // We only want to load level JSON when the main gameplay scene is loaded.
+        // This prevents preloading Adventure data while we are still on the main menu
+        // and ensures the first click on Classic uses the correct Classic JSON.
+        if (scene.buildIndex != classicGameSceneBuildIndex)
+            return;
 
         // Reset current score whenever the main gameplay scene loads, while keeping MaxScore/high score.
         if (scene.buildIndex == classicGameSceneBuildIndex && ScoreManager.instance != null)

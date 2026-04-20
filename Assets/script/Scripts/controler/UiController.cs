@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class UiController : MonoBehaviour
@@ -9,6 +10,19 @@ public class UiController : MonoBehaviour
 
     void Start()
     {
+        var app = AppManager.instance;
+        var scene = SceneManager.GetActiveScene();
+
+        // Hide score UI only when we are in Adventure mode AND on the main gameplay scene.
+        // In the menu scene, the top bar should remain visible even if game mode is Adventure.
+        if (app != null &&
+            app.CurrentGameMode == AppManager.GameMode.Adventure &&
+            scene.buildIndex == app.ClassicGameSceneBuildIndex)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         ScoreManager.instance.OnScoreUpdatedEvent += HandleOnScroreUpdatedEvent;
         ScoreManager.instance.OnMaxScoreUpdatedEvent += HandleOnMaxScroreUpdatedEvent;
 

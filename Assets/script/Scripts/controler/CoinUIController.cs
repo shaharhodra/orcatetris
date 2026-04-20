@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 using DG.Tweening;
 
@@ -15,6 +16,19 @@ public class CoinUIController : MonoBehaviour
 
     void Start()
     {
+        var app = AppManager.instance;
+        var scene = SceneManager.GetActiveScene();
+
+        // Hide coins UI only when we are in Adventure mode AND on the main gameplay scene.
+        // In the menu scene, the top bar should remain visible even if game mode is Adventure.
+        if (app != null &&
+            app.CurrentGameMode == AppManager.GameMode.Adventure &&
+            scene.buildIndex == app.ClassicGameSceneBuildIndex)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         if (PlayerManeger.instance != null)
         {
             PlayerManeger.instance.OnCoinsUpdatedEvent += HandleCoinsUpdated;

@@ -102,7 +102,10 @@ public class GridPlacer : MonoBehaviour
 
         LineClearResult clearResult;
 
-        if (scoreManager != null)
+        bool isClassicMode = AppManager.instance != null &&
+                             AppManager.instance.CurrentGameMode == AppManager.GameMode.Classic;
+
+        if (scoreManager != null && isClassicMode)
         {
             scoreManager.AddScore(offsets.Length * scorePerPlacedCell);
             clearResult = board.ClearFullLinesDetailed();
