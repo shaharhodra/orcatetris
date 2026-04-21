@@ -1,5 +1,7 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 [Serializable]
@@ -33,7 +35,22 @@ public class LevelData
 [Serializable]
 public class ShapeWave
 {
-	public List<string> ShapeNames;
+	public List<ShapeLevelData> Shapes;
+}
+
+
+[Serializable]
+public class ShapeLevelData
+{
+	public string Name;
+	public List<SymbolData> Symbols;
+}
+
+[Serializable]
+public class SymbolData
+{
+	public ColectionTypes Type;
+	public Vector2 Position;
 }
 
 [Serializable]
@@ -46,7 +63,7 @@ public class ColorLevels
 public enum ColectionTypes
 {
 	Circles = 0,
-	Squares = 1,	
+	Squares = 1,
 	Stars = 2,
 	Triangles = 3,
 }
@@ -64,5 +81,3 @@ public class LevelTargetData
 	public Color Color;
 	public ColectionTypes TargetItem;
 }
-
-

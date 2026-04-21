@@ -112,9 +112,10 @@ public class AppManager : Singleton<AppManager>
 
     private void Start()
     {
-        // Intentionally left empty: we now rely solely on the SceneManager.sceneLoaded
-        // callback (HandleSceneLoaded) to load level JSON when the gameplay scene loads.
-    }
+        HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+        
+        
+	}
 
     //private string GetProgressFilePath()
     //{

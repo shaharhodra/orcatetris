@@ -662,6 +662,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34749815cf35f4865b631c19cb3bdd09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  IsDestroyOnLoad: 1
   _levelData:
     GameType: 0
     LevelName: 
@@ -716,7 +717,7 @@ MonoBehaviour:
   - {fileID: 4900000, guid: c3b48e600b373564cac3db6f624e0891, type: 3}
   - {fileID: 4900000, guid: ee9ba277716850542883d337e067cc09, type: 3}
   _classicLevelJsonFile: {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
-  startLevelIndex: 1
+  startLevelIndex: 0
   useAddressablesForLevels: 0
   adventureLevelsLabel: 
   classicLevelsLabel: 
@@ -2669,6 +2670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74ff5a49e043a6842a067c19f72c20c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::palceManager
+  IsDestroyOnLoad: 1
   board: {fileID: 1414012165}
   placer: {fileID: 1414012167}
   shapeTrayManager: {fileID: 855154864}
@@ -5373,6 +5375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a489cabcbf7ed48a8689e7aefdc00b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
+  IsDestroyOnLoad: 1
   scoreAnimationDuration: 1
 --- !u!4 &1936900131
 Transform:
@@ -5418,6 +5421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 329219ba4a3555c49b4c9e2fbdcd7046, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReviveManager
+  IsDestroyOnLoad: 1
   board: {fileID: 1414012165}
   maxRevives: 3
   revivePopup: {fileID: 1623868274}

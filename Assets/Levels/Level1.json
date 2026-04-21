@@ -29,10 +29,67 @@
     }
   ],
 
-  "ShapeWaves": [
-    { "ShapeNames": ["3x3Adv", "3x2upAdv", "lineof4adv"] },
-    { "ShapeNames": ["T_Shape", "Line_2", "Square_1x1"] },
-    { "ShapeNames": ["Z_Shape", "Line_4", "L_Shape_Flip"] }
-  ]
+  "ShapeWaves":[
+      {
+         "Shapes":[
+            {
+               "Name":"3x2",
+               "Symbols":[
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":0.0,
+                        "y":0.0
+                     }
+                  },
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":0.0,
+                        "y":1.0
+                     }
+                  },
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":1.0,
+                        "y":1.0
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "Shapes":[
+            {
+               "Name":"3x2",
+               "Symbols":[
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":0.0,
+                        "y":0.0
+                     }
+                  },
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":0.0,
+                        "y":1.0
+                     }
+                  },
+                  {
+                     "Type":0,
+                     "Position":{
+                        "x":1.0,
+                        "y":1.0
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
 }
 
