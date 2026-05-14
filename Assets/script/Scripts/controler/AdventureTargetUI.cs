@@ -10,21 +10,24 @@ public class AdventureTargetUI : MonoBehaviour
     [Header("References")]
     [SerializeField] private AdventureManager adventureManager;
 
-    [Header("Target Item Prefab")]
-    [Tooltip("Prefab with an Image (icon) and a TMP text (count). Will be instantiated per target.")]
-    [SerializeField] private GameObject targetItemPrefab;
-
-    [Header("Container")]
-    [Tooltip("Horizontal layout parent where target items will be spawned.")]
-    [SerializeField] private Transform container;
-
-    [Header("Symbol Sprites")]
-    [Tooltip("Same order as ColectionTypes: 0=Circles, 1=Squares, 2=Stars, 3=Triangles")]
-    [SerializeField] private Sprite[] symbolSprites = new Sprite[4];
+    [Header("Manual UI Elements")]
+    [Tooltip("Assign UI elements manually for each symbol type. Order: Circles, Squares, Stars, Triangles")]
+    [SerializeField] private TargetUIItem[] manualUIItems;
 
     [Header("Animation")]
     [SerializeField] private float punchScale = 0.2f;
     [SerializeField] private float punchDuration = 0.25f;
+
+    [Header("UI Icon Scale")]
+    [SerializeField] private float iconScale = 1.0f; // Scale for UI icons only
+
+    [System.Serializable]
+    public class TargetUIItem
+    {
+        public ColectionTypes SymbolType;
+        public Image Icon;
+        public TextMeshProUGUI CountText;
+    }
 
     // Runtime: one UI entry per target type
     private Dictionary<ColectionTypes, TargetUIEntry> entries = new Dictionary<ColectionTypes, TargetUIEntry>();
@@ -55,9 +58,9 @@ public class AdventureTargetUI : MonoBehaviour
             return;
         }
 
-        // If targets already loaded, build UI
+        // If targets already loaded, setup manual UI
         if (adventureManager.RemainingTargets != null && adventureManager.RemainingTargets.Count > 0)
-            BuildUI(adventureManager.RemainingTargets);
+            SetupManualUI(adventureManager.RemainingTargets);
     }
 
     private void OnDestroy()
@@ -73,48 +76,43 @@ public class AdventureTargetUI : MonoBehaviour
     {
         if (entries.Count == 0)
         {
-            BuildUI(targets);
+            SetupManualUI(targets);
             return;
         }
 
         UpdateUI(targets);
     }
 
-    private void BuildUI(Dictionary<ColectionTypes, int> targets)
+    private void SetupManualUI(Dictionary<ColectionTypes, int> targets)
     {
-        // Clear old entries
-        foreach (var kvp in entries)
-        {
-            if (kvp.Value.Root != null)
-                Destroy(kvp.Value.Root);
-        }
         entries.Clear();
 
-        if (targetItemPrefab == null || container == null)
+        if (manualUIItems == null)
             return;
 
-        foreach (var kvp in targets)
+        foreach (var item in manualUIItems)
         {
-            var go = Instantiate(targetItemPrefab, container);
-            go.SetActive(true);
+            if (item.Icon == null || item.CountText == null)
+                continue;
 
-            var icon = go.GetComponentInChildren<Image>();
-            var text = go.GetComponentInChildren<TextMeshProUGUI>();
+            // Set initial count
+            int count = 0;
+            if (targets.ContainsKey(item.SymbolType))
+                count = targets[item.SymbolType];
 
-            int spriteIndex = (int)kvp.Key;
-            if (icon != null && symbolSprites != null && spriteIndex >= 0 && spriteIndex < symbolSprites.Length)
-                icon.sprite = symbolSprites[spriteIndex];
+            // Apply icon scale
+            item.Icon.transform.localScale = Vector3.one * iconScale;
 
-            if (text != null)
-                text.text = kvp.Value.ToString();
-
-            entries[kvp.Key] = new TargetUIEntry
+            entries[item.SymbolType] = new TargetUIEntry
             {
-                Root = go,
-                Icon = icon,
-                CountText = text,
-                LastCount = kvp.Value
+                Root = item.Icon.gameObject,
+                Icon = item.Icon,
+                CountText = item.CountText,
+                LastCount = count
             };
+
+            // Update initial display
+            item.CountText.text = count.ToString();
         }
     }
 
@@ -159,5 +157,24 @@ public class AdventureTargetUI : MonoBehaviour
             if (kvp.Value.CountText != null)
                 kvp.Value.CountText.text = "0";
         }
+    }
+
+    // Public methods for manual control
+    public void ShowUI()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void HideUI()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void SetAdventureMode(bool isAdventure)
+    {
+        if (isAdventure)
+            ShowUI();
+        else
+            HideUI();
     }
 }

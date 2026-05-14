@@ -319,18 +319,22 @@ public class ShapeTrayManager : MonoBehaviour
     /// </summary>
     private void RefillFromWave(ShapeWave wave)
     {
-        if (wave == null || wave.Shapes == null)
+        if (wave == null || wave.Shapes == null || wave.Shapes.Count == 0)
             return;
 
-        int count = Mathf.Min(wave.Shapes.Count, slots.Length);
-
-        for (int i = 0; i < count; i++)
+        // Always spawn 3 shapes in Adventure mode
+        int shapesToSpawn = 3;
+        
+        for (int i = 0; i < shapesToSpawn && i < slots.Length; i++)
         {
             var slot = slots[i];
             if (slot == null)
                 continue;
 
-            string shapeName = wave.Shapes[i].Name;
+            // Cycle through wave shapes if we need more than defined
+            int shapeIndex = i % wave.Shapes.Count;
+            string shapeName = wave.Shapes[shapeIndex].Name;
+            
             if (string.IsNullOrEmpty(shapeName))
                 continue;
 
@@ -363,12 +367,108 @@ public class ShapeTrayManager : MonoBehaviour
 
             activeShapes.Add(shape);
 
+            // Apply symbols from JSON data to the shape
+            var shapeData = wave.Shapes[shapeIndex];
+            if (shapeData.Symbols != null && shapeData.Symbols.Count > 0)
+            {
+                Debug.Log($"[ShapeTrayManager] Applying {shapeData.Symbols.Count} symbols to shape '{shape.name}'");
+                ApplySymbolsToShape(shape, shapeData.Symbols);
+            }
+            else
+            {
+                Debug.Log($"[ShapeTrayManager] No symbols defined for shape '{shape.name}'");
+            }
+
             var handler = shape.GetComponent<ShapeDragHandler>();
             if (handler != null)
                 handler.Init(board, placer, shape);
         }
 
-        Debug.Log($"[ShapeTrayManager] Adventure wave {currentWaveIndex + 1}/{shapeWaves.Count}: spawned {activeShapes.Count} shapes.");
+        Debug.Log($"[ShapeTrayManager] Adventure wave {currentWaveIndex + 1}/{shapeWaves.Count}: spawned {activeShapes.Count} shapes (always 3).");
+    }
+
+    /// <summary>
+    /// Apply symbols from JSON data to shape blocks
+    /// </summary>
+    private void ApplySymbolsToShape(Shape shape, List<SymbolData> symbols)
+    {
+        if (shape == null || symbols == null)
+            return;
+
+        // Step 1: Get all BlockSymbol components (the actual blocks)
+        var blocks = shape.GetComponentsInChildren<BlockSymbol>();
+        if (blocks.Length == 0)
+        {
+            Debug.LogWarning($"[ShapeTrayManager] No BlockSymbol components found in shape '{shape.name}'");
+            return;
+        }
+
+        // Step 2: Build a grid map from normalized positions to blocks
+        // Find min x/y and the spacing between blocks
+        float minX = float.MaxValue, minY = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue;
+        foreach (var block in blocks)
+        {
+            Vector3 lp = block.transform.localPosition;
+            if (lp.x < minX) minX = lp.x;
+            if (lp.y < minY) minY = lp.y;
+            if (lp.x > maxX) maxX = lp.x;
+            if (lp.y > maxY) maxY = lp.y;
+        }
+
+        // Find the smallest non-zero distance between blocks (the cell spacing)
+        float spacing = float.MaxValue;
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            for (int j = i + 1; j < blocks.Length; j++)
+            {
+                float dx = Mathf.Abs(blocks[i].transform.localPosition.x - blocks[j].transform.localPosition.x);
+                float dy = Mathf.Abs(blocks[i].transform.localPosition.y - blocks[j].transform.localPosition.y);
+                if (dx > 0.01f && dx < spacing) spacing = dx;
+                if (dy > 0.01f && dy < spacing) spacing = dy;
+            }
+        }
+        if (spacing == float.MaxValue || spacing < 0.01f) spacing = 1f;
+
+        Debug.Log($"[ShapeTrayManager] Shape '{shape.name}': {blocks.Length} blocks, min=({minX},{minY}), spacing={spacing}");
+
+        // Step 3: Build dictionary of normalized grid position → block
+        var gridMap = new System.Collections.Generic.Dictionary<Vector2Int, BlockSymbol>();
+        foreach (var block in blocks)
+        {
+            Vector3 lp = block.transform.localPosition;
+            int gx = Mathf.RoundToInt((lp.x - minX) / spacing);
+            int gy = Mathf.RoundToInt((lp.y - minY) / spacing);
+            Vector2Int gridPos = new Vector2Int(gx, gy);
+            
+            if (!gridMap.ContainsKey(gridPos))
+            {
+                gridMap[gridPos] = block;
+            }
+            Debug.Log($"[ShapeTrayManager] Block '{block.name}' localPos=({lp.x:F2},{lp.y:F2}) → grid ({gx},{gy})");
+        }
+
+        // Step 4: Log available grid positions
+        Debug.Log($"[ShapeTrayManager] Available grid positions: {string.Join(", ", gridMap.Keys)}");
+
+        // Step 5: Apply each symbol from JSON to the matching grid block
+        foreach (var symbolData in symbols)
+        {
+            Vector2Int jsonPos = new Vector2Int(
+                Mathf.RoundToInt(symbolData.Position.x),
+                Mathf.RoundToInt(symbolData.Position.y)
+            );
+
+            if (gridMap.TryGetValue(jsonPos, out BlockSymbol targetBlock))
+            {
+                Debug.Log($"[ShapeTrayManager] ✓ Symbol {symbolData.Type} at JSON ({jsonPos.x},{jsonPos.y}) → block '{targetBlock.name}'");
+                targetBlock.SetSymbolType(symbolData.Type);
+            }
+            else
+            {
+                Debug.LogWarning($"[ShapeTrayManager] ❌ No block at grid ({jsonPos.x},{jsonPos.y}) for symbol {symbolData.Type}. Available: {string.Join(", ", gridMap.Keys)}");
+            }
+        }
     }
 
     private void CheckNoMovesAndMaybeRevive()

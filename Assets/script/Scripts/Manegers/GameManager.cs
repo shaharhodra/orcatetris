@@ -47,6 +47,15 @@ public class GameManager : Singleton<GameManager>
     }
 
     public LevelData CurrentLevelData => AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
+    
+    // Game Mode Management
+    private IGameMode currentGameModeInstance;
+    
+    public IGameMode CurrentGameModeInstance
+    {
+        get { return currentGameModeInstance; }
+    }
+    
     private int lastLoadedSceneHandle = -1;
 
     private readonly List<TextAsset> addressableAdventureLevels = new List<TextAsset>();
@@ -146,6 +155,9 @@ public class GameManager : Singleton<GameManager>
             return;
 
         lastLoadedSceneHandle = scene.handle;
+
+        // Initialize the appropriate game mode
+        InitializeGameMode();
 
         // Reset current score whenever the main gameplay scene loads, while keeping MaxScore/high score.
         if (scene.buildIndex == classicGameSceneBuildIndex && ScoreManager.instance != null)
@@ -426,4 +438,87 @@ public class GameManager : Singleton<GameManager>
     {
         OnDataLoaded?.Invoke(levelData);
     }
+
+    #region Game Mode Management
+    
+    /// <summary>
+    /// Initialize the appropriate game mode based on CurrentGameMode
+    /// </summary>
+    private void InitializeGameMode()
+    {
+        // Cleanup previous game mode if exists
+        if (currentGameModeInstance != null)
+        {
+            currentGameModeInstance.Cleanup();
+            currentGameModeInstance = null;
+        }
+        
+        // Create new game mode instance
+        switch (CurrentGameMode)
+        {
+            case GameMode.Classic:
+                currentGameModeInstance = new ClassicGameMode();
+                break;
+            case GameMode.Adventure:
+                currentGameModeInstance = new AdventureGameMode();
+                break;
+            default:
+                currentGameModeInstance = new AdventureGameMode(); // Default to Adventure
+                break;
+        }
+        
+        // Initialize the new game mode
+        currentGameModeInstance.Initialize();
+        
+        Debug.Log($"[GameManager] Initialized {CurrentGameMode} game mode");
+    }
+    
+    /// <summary>
+    /// Switch to a specific game mode
+    /// </summary>
+    public void SwitchToGameMode(GameMode gameMode)
+    {
+        PlayerPrefs.SetInt(SelectedGameModeKey, (int)gameMode);
+        PlayerPrefs.Save();
+        
+        Debug.Log($"[GameManager] Switching to {gameMode} mode");
+        
+        // Reinitialize with new game mode
+        InitializeGameMode();
+    }
+    
+    /// <summary>
+    /// Forward shape placement to current game mode
+    /// </summary>
+    public void HandleShapePlaced(Shape shape)
+    {
+        if (currentGameModeInstance != null)
+        {
+            currentGameModeInstance.HandleShapePlaced(shape);
+        }
+    }
+    
+    /// <summary>
+    /// Forward game over check to current game mode
+    /// </summary>
+    public void CheckGameOver()
+    {
+        if (currentGameModeInstance != null)
+        {
+            currentGameModeInstance.CheckGameOver();
+        }
+    }
+    
+    /// <summary>
+    /// Reset current game mode
+    /// </summary>
+    public void ResetCurrentGameMode()
+    {
+        if (currentGameModeInstance != null)
+        {
+            currentGameModeInstance.Reset();
+        }
+    }
+    
+    #endregion
 }

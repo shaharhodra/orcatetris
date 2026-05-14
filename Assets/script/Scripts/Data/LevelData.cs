@@ -27,6 +27,11 @@ public class LevelData
 	/// Each wave has shape prefab names spawned in order.
 	/// </summary>
 	public List<ShapeWave> ShapeWaves;
+
+	/// <summary>
+	/// Adventure only: blocks pre-filled on the grid at game start.
+	/// </summary>
+	public List<InitialBlockData> InitialBlocks;
 }
 
 /// <summary>
@@ -37,7 +42,6 @@ public class ShapeWave
 {
 	public List<ShapeLevelData> Shapes;
 }
-
 
 [Serializable]
 public class ShapeLevelData
@@ -51,6 +55,14 @@ public class SymbolData
 {
 	public ColectionTypes Type;
 	public Vector2 Position;
+}
+
+[Serializable]
+public class InitialBlockData
+{
+	public int x;
+	public int y;
+	public int Symbol = -1; // ColectionTypes enum value, -1 = no symbol
 }
 
 [Serializable]
