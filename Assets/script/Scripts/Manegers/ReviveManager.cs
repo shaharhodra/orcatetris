@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -100,10 +100,15 @@ public class ReviveManager : MonoBehaviour
 
     public void RequestRevive()
     {
-        // Revive can only be requested in Classic mode.
-        var app = AppManager.instance;
-        if (app == null || app.CurrentGameMode != AppManager.GameMode.Classic)
+        Debug.Log("[ReviveManager] RequestRevive called");
+        
+        // Disable revive in Adventure mode
+        if (GameManager.instance != null && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic)
+        {
+            Debug.Log("[ReviveManager] Adventure mode detected, calling TriggerGameOver directly");
+            TriggerGameOver();
             return;
+        }
 
         if (popupOpen)
         {
@@ -354,19 +359,26 @@ public class ReviveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// מפעילה את OnLose popup – הפופאפ נשאר פתוח עד שהשחקן לוחץ כפתור
+    /// Gets called when game over happens.
     /// </summary>
     private void TriggerGameOver()
     {
-        Debug.Log("[ReviveManager] Triggering Game Over");
-
+        Debug.Log("[ReviveManager] TriggerGameOver called");
+        
         if (popUpService != null)
         {
             popUpService.OnPopupDismissed += OnGameOverPopupDismissed;
-            popUpService.RunIfConditionMetAndStay(PopUpCondition.OnLose);
+            
+            // Use OnLose for both Classic and Adventure modes
+            // The popup can check the game mode internally and display accordingly
+            PopUpCondition popupCondition = PopUpCondition.OnLose;
+                
+            Debug.Log($"[ReviveManager] Using popup condition: {popupCondition}");
+            popUpService.RunIfConditionMetAndStay(popupCondition);
         }
         else
         {
+            Debug.LogWarning("[ReviveManager] No popUpService found, invoking level restart");
             GameManager.instance.InvokeOnLevelRestartedEvent();
         }
     }

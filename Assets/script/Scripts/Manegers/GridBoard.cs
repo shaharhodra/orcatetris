@@ -25,6 +25,11 @@ public class GridBoard : MonoBehaviour
     private System.Collections.Generic.HashSet<Vector2Int> previewClearCells;
     [SerializeField] private GridBoard board;
 
+    [Header("Pre-fill")]
+    [SerializeField] private GameObject initialBlockPrefab; // prefab for pre-filled blocks
+    private List<InitialBlockData> pendingInitialBlocks;
+    private List<InitialBlockData> storedInitialBlocks; // kept for restart
+
     // ✅ תיקון: הוסף getters נכונים
     public int Rows => height;
     public int Columns => width;
@@ -195,6 +200,16 @@ public class GridBoard : MonoBehaviour
 
         //  Debug.Log($"[GridBoard] Building grid on {gameObject.name}, size = {width}x{height}");
 
+        // Clear any existing children to prevent duplicates
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            var child = transform.GetChild(i);
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
         CenterOrigin();
 
         cells = new GridCell[width, height];
@@ -215,6 +230,113 @@ public class GridBoard : MonoBehaviour
                 cells[x, y] = cell;
             }
         }
+
+        // Apply pending initial blocks after grid is built
+        if (pendingInitialBlocks != null && pendingInitialBlocks.Count > 0)
+        {
+            ApplyInitialBlocks(pendingInitialBlocks);
+        }
+    }
+
+    /// <summary>
+    /// Store initial blocks to be placed after the grid is built.
+    /// Call this before ApplySize/RebuildGrid.
+    /// </summary>
+    public void SetInitialBlocks(List<InitialBlockData> blocks)
+    {
+        pendingInitialBlocks = blocks;
+        storedInitialBlocks = blocks; // keep for restart
+    }
+
+    /// <summary>
+    /// Place pre-filled blocks on the grid from JSON data.
+    /// </summary>
+    private void ApplyInitialBlocks(List<InitialBlockData> blocks)
+    {
+        if (blocks == null || cells == null)
+            return;
+
+        if (initialBlockPrefab == null)
+        {
+            Debug.LogWarning("[GridBoard] initialBlockPrefab is not assigned! Cannot create pre-filled blocks.");
+            return;
+        }
+
+        // Get symbol sprites from AdventureTargetUI
+        Sprite[] symbolSprites = null;
+        var adventureUI = FindObjectOfType<AdventureTargetUI>();
+        if (adventureUI != null)
+        {
+            var field = typeof(AdventureTargetUI).GetField("symbolSprites",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null)
+                symbolSprites = field.GetValue(adventureUI) as Sprite[];
+        }
+
+        Debug.Log($"[GridBoard] Applying {blocks.Count} initial blocks to grid");
+
+        foreach (var blockData in blocks)
+        {
+            Vector2Int pos = new Vector2Int(blockData.x, blockData.y);
+
+            if (!IsInside(pos))
+            {
+                Debug.LogWarning($"[GridBoard] Initial block at ({blockData.x},{blockData.y}) is outside grid!");
+                continue;
+            }
+
+            // Mark cell as occupied
+            SetOccupied(pos, true);
+
+            // Instantiate the prefab at the grid position
+            Vector3 worldPos = GridToWorld(pos);
+            var blockObj = Instantiate(initialBlockPrefab, worldPos, Quaternion.identity, transform);
+            blockObj.name = $"InitialBlock_{blockData.x}_{blockData.y}";
+
+            placedBlocks[pos.x, pos.y] = blockObj;
+
+            // Apply symbol if defined
+            if (blockData.Symbol >= 0)
+            {
+                var symbolType = (ColectionTypes)blockData.Symbol;
+
+                Sprite symSprite = null;
+                if (symbolSprites != null && blockData.Symbol < symbolSprites.Length)
+                    symSprite = symbolSprites[blockData.Symbol];
+
+                if (symSprite != null)
+                {
+                    var iconObj = new GameObject("SymbolIcon");
+                    iconObj.transform.SetParent(blockObj.transform, false);
+                    iconObj.transform.localPosition = Vector3.zero;
+                    iconObj.transform.localScale = Vector3.one * 0.4f;
+
+                    var iconSr = iconObj.AddComponent<SpriteRenderer>();
+                    iconSr.sprite = symSprite;
+                    iconSr.sortingOrder = 10;
+
+                    SetSymbol(pos, symbolType, iconObj);
+                    Debug.Log($"[GridBoard] Initial block at ({blockData.x},{blockData.y}) with symbol {symbolType}");
+                }
+                else
+                {
+                    cellSymbolTypes[pos.x, pos.y] = blockData.Symbol;
+                    Debug.Log($"[GridBoard] Initial block at ({blockData.x},{blockData.y}) with symbol type {blockData.Symbol} (no sprite found)");
+                }
+            }
+            else
+            {
+                Debug.Log($"[GridBoard] Initial block at ({blockData.x},{blockData.y}) without symbol");
+            }
+        }
+
+        // Verify all initial blocks are occupied
+        int occupiedCount = 0;
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (cells[x, y] != null && cells[x, y].occupied)
+                    occupiedCount++;
+        Debug.Log($"[GridBoard] After ApplyInitialBlocks: {occupiedCount} cells are occupied");
     }
 
     private void CenterOrigin()
@@ -963,5 +1085,11 @@ public class GridBoard : MonoBehaviour
     public void Restart ()
     {
         Clear();
+
+        // Re-apply initial blocks after clearing
+        if (storedInitialBlocks != null && storedInitialBlocks.Count > 0)
+        {
+            ApplyInitialBlocks(storedInitialBlocks);
+        }
     }
 }

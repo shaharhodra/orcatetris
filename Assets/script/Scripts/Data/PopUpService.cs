@@ -11,6 +11,7 @@ public enum PopUpCondition
     OnGameStart,
     OnWin,
     OnLose,
+    OnAdventureLose,
     Custom
 }
 
@@ -140,22 +141,74 @@ public class PopUpService : MonoBehaviour
         int finalScore = ScoreManager.instance != null ? ScoreManager.instance.Score : 0;
         int maxScore = ScoreManager.instance != null ? ScoreManager.instance.MaxScore : 0;
 
-        // כפתור חסום עד סיום הספירה
-        if (_restartButton != null)
-            _restartButton.interactable = false;
+        // Check game mode
+        bool isAdventure = GameManager.instance != null && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic;
+        
+        Debug.Log($"[PopUpService] Game over popup - Is Adventure: {isAdventure}");
 
-        // איפוס scale לפני האנימציה
+        // Handle Adventure mode differently
+        if (isAdventure)
+        {
+            // Show restart button for Adventure mode (but change text/behavior)
+            if (_restartButton != null)
+            {
+                _restartButton.gameObject.SetActive(true);
+                // You can change the button text here if needed
+                // var buttonText = _restartButton.GetComponentInChildren<TextMeshProUGUI>();
+                // if (buttonText != null) buttonText.text = "Restart Adventure";
+            }
+
+            // Show completion message instead of score
+            if (_scoreText != null)
+            {
+                _scoreText.text = "Adventure Complete!";
+            }
+
+            // Hide max score for Adventure mode
+            if (_maxScoreText != null)
+            {
+                _maxScoreText.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            // Classic mode - show scores and revive button
+            if (_restartButton != null)
+            {
+                _restartButton.gameObject.SetActive(true);
+                _restartButton.interactable = false; // Will be enabled after score animation
+            }
+
+            // Show final score
+            if (_scoreText != null)
+            {
+                _scoreText.text = finalScore.ToString();
+            }
+
+            // Show max score
+            if (_maxScoreText != null)
+            {
+                _maxScoreText.gameObject.SetActive(true);
+                _maxScoreText.text = maxScore.ToString();
+            }
+        }
+
+        // For Adventure mode, make button immediately interactable
+        if (_restartButton != null && isAdventure)
+        {
+            _restartButton.interactable = true;
+        }
+
+        // Reset scale before animation
         if (_scoreText != null)
             _scoreText.rectTransform.localScale = Vector3.zero;
         if (_maxScoreText != null)
             _maxScoreText.rectTransform.localScale = Vector3.zero;
         if (_restartButton != null)
             _restartButton.transform.localScale = Vector3.zero;
-
-        // הצגת ערכים
-        if (_maxScoreText != null)
-            _maxScoreText.text = maxScore.ToString();
-        if (_scoreText != null)
+        
+        // Reset score text to "0" only for Classic mode (Adventure shows "Adventure Complete!")
+        if (_scoreText != null && !isAdventure)
             _scoreText.text = "0";
 
         // רצף אנימציות: score -> max score -> ספירה -> כפתור
@@ -194,7 +247,7 @@ public class PopUpService : MonoBehaviour
         }
     }
 
-    public async UniTask RunPopupSequenceAsync ()
+    async UniTask RunPopupSequenceAsync ()
     {
         IsActive = true;
         SetOverlayActiveState(true);
@@ -209,6 +262,5 @@ public class PopUpService : MonoBehaviour
 
         IsActive = false;
     }
-    
 }
 
