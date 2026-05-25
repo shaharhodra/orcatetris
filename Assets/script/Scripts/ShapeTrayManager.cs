@@ -309,14 +309,18 @@ public class ShapeTrayManager : MonoBehaviour
         // ===== Adventure predefined waves (only in Adventure mode) =====
         if (useAdventureWaves && shapeWaves != null)
         {
-            if (currentWaveIndex < shapeWaves.Count)
+            if (shapeWaves.Count > 0)
             {
+                // Loop waves instead of stopping when the last wave is reached.
+                if (currentWaveIndex >= shapeWaves.Count)
+                    currentWaveIndex = 0;
+
                 RefillFromWave(shapeWaves[currentWaveIndex]);
                 currentWaveIndex++;
             }
             else
             {
-                Debug.Log("[ShapeTrayManager] All adventure waves used. No more shapes to spawn.");
+                Debug.Log("[ShapeTrayManager] No adventure waves defined.");
             }
 
             CheckNoMovesAndMaybeRevive();

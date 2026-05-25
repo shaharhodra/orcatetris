@@ -20,6 +20,7 @@ public class AdventureTargetUI : MonoBehaviour
 
     [Header("UI Icon Scale")]
     [SerializeField] private float iconScale = 1.0f; // Scale for UI icons only
+    [SerializeField] private Sprite[] symbolSprites;
 
     [System.Serializable]
     public class TargetUIItem
@@ -58,6 +59,9 @@ public class AdventureTargetUI : MonoBehaviour
             return;
         }
 
+        // Initialize symbolSprites array from manual UI icons so gameplay systems can use them.
+        InitializeSymbolSpritesFromManualItems();
+
         // If targets already loaded, setup manual UI
         if (adventureManager.RemainingTargets != null && adventureManager.RemainingTargets.Count > 0)
             SetupManualUI(adventureManager.RemainingTargets);
@@ -69,6 +73,48 @@ public class AdventureTargetUI : MonoBehaviour
         {
             adventureManager.OnTargetsUpdated -= HandleTargetsUpdated;
             adventureManager.OnAllTargetsCompleted -= HandleAllCompleted;
+        }
+    }
+
+    private void InitializeSymbolSpritesFromManualItems()
+    {
+        if (manualUIItems == null || manualUIItems.Length == 0)
+            return;
+
+        int maxTypeIndex = -1;
+        for (int i = 0; i < manualUIItems.Length; i++)
+        {
+            int idx = (int)manualUIItems[i].SymbolType;
+            if (idx > maxTypeIndex)
+                maxTypeIndex = idx;
+        }
+
+        if (maxTypeIndex < 0)
+            return;
+
+        if (symbolSprites == null || symbolSprites.Length <= maxTypeIndex)
+        {
+            var newArray = new Sprite[maxTypeIndex + 1];
+            if (symbolSprites != null)
+            {
+                for (int i = 0; i < Mathf.Min(symbolSprites.Length, newArray.Length); i++)
+                    newArray[i] = symbolSprites[i];
+            }
+            symbolSprites = newArray;
+        }
+
+        for (int i = 0; i < manualUIItems.Length; i++)
+        {
+            var item = manualUIItems[i];
+            if (item.Icon == null)
+                continue;
+
+            int idx = (int)item.SymbolType;
+            if (idx < 0 || idx >= symbolSprites.Length)
+                continue;
+
+            if (symbolSprites[idx] == null)
+                symbolSprites[idx] = item.Icon.sprite;
         }
     }
 

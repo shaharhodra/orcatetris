@@ -1,9 +1,1369 @@
 {
-  "Level": 17,
-  "TimeInSeconds": 120,
-  "GridRows": 4,
-  "GridColumns": 4,
-  "NumberOfShapes": 0,
-  "LevelName": "Level 17",
-  "Shapes": []
+    "GameType": 0,
+    "LevelName": "Level 17",
+    "Level": 17,
+    "GridRows": 10,
+    "GridColumns": 10,
+    "NumberOfShapes": 0,
+    "DifficultyLevel": 2,
+    "DifficultyThreshold": 0,
+    "ScorePerPlaceCell": 0,
+    "ScorePerClearCell": 0,
+    "ColorLevels": [],
+    "ScorePerCoinThreshold": 0,
+    "CoinsPerThreshold": 0,
+    "LevelTargets": [
+        {
+            "Target": 23,
+            "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "TargetItem": 0
+        },
+        {
+            "Target": 23,
+            "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "TargetItem": 1
+        },
+        {
+            "Target": 23,
+            "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "TargetItem": 2
+        },
+        {
+            "Target": 23,
+            "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "TargetItem": 3
+        }
+    ],
+    "ShapeWaves": [
+        {
+            "Shapes": [
+                {
+                    "Name": "singel",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x3",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "J",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "lineof4",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2up",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "L",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "4on4",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "cross",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "plas",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "plasLeft",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "plasRight",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "Jsmall",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x3",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "singel",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "lineof4",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "L",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "singel",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x3",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "J",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "lineof4",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2up",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "L",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "4on4",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "cross",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "plas",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "plasLeft",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "plasRight",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "Jsmall",
+                    "Symbols": [
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x2",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 1.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "3x3",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 2.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Shapes": [
+                {
+                    "Name": "singel",
+                    "Symbols": [
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "lineof4",
+                    "Symbols": [
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 1.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 2,
+                            "Position": {
+                                "x": 2.0,
+                                "y": 0.0
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "L",
+                    "Symbols": [
+                        {
+                            "Type": 3,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 0.0
+                            }
+                        },
+                        {
+                            "Type": 0,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 1.0
+                            }
+                        },
+                        {
+                            "Type": 1,
+                            "Position": {
+                                "x": 0.0,
+                                "y": 2.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "InitialBlocks": [
+        {
+            "x": 2,
+            "y": 3,
+            "Symbol": 0
+        },
+        {
+            "x": 3,
+            "y": 3,
+            "Symbol": 1
+        },
+        {
+            "x": 4,
+            "y": 3,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 3,
+            "Symbol": 3
+        },
+        {
+            "x": 6,
+            "y": 3,
+            "Symbol": 0
+        },
+        {
+            "x": 2,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 3,
+            "y": 4,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 4,
+            "Symbol": 3
+        },
+        {
+            "x": 5,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 6,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 2,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 3,
+            "y": 5,
+            "Symbol": 3
+        },
+        {
+            "x": 4,
+            "y": 5,
+            "Symbol": 0
+        },
+        {
+            "x": 5,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 6,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 3,
+            "y": 6,
+            "Symbol": 0
+        },
+        {
+            "x": 4,
+            "y": 6,
+            "Symbol": 1
+        },
+        {
+            "x": 5,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 7,
+            "Symbol": 3
+        },
+        {
+            "x": 2,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 3,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 4,
+            "y": 4,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 4,
+            "Symbol": 3
+        },
+        {
+            "x": 6,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 2,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 3,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 5,
+            "Symbol": 3
+        },
+        {
+            "x": 5,
+            "y": 5,
+            "Symbol": 0
+        },
+        {
+            "x": 6,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 2,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 3,
+            "y": 6,
+            "Symbol": 3
+        },
+        {
+            "x": 4,
+            "y": 6,
+            "Symbol": 0
+        },
+        {
+            "x": 5,
+            "y": 6,
+            "Symbol": 1
+        },
+        {
+            "x": 6,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 3,
+            "y": 7,
+            "Symbol": 0
+        },
+        {
+            "x": 4,
+            "y": 7,
+            "Symbol": 1
+        },
+        {
+            "x": 5,
+            "y": 7,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 8,
+            "Symbol": 3
+        },
+        {
+            "x": 3,
+            "y": 3,
+            "Symbol": 0
+        },
+        {
+            "x": 4,
+            "y": 3,
+            "Symbol": 1
+        },
+        {
+            "x": 5,
+            "y": 3,
+            "Symbol": 2
+        },
+        {
+            "x": 6,
+            "y": 3,
+            "Symbol": 3
+        },
+        {
+            "x": 7,
+            "y": 3,
+            "Symbol": 0
+        },
+        {
+            "x": 3,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 4,
+            "y": 4,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 4,
+            "Symbol": 3
+        },
+        {
+            "x": 6,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 7,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 3,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 5,
+            "Symbol": 3
+        },
+        {
+            "x": 5,
+            "y": 5,
+            "Symbol": 0
+        },
+        {
+            "x": 6,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 7,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 6,
+            "Symbol": 0
+        },
+        {
+            "x": 5,
+            "y": 6,
+            "Symbol": 1
+        },
+        {
+            "x": 6,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 7,
+            "Symbol": 3
+        },
+        {
+            "x": 3,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 4,
+            "y": 4,
+            "Symbol": 1
+        },
+        {
+            "x": 5,
+            "y": 4,
+            "Symbol": 2
+        },
+        {
+            "x": 6,
+            "y": 4,
+            "Symbol": 3
+        },
+        {
+            "x": 7,
+            "y": 4,
+            "Symbol": 0
+        },
+        {
+            "x": 3,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 4,
+            "y": 5,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 5,
+            "Symbol": 3
+        },
+        {
+            "x": 6,
+            "y": 5,
+            "Symbol": 0
+        },
+        {
+            "x": 7,
+            "y": 5,
+            "Symbol": 1
+        },
+        {
+            "x": 3,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 6,
+            "Symbol": 3
+        },
+        {
+            "x": 5,
+            "y": 6,
+            "Symbol": 0
+        },
+        {
+            "x": 6,
+            "y": 6,
+            "Symbol": 1
+        },
+        {
+            "x": 7,
+            "y": 6,
+            "Symbol": 2
+        },
+        {
+            "x": 4,
+            "y": 7,
+            "Symbol": 0
+        },
+        {
+            "x": 5,
+            "y": 7,
+            "Symbol": 1
+        },
+        {
+            "x": 6,
+            "y": 7,
+            "Symbol": 2
+        },
+        {
+            "x": 5,
+            "y": 8,
+            "Symbol": 3
+        }
+    ]
 }

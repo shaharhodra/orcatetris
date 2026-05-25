@@ -33,6 +33,9 @@ public class AdventureManager : MonoBehaviour
         if (AppManager.instance != null)
             AppManager.instance.OnDataLoaded += HandleDataLoaded;
 
+        if (GameManager.instance != null)
+            GameManager.instance.OnLevelRestartedEvent += HandleLevelRestarted;
+
         // If data is already loaded, init immediately
         if (IsAdventureMode && AppManager.instance.CurrentLevelData != null)
             InitTargets(AppManager.instance.CurrentLevelData);
@@ -45,6 +48,21 @@ public class AdventureManager : MonoBehaviour
 
         if (AppManager.instance != null)
             AppManager.instance.OnDataLoaded -= HandleDataLoaded;
+
+        if (GameManager.instance != null)
+            GameManager.instance.OnLevelRestartedEvent -= HandleLevelRestarted;
+    }
+
+    private void HandleLevelRestarted(LevelData levelData)
+    {
+        if (!IsAdventureMode)
+            return;
+
+        if (levelData == null && AppManager.instance != null)
+            levelData = AppManager.instance.CurrentLevelData;
+
+        if (levelData != null)
+            InitTargets(levelData);
     }
 
     private void HandleDataLoaded(LevelData levelData)
