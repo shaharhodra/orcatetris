@@ -119,5 +119,16 @@ public class PlayerManeger : Singleton<PlayerManeger>
             Debug.LogError("Failed to save player progress");
         }
     }
+        [ContextMenu("Debug/Reset Player Progress To Level 1")]
+       public void ResetProgress()
+    {
+        PlayerProgress = new PlayerProgressData
+        {
+            HighestUnlockedLevel = 1,
+            Coins = 0
+        };
 
+        SavePlayerProgress();
+        Debug.Log("[PlayerManeger] Progress reset to level 1 with 0 coins.");
+    }
 }

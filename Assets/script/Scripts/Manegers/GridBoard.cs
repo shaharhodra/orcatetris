@@ -456,6 +456,38 @@ public class GridBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fully clears a single cell: destroys the placed block (cube) and its symbol.
+    /// Also handles initial blocks from JSON whose cube may not be tracked in
+    /// placedBlocks: their symbol icon is parented to the cube, so we destroy that
+    /// parent as a fallback. This prevents leftover cubes after a line clear.
+    /// </summary>
+    private void DestroyCellContents(int x, int y)
+    {
+        // Destroy the tracked block (cube), if any.
+        if (placedBlocks != null && placedBlocks[x, y] != null)
+        {
+            Destroy(placedBlocks[x, y]);
+            placedBlocks[x, y] = null;
+        }
+
+        // Fallback: an initial block's cube might not be tracked in placedBlocks.
+        // Its symbol icon is a child of that cube, so destroy the icon's parent.
+        if (symbolIcons != null && symbolIcons[x, y] != null)
+        {
+            var iconParent = symbolIcons[x, y].transform.parent;
+            if (iconParent != null && iconParent != transform)
+                Destroy(iconParent.gameObject);
+        }
+
+        string initialBlockName = $"InitialBlock_{x}_{y}";
+        Transform initialBlock = transform.Find(initialBlockName);
+        if (initialBlock != null)
+            Destroy(initialBlock.gameObject);
+
+        ClearSymbolAt(x, y);
+    }
+
     public int ClearFullLines()
     {
         return ClearFullLinesDetailed().CellsCleared;
@@ -563,13 +595,7 @@ public class GridBoard : MonoBehaviour
                     cleared++;
                 }
 
-                if (placedBlocks != null && placedBlocks[x, y] != null)
-                {
-                    Destroy(placedBlocks[x, y]);
-                    placedBlocks[x, y] = null;
-                }
-
-                ClearSymbolAt(x, y);
+                DestroyCellContents(x, y);
             }
         }
 
@@ -687,11 +713,7 @@ public class GridBoard : MonoBehaviour
                 cleared++;
             }
 
-            if (placedBlocks != null && placedBlocks[x, y] != null)
-            {
-                Destroy(placedBlocks[x, y]);
-                placedBlocks[x, y] = null;
-            }
+            DestroyCellContents(x, y);
         }
 
         return cleared;
@@ -715,11 +737,7 @@ public class GridBoard : MonoBehaviour
                 cleared++;
             }
 
-            if (placedBlocks != null && placedBlocks[x, y] != null)
-            {
-                Destroy(placedBlocks[x, y]);
-                placedBlocks[x, y] = null;
-            }
+            DestroyCellContents(x, y);
         }
 
         return cleared;

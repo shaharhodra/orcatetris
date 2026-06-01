@@ -34,6 +34,11 @@ public class ScoreManager : Singleton<ScoreManager>
     {
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
+        // Re-read score/coins thresholds whenever level data is (re)loaded, because at
+        // Start() the level JSON is often not loaded yet (loaded later via scene load).
+        if (AppManager.instance != null)
+            AppManager.instance.OnDataLoaded += HandleOnDataLoaded;
+
         HandleLevelDataLoaded();
 		MaxScore = GetUserHighScore();
         OnMaxScoreUpdatedEvent?.Invoke(MaxScore);
@@ -43,6 +48,14 @@ public class ScoreManager : Singleton<ScoreManager>
     {
 
 		GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+
+        if (AppManager.instance != null)
+            AppManager.instance.OnDataLoaded -= HandleOnDataLoaded;
+    }
+
+    private void HandleOnDataLoaded(LevelData levelData)
+    {
+        HandleLevelDataLoaded();
     }
 
     public void InvokeOnScoreUpdatedEvent(int score)

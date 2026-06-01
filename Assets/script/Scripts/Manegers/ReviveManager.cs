@@ -121,10 +121,10 @@ public class ReviveManager : MonoBehaviour
             return;
         }
 
-        // ✅ תיקון: אם הגענו ל-3 revives (כלומר usedRevives == 2), לך ישר ל-OnLose
-        if (usedRevives >= 2)
+        // אם הגענו למספר המקסימלי של ריבייבים שהוגדר באינספקטור, סיים את המשחק.
+        if (usedRevives >= maxRevives)
         {
-            Debug.Log("[ReviveManager] Already used 2 revives, going straight to OnLose");
+            Debug.Log($"[ReviveManager] Reached max revives ({maxRevives}), going straight to OnLose");
             TriggerGameOver();
             return;
         }
@@ -281,30 +281,24 @@ public class ReviveManager : MonoBehaviour
             return;
         }
 
-        // Perform revive: increment counter and clear row+column
+        // Perform revive: increment counter and actually clear space on the board
+        // using SmartRevive (clears the most-occupied row/column) so the player can
+        // continue. Game over only happens if revives run out and there is still no move.
         do
         {
             usedRevives++;
             Debug.Log($"[WatchAdAndRevive] Used revives: {usedRevives}/{maxRevives}");
 
-            // ✅ תיקון: בדוק אם הגענו ל-3 revives אחרי ההגדלה
-            if (usedRevives >= 3)
+            if (placeManager != null)
             {
-              //  Debug.Log("[WatchAdAndRevive] Reached max revives (3), triggering game over");
-                TriggerGameOver();
-                // PerformSmartRevive משתמש ב-ShapeTrayManager.GetAvailableShapes + SmartReviveWithValidation
+                // PerformSmartRevive uses ShapeTrayManager.GetAvailableShapes + SmartReviveWithValidation
                 var result = placeManager.PerformSmartRevive();
                 Debug.Log($"[WatchAdAndRevive] SmartRevive: rowsCleared={result.rowsCleared}, colsCleared={result.colsCleared}, cellsCleared={result.cellsCleared}");
             }
             else if (board != null)
             {
-                bool cleared = EnsureSpaceForOneShape();
-                if (!cleared)
-                {
-                    Debug.LogWarning("[WatchAdAndRevive] Failed to clear space for at least one shape.");
-                    TriggerGameOver();
-                    return;
-                }
+                // Fallback if placeManager is missing.
+                EnsureSpaceForOneShape();
             }
 
             if (shapeTrayManager == null)
