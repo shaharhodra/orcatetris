@@ -2,8 +2,8 @@
   "Level": 1,
   "LevelType": "adventure",
   "TimeInSeconds": 180,
-  "GridRows": 6,
-  "GridColumns": 6,
+  "GridRows": 8,
+  "GridColumns": 8,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
   "Shapes": [],
@@ -11,7 +11,8 @@
   "DifficultyThreshold": 5,
   "ScorePerCoinThreshold": 500,
   "CoinsPerThreshold": 3,
-  "LevelTargets": [
+  "LevelTargets": [ 
+  { "Target": 1, "TargetItem": 0, "Color": "FF7F00FF" }
   ],
 
   "InitialBlocks": [
@@ -34,7 +35,10 @@
   "ShapeWaves": [
     {
       "Shapes": [
-        { "Name": "3x2"},
+         { "Name": "3x2", "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
+          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } },
+          { "Type": 0, "Position": { "x": 2.0, "y": 1.0 } } ] },
 
         { "Name": "3x3" },
 

@@ -64,7 +64,7 @@ public class AdventureTargetUI : MonoBehaviour
         InitializeSymbolSpritesFromManualItems();
 
         // If targets already loaded, setup manual UI
-        if (adventureManager.RemainingTargets != null && adventureManager.RemainingTargets.Count > 0)
+        if (adventureManager.RemainingTargets != null)// && adventureManager.RemainingTargets.Count > 0)
             SetupManualUI(adventureManager.RemainingTargets);
     }
 
@@ -121,12 +121,7 @@ public class AdventureTargetUI : MonoBehaviour
 
     private void HandleTargetsUpdated(Dictionary<ColectionTypes, int> targets)
     {
-        if (entries.Count == 0)
-        {
-            SetupManualUI(targets);
-            return;
-        }
-
+        SetupManualUI(targets);
         UpdateUI(targets);
     }
 
@@ -142,8 +137,9 @@ public class AdventureTargetUI : MonoBehaviour
             if (item.Icon == null || item.CountText == null)
                 continue;
 
-            // Set initial count
-            int count = 0;
+			item.Root.gameObject.SetActive(true); // Hide if not in targets
+												   // Set initial count
+			int count = 0;
             if (targets.ContainsKey(item.SymbolType))
                 count = targets[item.SymbolType];
             else
