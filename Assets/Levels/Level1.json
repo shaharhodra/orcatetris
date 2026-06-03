@@ -2,8 +2,8 @@
   "Level": 1,
   "LevelType": "adventure",
   "TimeInSeconds": 180,
-  "GridRows": 8,
-  "GridColumns": 8,
+  "GridRows": 6,
+  "GridColumns": 6,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
   "Shapes": [],
@@ -12,136 +12,73 @@
   "ScorePerCoinThreshold": 500,
   "CoinsPerThreshold": 3,
   "LevelTargets": [
-    {
-      "Target": 6,
-      "TargetItem": 0,
-      "Color": "FF7F00FF"
-    },
-    {
-      "Target": 6,
-      "TargetItem": 1,
-      "Color": "FF7F00FF"
-    },
-    {
-      "Target": 6,
-      "TargetItem": 2,
-      "Color": "FF7F00FF"
-    },
-    {
-      "Target": 6,
-      "TargetItem": 3,
-      "Color": "FF7F00FF"
-    }
   ],
 
   "InitialBlocks": [
-    { "x": 2, "y": 2, "Symbol": 0 },
-    { "x": 3, "y": 2, "Symbol": 1 },
-    { "x": 4, "y": 2, "Symbol": 2 },
-    { "x": 5, "y": 2, "Symbol": 3 },
+    { "x": 2, "y": 2},
+    { "x": 3, "y": 2},
+    { "x": 4, "y": 2},
+    { "x": 5, "y": 2},
 
-    { "x": 2, "y": 3, "Symbol": 1 },
-    { "x": 3, "y": 3, "Symbol": 2 },
-    { "x": 4, "y": 3, "Symbol": 3 },
-    { "x": 5, "y": 3, "Symbol": 0 },
+    { "x": 2, "y": 3},
+    { "x": 3, "y": 3},
+    { "x": 4, "y": 3},
+    { "x": 5, "y": 3},
 
-    { "x": 2, "y": 4, "Symbol": 2 },
-    { "x": 3, "y": 4, "Symbol": 3 },
-    { "x": 4, "y": 4, "Symbol": 0 },
-    { "x": 5, "y": 4, "Symbol": 1 }
+    { "x": 2, "y": 4},
+    { "x": 3, "y": 4},
+    { "x": 4, "y": 4},
+    { "x": 5, "y": 4}
   ],
 
   "ShapeWaves": [
     {
       "Shapes": [
-        { "Name": "3x2",   "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 2, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "3x2"},
 
-        { "Name": "3x3",   "Symbols": [
-          { "Type": 1, "Position": { "x": 0.0, "y": 2.0 } },
-          { "Type": 2, "Position": { "x": 1.0, "y": 2.0 } },
-          { "Type": 3, "Position": { "x": 2.0, "y": 2.0 } } ] },
+        { "Name": "3x3" },
 
-        { "Name": "singel", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] }
+        { "Name": "singel"}
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "lineof4", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 1, "Position": { "x": 1.0, "y": 0.0 } },
-          { "Type": 2, "Position": { "x": 2.0, "y": 0.0 } } ] },
+        { "Name": "lineof4" },
 
-        { "Name": "3x2up", "Symbols": [
-          { "Type": 3, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "3x2up" },
 
-        { "Name": "J", "Symbols": [
-          { "Type": 2, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 3, "Position": { "x": 1.0, "y": 0.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 0.0 } } ] }
+        { "Name": "J" }
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "4on4", "Symbols": [
-          { "Type": 1, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 2, "Position": { "x": 2.0, "y": 1.0 } },
-          { "Type": 3, "Position": { "x": 1.0, "y": 2.0 } } ] },
+        { "Name": "4on4" },
 
-        { "Name": "cross", "Symbols": [
-          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 2, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "cross" },
 
-        { "Name": "L", "Symbols": [
-          { "Type": 3, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 0.0, "y": 2.0 } } ] }
+        { "Name": "L" }
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "plasLeft", "Symbols": [
-          { "Type": 2, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 3, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "plasLeft" },
 
-        { "Name": "plasRight", "Symbols": [
-          { "Type": 1, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 2, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 3, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "plasRight"},
 
-        { "Name": "plas", "Symbols": [
-          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 2, "Position": { "x": 2.0, "y": 1.0 } } ] }
+        { "Name": "plas" }
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "3x2", "Symbols": [
-          { "Type": 3, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } },
-          { "Type": 1, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "3x2" },
 
-        { "Name": "3x3", "Symbols": [
-          { "Type": 2, "Position": { "x": 0.0, "y": 2.0 } },
-          { "Type": 3, "Position": { "x": 1.0, "y": 2.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 2.0 } } ] },
+        { "Name": "3x3" },
 
-        { "Name": "Jsmall", "Symbols": [
-          { "Type": 1, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 2, "Position": { "x": 1.0, "y": 0.0 } },
-          { "Type": 3, "Position": { "x": 1.0, "y": 1.0 } } ] }
+        { "Name": "Jsmall" }
       ]
     }
   ]

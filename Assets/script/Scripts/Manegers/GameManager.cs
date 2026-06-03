@@ -378,7 +378,14 @@ public class GameManager : Singleton<GameManager>
         {
             var data = JsonUtility.FromJson<LevelData>(ta.text);
             if (data != null && data.Level > 0)
+            {
+                if (data.Level==1)
+                {
+                    Debug.Log("masheho");
+                }
                 return data.Level;
+
+            }
         }
         catch
         {

@@ -153,12 +153,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - adv
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 76d56a5730cc2f144a97f1a21880742c
-    m_Address: Assets/Levels/Level21.json
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - adv
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 80f5a98442320c444af96187d5a90e1e
     m_Address: Assets/Levels/Level5.json
     m_ReadOnly: 0
@@ -281,6 +275,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da7f166eb5c71784b891bd8f37b64fee
     m_Address: Assets/Levels/Level20.json
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - adv
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e00b801a91213b349b219e85de0d5567
+    m_Address: Assets/Levels/Level1.json
     m_ReadOnly: 0
     m_SerializedLabels:
     - adv

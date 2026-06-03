@@ -128,7 +128,17 @@ public class PlayerManeger : Singleton<PlayerManeger>
             Coins = 0
         };
 
-        SavePlayerProgress();
+        try
+        {
+            var json = JsonUtility.ToJson(PlayerProgress);
+            File.WriteAllText(GetProgressFilePath(), json);
+        }
+        catch
+        {
+            Debug.LogError("Failed to reset player progress");
+        }
+
+        OnCoinsUpdatedEvent?.Invoke(PlayerProgress.Coins);
         Debug.Log("[PlayerManeger] Progress reset to level 1 with 0 coins.");
     }
 }

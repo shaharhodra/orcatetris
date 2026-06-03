@@ -25,6 +25,7 @@ public class AdventureTargetUI : MonoBehaviour
     [System.Serializable]
     public class TargetUIItem
     {
+        public Transform Root;
         public ColectionTypes SymbolType;
         public Image Icon;
         public TextMeshProUGUI CountText;
@@ -145,13 +146,15 @@ public class AdventureTargetUI : MonoBehaviour
             int count = 0;
             if (targets.ContainsKey(item.SymbolType))
                 count = targets[item.SymbolType];
+            else
+                item.Root.gameObject.SetActive(false); // Hide if not in targets
 
             // Apply icon scale
             item.Icon.transform.localScale = Vector3.one * iconScale;
 
             entries[item.SymbolType] = new TargetUIEntry
             {
-                Root = item.Icon.gameObject,
+                Root = item.Root.gameObject,
                 Icon = item.Icon,
                 CountText = item.CountText,
                 LastCount = count

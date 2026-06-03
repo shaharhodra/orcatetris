@@ -3973,9 +3973,10 @@ MonoBehaviour:
     CoinsPerThreshold: 0
     LevelTargets: []
     ShapeWaves: []
+    InitialBlocks: []
   _levelJson: 
   _levelJsonFiles:
-  - {fileID: 4900000, guid: c9a4cea304d84dd49917a4e1a84bee6c, type: 3}
+  - {fileID: 4900000, guid: e00b801a91213b349b219e85de0d5567, type: 3}
   - {fileID: 4900000, guid: 87273cfe2a99b974da4702015ce3e434, type: 3}
   - {fileID: 4900000, guid: 6d8d91600d7a7b941981b62b45770170, type: 3}
   - {fileID: 4900000, guid: e658f04e03e73854e9259b1ec6c7e2bc, type: 3}
@@ -3995,7 +3996,7 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 1c98ddaee4899fb41beea10d7d7748c6, type: 3}
   - {fileID: 4900000, guid: 4db11aa5f4b7c694cadf08fabed21d56, type: 3}
   - {fileID: 4900000, guid: da7f166eb5c71784b891bd8f37b64fee, type: 3}
-  - {fileID: 4900000, guid: 76d56a5730cc2f144a97f1a21880742c, type: 3}
+  - {fileID: 4900000, guid: c9a4cea304d84dd49917a4e1a84bee6c, type: 3}
   - {fileID: 4900000, guid: a28fbe1ce1660504fa63e75ec5290e6f, type: 3}
   - {fileID: 4900000, guid: c526bb133b0acb948aefe628b79db973, type: 3}
   - {fileID: 4900000, guid: fdae207a49095e24ca30e96a96327b5c, type: 3}
@@ -4940,6 +4941,7 @@ MonoBehaviour:
       Color: {r: 1, g: 0.19339621, b: 0.19339621, a: 1}
       TargetItem: 1
     ShapeWaves: []
+    InitialBlocks: []
   _levelJson: 
   _levelJsonFiles: []
   _classicLevelJsonFile: {fileID: 0}
