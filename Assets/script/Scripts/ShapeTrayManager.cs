@@ -76,13 +76,25 @@ public class ShapeTrayManager : MonoBehaviour
 
         var app = AppManager.instance;
 
-        // In Adventure mode we always wait for LevelData via OnDataLoaded,
-        // then InitAdventureWaves + refill will be called from the handler.
         if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
         {
-            waitingForAdventureLevelData = true;
-            app.OnDataLoaded -= HandleLevelDataLoadedForTray; // avoid double subscription
-            app.OnDataLoaded += HandleLevelDataLoadedForTray;
+            if (app.CurrentLevelData != null)
+            {
+                waitingForAdventureLevelData = false;
+                InitAdventureWaves();
+
+                if (useAddressables)
+                    LoadAddressablesAndRefill();
+                else
+                    RefillIfNeeded();
+            }
+            else
+            {
+                waitingForAdventureLevelData = true;
+                app.OnDataLoaded -= HandleLevelDataLoadedForTray; // avoid double subscription
+                app.OnDataLoaded += HandleLevelDataLoadedForTray;
+            }
+
             return;
         }
 
@@ -306,6 +318,9 @@ public class ShapeTrayManager : MonoBehaviour
         if (slots == null || slots.Length < 3)
             return;
 
+        bool isAdventureMode = AppManager.instance != null &&
+                               AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
+
         // ===== Adventure predefined waves (only in Adventure mode) =====
         if (useAdventureWaves && shapeWaves != null)
         {
@@ -324,6 +339,12 @@ public class ShapeTrayManager : MonoBehaviour
             }
 
             CheckNoMovesAndMaybeRevive();
+            return;
+        }
+
+        if (isAdventureMode)
+        {
+            Debug.LogWarning("[ShapeTrayManager] Adventure mode is active but no ShapeWaves are loaded, so no shapes will be spawned.");
             return;
         }
 
