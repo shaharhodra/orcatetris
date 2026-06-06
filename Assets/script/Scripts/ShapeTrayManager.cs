@@ -78,7 +78,7 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
         {
-            if (app.CurrentLevelData != null)
+            if (app.CurrentLevelData != null && app.CurrentLevelData.ShapeWaves != null && app.CurrentLevelData.ShapeWaves.Count > 0)
             {
                 waitingForAdventureLevelData = false;
                 InitAdventureWaves();
@@ -119,6 +119,9 @@ public class ShapeTrayManager : MonoBehaviour
             return;
 
         if (!waitingForAdventureLevelData)
+            return;
+
+        if (levelData == null || levelData.ShapeWaves == null || levelData.ShapeWaves.Count == 0)
             return;
 
         waitingForAdventureLevelData = false;

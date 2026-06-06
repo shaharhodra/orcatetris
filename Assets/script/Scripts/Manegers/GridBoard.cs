@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class GridBoard : MonoBehaviour
 {
@@ -23,6 +24,14 @@ public class GridBoard : MonoBehaviour
     private GameObject[,] symbolIcons;
     private System.Collections.Generic.HashSet<Vector2Int> hoveredCells;
     private System.Collections.Generic.HashSet<Vector2Int> previewClearCells;
+
+    [Header("Clear Animation")]
+    [SerializeField] private bool animateClearedBlocks = true;
+    [SerializeField] private float clearJumpPower = 1.2f;
+    [SerializeField] private float clearJumpDuration = 0.25f;
+    [SerializeField] private float clearFallDistance = 8f;
+    [SerializeField] private float clearFallDuration = 0.55f;
+    [SerializeField] private float clearScatterX = 0.45f;
     [SerializeField] private GridBoard board;
 
     [Header("Pre-fill")]
@@ -444,16 +453,31 @@ public class GridBoard : MonoBehaviour
         return cellSymbolTypes[cell.x, cell.y];
     }
 
-    private void ClearSymbolAt(int x, int y)
+    private GameObject DetachSymbolAt(int x, int y)
     {
         if (cellSymbolTypes != null)
             cellSymbolTypes[x, y] = -1;
 
-        if (symbolIcons != null && symbolIcons[x, y] != null)
+        if (symbolIcons == null || symbolIcons[x, y] == null)
+            return null;
+
+        GameObject icon = symbolIcons[x, y];
+        symbolIcons[x, y] = null;
+
+        if (icon != null)
         {
-            Destroy(symbolIcons[x, y]);
-            symbolIcons[x, y] = null;
+            icon.transform.DOKill();
+            icon.transform.SetParent(null, true);
         }
+
+        return icon;
+    }
+
+    private void ClearSymbolAt(int x, int y)
+    {
+        GameObject icon = DetachSymbolAt(x, y);
+        if (icon != null)
+            Destroy(icon);
     }
 
     /// <summary>
@@ -464,28 +488,71 @@ public class GridBoard : MonoBehaviour
     /// </summary>
     private void DestroyCellContents(int x, int y)
     {
-        // Destroy the tracked block (cube), if any.
+        GameObject blockToAnimate = null;
+
         if (placedBlocks != null && placedBlocks[x, y] != null)
         {
-            Destroy(placedBlocks[x, y]);
+            blockToAnimate = placedBlocks[x, y];
             placedBlocks[x, y] = null;
-        }
-
-        // Fallback: an initial block's cube might not be tracked in placedBlocks.
-        // Its symbol icon is a child of that cube, so destroy the icon's parent.
-        if (symbolIcons != null && symbolIcons[x, y] != null)
-        {
-            var iconParent = symbolIcons[x, y].transform.parent;
-            if (iconParent != null && iconParent != transform)
-                Destroy(iconParent.gameObject);
         }
 
         string initialBlockName = $"InitialBlock_{x}_{y}";
         Transform initialBlock = transform.Find(initialBlockName);
-        if (initialBlock != null)
-            Destroy(initialBlock.gameObject);
+        if (blockToAnimate == null && initialBlock != null)
+            blockToAnimate = initialBlock.gameObject;
+
+        if (blockToAnimate != null)
+            AnimateAndDestroyClearedBlock(blockToAnimate);
 
         ClearSymbolAt(x, y);
+    }
+
+    private ClearedSymbolVisual CaptureSymbolVisual(int x, int y)
+    {
+        if (cellSymbolTypes == null || cellSymbolTypes[x, y] < 0)
+            return null;
+
+        var symbolType = (ColectionTypes)cellSymbolTypes[x, y];
+        GameObject icon = DetachSymbolAt(x, y);
+        Vector3 worldPosition = GridToWorld(new Vector2Int(x, y));
+
+        if (icon != null)
+        {
+            worldPosition = icon.transform.position;
+            icon.transform.SetParent(null, true);
+        }
+
+        return new ClearedSymbolVisual(symbolType, worldPosition, icon);
+    }
+
+    private void AnimateAndDestroyClearedBlock(GameObject block)
+    {
+        if (block == null)
+            return;
+
+        if (!animateClearedBlocks)
+        {
+            Destroy(block);
+            return;
+        }
+
+        Transform t = block.transform;
+        t.DOKill();
+        t.SetParent(null, true);
+
+        Vector3 start = t.position;
+        Vector3 jumpTarget = start + new Vector3(Random.Range(-clearScatterX, clearScatterX), 0.25f, 0f);
+        Vector3 fallTarget = jumpTarget + Vector3.down * clearFallDistance;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(t.DOJump(jumpTarget, clearJumpPower, 1, clearJumpDuration).SetEase(Ease.OutQuad));
+        seq.Append(t.DOMove(fallTarget, clearFallDuration).SetEase(Ease.InQuad));
+        seq.Join(t.DORotate(new Vector3(0f, 0f, Random.Range(-180f, 180f)), clearFallDuration, RotateMode.FastBeyond360));
+        seq.OnComplete(() =>
+        {
+            if (block != null)
+                Destroy(block);
+        });
     }
 
     public int ClearFullLines()
@@ -569,6 +636,7 @@ public class GridBoard : MonoBehaviour
         }
 
         Dictionary<ColectionTypes, int> clearedSymbols = null;
+        List<ClearedSymbolVisual> clearedSymbolVisuals = null;
 
         for (int x = 0; x < width; x++)
         {
@@ -587,6 +655,14 @@ public class GridBoard : MonoBehaviour
                         clearedSymbols[st]++;
                     else
                         clearedSymbols[st] = 1;
+
+                    var visual = CaptureSymbolVisual(x, y);
+                    if (visual != null)
+                    {
+                        if (clearedSymbolVisuals == null)
+                            clearedSymbolVisuals = new List<ClearedSymbolVisual>();
+                        clearedSymbolVisuals.Add(visual);
+                    }
                 }
 
                 if (cells[x, y] != null && cells[x, y].occupied)
@@ -599,7 +675,7 @@ public class GridBoard : MonoBehaviour
             }
         }
 
-        return new LineClearResult(rowsCleared, colsCleared, cleared, clearedSymbols);
+        return new LineClearResult(rowsCleared, colsCleared, cleared, clearedSymbols, clearedSymbolVisuals);
     }
 
     /// <summary>

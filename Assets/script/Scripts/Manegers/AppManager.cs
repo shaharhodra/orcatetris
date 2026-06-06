@@ -142,12 +142,14 @@ public class AppManager : Singleton<AppManager>
     {
         PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Adventure);
         PlayerPrefs.Save();
+        CurrentLevelData = null;
     }
 
     public void SetGameModeClassic()
     {
         PlayerPrefs.SetInt(SelectedGameModeKey, (int)GameMode.Classic);
         PlayerPrefs.Save();
+        CurrentLevelData = null;
     }
 
     public void LoadAdventureLobby()
@@ -171,8 +173,7 @@ public class AppManager : Singleton<AppManager>
 
     public void StartAdventureGameFromLobby()
     {
-        // CurrentGameMode is already Adventure when we arrive to ADV MODE via LoadAdventureLobby,
-        // so we don't change it here. We only load the shared gameplay scene.
+        SetGameModeAdventure();
        // Debug.Log($"AppManager -> StartAdventureGameFromLobby called. CurrentGameMode={CurrentGameMode}, loading scene buildIndex={classicGameSceneBuildIndex}");
         SceneManager.LoadScene(classicGameSceneBuildIndex);
     }

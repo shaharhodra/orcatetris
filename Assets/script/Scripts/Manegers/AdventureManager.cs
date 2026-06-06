@@ -16,6 +16,7 @@ public class AdventureManager : MonoBehaviour
 
     // Events
     public event Action<Dictionary<ColectionTypes, int>> OnTargetsUpdated;
+    public event Action<List<ClearedSymbolVisual>> OnClearedSymbolVisuals;
     public event Action OnAllTargetsCompleted;
 
     public bool IsAdventureMode => AppManager.instance != null
@@ -123,6 +124,9 @@ public class AdventureManager : MonoBehaviour
 
         if (changed)
         {
+            if (result.ClearedSymbolVisuals != null && result.ClearedSymbolVisuals.Count > 0)
+                OnClearedSymbolVisuals?.Invoke(result.ClearedSymbolVisuals);
+
             OnTargetsUpdated?.Invoke(remainingTargets);
             CheckWinCondition();
         }
