@@ -20,6 +20,12 @@ public class AdventureTargetUI : MonoBehaviour
     [SerializeField] private float countTweenDuration = 0.35f;
     [SerializeField] private float symbolFlyDuration = 0.55f;
     [SerializeField] private Ease symbolFlyEase = Ease.InOutCubic;
+    [SerializeField] private float symbolPreFlyScaleMultiplier = 3f;
+    [SerializeField] private float symbolPreFlyScaleDuration = 0.18f;
+    [SerializeField] private Ease symbolPreFlyScaleEase = Ease.OutBack;
+    [SerializeField] private float symbolIntoTargetScaleMultiplier = 0f;
+    [SerializeField] private Ease symbolIntoTargetScaleEase = Ease.InBack;
+    [SerializeField] private bool fadeSymbolIntoTarget = true;
 
     [Header("UI Icon Scale")]
     [SerializeField] private float iconScale = 1.0f; // Scale for UI icons only
@@ -252,20 +258,41 @@ public class AdventureTargetUI : MonoBehaviour
             flyingTransform.SetParent(null, true);
 
             Vector3 targetPosition = GetWorldPosition(entry.Icon.transform);
-            flyingTransform.DOMove(targetPosition, symbolFlyDuration)
-                .SetEase(symbolFlyEase)
-                .OnComplete(() =>
-                {
-                    if (entry.Root != null)
-                    {
-                        entry.Root.transform.DOKill(true);
-                        entry.Root.transform.localScale = Vector3.one;
-                        entry.Root.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
-                    }
 
-                    if (flyingIcon != null)
-                        Destroy(flyingIcon);
-                });
+            Vector3 baseScale = flyingTransform.localScale;
+            if (baseScale == Vector3.zero)
+                baseScale = Vector3.one;
+
+            var sr = flyingIcon.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                var c = sr.color;
+                c.a = 1f;
+                sr.color = c;
+            }
+
+            Sequence seq = DOTween.Sequence();
+            seq.SetTarget(flyingTransform);
+            seq.Append(flyingTransform.DOScale(baseScale * symbolPreFlyScaleMultiplier, symbolPreFlyScaleDuration).SetEase(symbolPreFlyScaleEase));
+
+            Tween moveTween = flyingTransform.DOMove(targetPosition, symbolFlyDuration).SetEase(symbolFlyEase);
+            seq.Append(moveTween);
+            seq.Join(flyingTransform.DOScale(baseScale * symbolIntoTargetScaleMultiplier, symbolFlyDuration).SetEase(symbolIntoTargetScaleEase));
+            if (fadeSymbolIntoTarget && sr != null)
+                seq.Join(sr.DOFade(0f, symbolFlyDuration));
+
+            seq.OnComplete(() =>
+            {
+                if (entry.Root != null)
+                {
+                    entry.Root.transform.DOKill(true);
+                    entry.Root.transform.localScale = Vector3.one;
+                    entry.Root.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
+                }
+
+                if (flyingIcon != null)
+                    Destroy(flyingIcon);
+            });
         }
     }
 

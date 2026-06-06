@@ -39,6 +39,13 @@ public class GridBoard : MonoBehaviour
     private List<InitialBlockData> pendingInitialBlocks;
     private List<InitialBlockData> storedInitialBlocks; // kept for restart
 
+    [Header("Initial Block Entry Animation")]
+    [SerializeField] private bool animateInitialBlockEntry = true;
+    [SerializeField] private float initialBlockEntryDuration = 0.6f;
+    [SerializeField] private Ease initialBlockEntryEase = Ease.OutBack;
+    [SerializeField] private float initialBlockEntryDistance = 8f;
+    [SerializeField] private float initialBlockEntryDelayPerBlock = 0.08f;
+
     // ✅ תיקון: הוסף getters נכונים
     public int Rows => height;
     public int Columns => width;
@@ -283,6 +290,7 @@ public class GridBoard : MonoBehaviour
         }
 
         Debug.Log($"[GridBoard] Applying {blocks.Count} initial blocks to grid");
+        int blockIndex = 0;
 
         foreach (var blockData in blocks)
         {
@@ -302,6 +310,11 @@ public class GridBoard : MonoBehaviour
             var blockObj = Instantiate(initialBlockPrefab, worldPos, Quaternion.identity, transform);
             blockObj.name = $"InitialBlock_{blockData.x}_{blockData.y}";
 
+            if (animateInitialBlockEntry)
+            {
+                AnimateInitialBlockEntry(blockObj, worldPos, blockIndex * initialBlockEntryDelayPerBlock);
+            }
+
             placedBlocks[pos.x, pos.y] = blockObj;
 
             // Apply symbol if defined
@@ -317,7 +330,18 @@ public class GridBoard : MonoBehaviour
                 {
                     var iconObj = new GameObject("SymbolIcon");
                     iconObj.transform.SetParent(blockObj.transform, false);
-                    iconObj.transform.localPosition = Vector3.zero;
+                    if (animateInitialBlockEntry)
+                    {
+                        Vector3 entryDir = GetRandomEntryDirectionForInitialBlock();
+                        iconObj.transform.localPosition = entryDir * initialBlockEntryDistance;
+                        iconObj.transform.DOLocalMove(Vector3.zero, initialBlockEntryDuration)
+                            .SetDelay(blockIndex * initialBlockEntryDelayPerBlock)
+                            .SetEase(initialBlockEntryEase);
+                    }
+                    else
+                    {
+                        iconObj.transform.localPosition = Vector3.zero;
+                    }
                     iconObj.transform.localScale = Vector3.one * 0.4f;
 
                     var iconSr = iconObj.AddComponent<SpriteRenderer>();
@@ -337,6 +361,8 @@ public class GridBoard : MonoBehaviour
             {
                 Debug.Log($"[GridBoard] Initial block at ({blockData.x},{blockData.y}) without symbol");
             }
+            
+            blockIndex++;
         }
 
         // Verify all initial blocks are occupied
@@ -1184,6 +1210,35 @@ public class GridBoard : MonoBehaviour
         if (storedInitialBlocks != null && storedInitialBlocks.Count > 0)
         {
             ApplyInitialBlocks(storedInitialBlocks);
+        }
+    }
+
+    private void AnimateInitialBlockEntry(GameObject blockObj, Vector3 targetPosition, float delay)
+    {
+        // Choose random side to enter from
+        Vector3 entryDirection = GetRandomEntryDirectionForInitialBlock();
+        Vector3 startPosition = targetPosition + entryDirection * initialBlockEntryDistance;
+        
+        blockObj.transform.position = startPosition;
+        
+        // Animate to target position
+        blockObj.transform.DOMove(targetPosition, initialBlockEntryDuration)
+            .SetDelay(delay)
+            .SetEase(initialBlockEntryEase);
+    }
+
+    private Vector3 GetRandomEntryDirectionForInitialBlock()
+    {
+        // Randomly choose one of 4 sides (left, right, top, bottom)
+        int side = UnityEngine.Random.Range(0, 4);
+        
+        switch (side)
+        {
+            case 0: return Vector3.left;   // From left
+            case 1: return Vector3.right;  // From right
+            case 2: return Vector3.up;     // From top
+            case 3: return Vector3.down;   // From bottom
+            default: return Vector3.left;
         }
     }
 }

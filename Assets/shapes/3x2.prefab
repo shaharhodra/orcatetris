@@ -155,6 +155,11 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &4507659388555545591
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,6 +481,11 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &5736323262829888865
 GameObject:
   m_ObjectHideFlags: 0
@@ -631,6 +641,11 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &6387091648828460992
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,6 +801,11 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &6581481366171484634
 GameObject:
   m_ObjectHideFlags: 0
@@ -941,6 +961,11 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &6650566469041322086
 GameObject:
   m_ObjectHideFlags: 0
@@ -1096,3 +1121,8 @@ MonoBehaviour:
   symbolSprite: {fileID: 0}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0

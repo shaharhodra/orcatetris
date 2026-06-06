@@ -741,6 +741,11 @@ MonoBehaviour:
   symbolSprite: {fileID: -9087663519634255545, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &6017876173049198032
 GameObject:
   m_ObjectHideFlags: 0
@@ -896,6 +901,11 @@ MonoBehaviour:
   symbolSprite: {fileID: -9087663519634255545, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &7447075308843844432
 GameObject:
   m_ObjectHideFlags: 0
@@ -1465,3 +1475,8 @@ MonoBehaviour:
   symbolSprite: {fileID: -9087663519634255545, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
   iconScale: 0.4
+  animateEntry: 1
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
