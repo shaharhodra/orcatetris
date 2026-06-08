@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4931225527813076007}
   - component: {fileID: 4380011084898466407}
   - component: {fileID: 2750607272024266131}
+  - component: {fileID: 3319576217315651316}
   m_Layer: 7
   m_Name: shape 2 (1)
   m_TagString: Untagged
@@ -138,6 +139,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3.0559788, y: 3.1788945}
   m_EdgeRadius: 0
+--- !u!114 &3319576217315651316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614223780646810565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d11d2a8c5241ad7489fa2a6e580b223a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockSymbol
+  symbolType: 0
+  symbolSprite: {fileID: 0}
+  sortingOrder: 10
+  iconScale: 0.4
+  animateEntry: 0
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &6940788565188892249
 GameObject:
   m_ObjectHideFlags: 0

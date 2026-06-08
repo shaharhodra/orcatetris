@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4387382659010833151}
   - component: {fileID: 4131241050123439429}
   - component: {fileID: 7940901760107402360}
+  - component: {fileID: 5708353109009180904}
   m_Layer: 7
   m_Name: shape 2 (2)
   m_TagString: Untagged
@@ -138,6 +139,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.95, y: 0.95}
   m_EdgeRadius: 0
+--- !u!114 &5708353109009180904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1024698157046497032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d11d2a8c5241ad7489fa2a6e580b223a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockSymbol
+  symbolType: 0
+  symbolSprite: {fileID: 0}
+  sortingOrder: 10
+  iconScale: 0.4
+  animateEntry: 0
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &2161923710041357827
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,6 +171,7 @@ GameObject:
   - component: {fileID: 45495679023402543}
   - component: {fileID: 2308986054530181873}
   - component: {fileID: 5667377250226916953}
+  - component: {fileID: 3465930957936701780}
   m_Layer: 7
   m_Name: shape 2
   m_TagString: Untagged
@@ -276,6 +299,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.95, y: 0.95}
   m_EdgeRadius: 0
+--- !u!114 &3465930957936701780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2161923710041357827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d11d2a8c5241ad7489fa2a6e580b223a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockSymbol
+  symbolType: 0
+  symbolSprite: {fileID: 0}
+  sortingOrder: 10
+  iconScale: 0.4
+  animateEntry: 0
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &4822410471295119475
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,6 +331,7 @@ GameObject:
   - component: {fileID: 6013768786009191282}
   - component: {fileID: 2019216091347706189}
   - component: {fileID: 4868812721369315132}
+  - component: {fileID: 610015922020403357}
   m_Layer: 7
   m_Name: shape 2 (1)
   m_TagString: Untagged
@@ -414,6 +459,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.95, y: 0.95}
   m_EdgeRadius: 0
+--- !u!114 &610015922020403357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4822410471295119475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d11d2a8c5241ad7489fa2a6e580b223a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockSymbol
+  symbolType: 0
+  symbolSprite: {fileID: 0}
+  sortingOrder: 10
+  iconScale: 0.4
+  animateEntry: 0
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
 --- !u!1 &7554597535967158769
 GameObject:
   m_ObjectHideFlags: 0
@@ -587,6 +653,7 @@ GameObject:
   - component: {fileID: 2367223179550771847}
   - component: {fileID: 7132956405185835992}
   - component: {fileID: 675295399776724936}
+  - component: {fileID: 2560914615391750538}
   m_Layer: 7
   m_Name: shape 2 (3)
   m_TagString: Untagged
@@ -714,3 +781,24 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.95, y: 0.95}
   m_EdgeRadius: 0
+--- !u!114 &2560914615391750538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7985917410334564776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d11d2a8c5241ad7489fa2a6e580b223a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockSymbol
+  symbolType: 0
+  symbolSprite: {fileID: 0}
+  sortingOrder: 10
+  iconScale: 0.4
+  animateEntry: 0
+  entryDuration: 0.6
+  entryEase: 27
+  entryDistance: 8
+  entryDelay: 0
