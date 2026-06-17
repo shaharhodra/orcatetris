@@ -61,7 +61,7 @@ public class BlockSymbol : MonoBehaviour
 
     [Header("Icon Settings")]
     [SerializeField] private int sortingOrder = 10;
-    [SerializeField] private float iconScale = 0.4f;
+    [SerializeField] private float iconScale = 0.6f;
 
     [Header("Entry Animation")]
     [SerializeField] private bool animateEntry = false;

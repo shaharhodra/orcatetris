@@ -252,6 +252,10 @@ public class GridBoard : MonoBehaviour
         {
             ApplyInitialBlocks(pendingInitialBlocks);
         }
+
+        // Apply current theme to newly created cells
+        if (ThemeManager.instance != null)
+            ThemeManager.instance.ApplyThemeToGrid(this);
     }
 
     /// <summary>
@@ -342,7 +346,7 @@ public class GridBoard : MonoBehaviour
                     {
                         iconObj.transform.localPosition = Vector3.zero;
                     }
-                    iconObj.transform.localScale = Vector3.one * 0.4f;
+                    iconObj.transform.localScale = Vector3.one * 0.6f;
 
                     var iconSr = iconObj.AddComponent<SpriteRenderer>();
                     iconSr.sprite = symSprite;
@@ -428,6 +432,19 @@ public class GridBoard : MonoBehaviour
             return false;
 
         return cells[cell.x, cell.y] != null && cells[cell.x, cell.y].occupied;
+    }
+
+    public bool IsBoardEmpty()
+    {
+        if (cells == null)
+            return true;
+
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (cells[x, y] != null && cells[x, y].occupied)
+                    return false;
+
+        return true;
     }
 
     public void SetOccupied(Vector2Int cell, bool value)

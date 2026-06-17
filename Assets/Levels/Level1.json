@@ -2,8 +2,8 @@
   "Level": 1,
   "LevelType": "adventure",
   "TimeInSeconds": 180,
-  "GridRows": 8,
-  "GridColumns": 8,
+  "GridRows": 6,
+  "GridColumns": 6,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
   "Shapes": [],
@@ -12,86 +12,59 @@
   "ScorePerCoinThreshold": 500,
   "CoinsPerThreshold": 3,
   "LevelTargets": [ 
-  { "Target": 10, "TargetItem": 0, "Color": "FF7F00FF" }
+  { "Target": 3, "TargetItem": 0, "Color": "FF7F00FF" }
   ],
 
   "InitialBlocks": [
-    { "x": 2, "y": 2,"Symbol": 0},
-    { "x": 3, "y": 2},
-    { "x": 4, "y": 2},
-    { "x": 5, "y": 2,"Symbol": 0},
+    { "x": 0, "y": 0},
+    { "x": 1, "y": 0},
+    { "x": 0, "y": 1},
+    { "x": 1, "y": 1},
 
-    { "x": 2, "y": 3,"Symbol": 0},
-    { "x": 3, "y": 3},
-    { "x": 4, "y": 3},
-    { "x": 5, "y": 3},
+    { "x": 4, "y": 0,"Symbol": 0},
+    { "x": 5, "y": 0},
+    { "x": 4, "y": 1},
+    { "x": 5, "y": 1}
 
-    { "x": 2, "y": 4},
-    { "x": 3, "y": 4,"Symbol": 0},
-    { "x": 4, "y": 4},
-    { "x": 5, "y": 4}
+    
   ],
 
   "ShapeWaves": [
     {
       "Shapes": [
-         { "Name": "3x2", "Symbols": [
+         { "Name": "4on4", "Symbols": [
           { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 1.0 } } ] },
+          { "Type": 0, "Position": { "x": 1.0, "y": 1.0 } } ] },
 
-        { "Name": "3x3", "Symbols": [
-          { "Type": 0, "Position": { "x": 2.0, "y": 1.0 } } ] },
+        { "Name": "3x2" },
      
-        { "Name": "singel", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } }
-      ]}
+        { "Name": "singel"}
         ]
     },
 
     {
       "Shapes": [
-        { "Name": "lineof4", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 0.0 } } ] },
+        { "Name": "lineof2" },
 
-        { "Name": "3x2", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 2.0, "y": 1.0 } } ] }, 
+        { "Name": "singel", "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } }
+        ] } ,
 
-        { "Name": "J" }
+        { "Name": "plasDowne" }
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "4on4" },
+        { "Name": "singel" },
 
-        { "Name": "cross" },
-
-        { "Name": "L" }
-      ]
-    },
-
-    {
-      "Shapes": [
-        { "Name": "plasLeft" },
-
-        { "Name": "plasRight"},
-
-        { "Name": "plas" }
-      ]
-    },
-
-    {
-      "Shapes": [
-        { "Name": "3x2" },
-
-        { "Name": "3x3" },
+        { "Name": "singel" },
 
         { "Name": "Jsmall" }
       ]
     }
+
+   
   ]
 
 }
-

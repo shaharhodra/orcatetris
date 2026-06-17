@@ -129,6 +129,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - adv
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f497319d4ae9cc4d96871d63bb2e867
+    m_Address: Assets/shapes/l2vertical.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 50f6cb1b91ee35d4cb5432cc02cc5976
     m_Address: Assets/shapes/3x2.prefab
     m_ReadOnly: 0
@@ -140,6 +146,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - adv
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6559839592a0c9943b6cee75e94c1470
+    m_Address: Assets/shapes/lineof2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6948d055226540945ae8a2f5205d5804
     m_Address: Assets/shapes/plasDowne.prefab
@@ -320,6 +332,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - adv
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f870f0df91727c746942b569070aecb9
+    m_Address: Assets/shapes/2up.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - shape
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fdae207a49095e24ca30e96a96327b5c
     m_Address: Assets/Levels/Level24.json

@@ -87,6 +87,8 @@ public class PopUpService : MonoBehaviour
 
     public void OnXButtonClicked ()
     {
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayButtonClick();
         scoreCountTween?.Kill();
         elementsSequence?.Kill();
 
@@ -131,6 +133,8 @@ public class PopUpService : MonoBehaviour
     public void ShowAndStay()
     {
         IsActive = true;
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayAmazingPopup();
         SetOverlayActiveStateForLoss(true);
         UpdateScoreTexts();
         ShowPopUp(true);
@@ -250,6 +254,8 @@ public class PopUpService : MonoBehaviour
     async UniTask RunPopupSequenceAsync ()
     {
         IsActive = true;
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayAmazingPopup();
         SetOverlayActiveState(true);
         ShowPopUp(true);
 

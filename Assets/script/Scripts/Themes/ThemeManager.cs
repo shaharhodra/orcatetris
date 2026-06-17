@@ -1,0 +1,197 @@
+using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
+using System.Collections.Generic;
+
+public class ThemeManager : MonoBehaviour
+{
+    public static ThemeManager instance;
+
+    // ThemeBlock components subscribe to this to update themselves
+    public static System.Action<ThemeData, bool> OnThemeChanged;
+
+    public ThemeData CurrentTheme => currentTheme;
+
+    [Header("Themes")]
+    [SerializeField] private ThemeData defaultTheme;
+    [SerializeField] private ThemeData[] themes;
+
+    [Header("Trigger Conditions")]
+    [Tooltip("Switch to theme at index N when score reaches scoreThresholds[N]")]
+    [SerializeField] private int[] scoreThresholds;
+    [Tooltip("Switch to this theme index when the board is fully cleared")]
+    [SerializeField] private int boardClearThemeIndex = -1;
+
+    [Header("Scene References")]
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private SpriteRenderer backgroundRenderer;
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private GridBoard gridBoard;
+
+    [Header("Optional Tintable Objects")]
+    [SerializeField] private List<Image> uiImages = new List<Image>();
+
+    private ThemeData currentTheme;
+    private int currentThemeIndex = -1;
+    private Sequence transitionSequence;
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
+    private void Start()
+    {
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        ApplyTheme(defaultTheme, instant: true);
+
+        // Listen to score changes
+        if (ScoreManager.instance != null)
+            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdated;
+    }
+
+    private void OnDestroy()
+    {
+        if (ScoreManager.instance != null)
+            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdated;
+    }
+
+    // ===== Public API =====
+
+    public void ApplyThemeToGrid(GridBoard board)
+    {
+        if (currentTheme == null || board == null)
+            return;
+
+        var gridCells = board.GetComponentsInChildren<GridCell>();
+        foreach (var cell in gridCells)
+        {
+            if (currentTheme.gridCellSprite != null)
+                cell.ApplyTheme(currentTheme.gridCellSprite, currentTheme.gridCellEmptyColor);
+            else
+                cell.ApplyThemeColor(currentTheme.gridCellEmptyColor);
+        }
+    }
+
+    public void TriggerBoardCleared()
+    {
+        if (boardClearThemeIndex >= 0 && themes != null && boardClearThemeIndex < themes.Length)
+            SwitchToTheme(boardClearThemeIndex);
+    }
+
+    public void SwitchToTheme(int index)
+    {
+        if (themes == null || index < 0 || index >= themes.Length)
+            return;
+
+        if (currentThemeIndex == index)
+            return;
+
+        currentThemeIndex = index;
+        ApplyTheme(themes[index], instant: false);
+    }
+
+    public void ResetToDefault()
+    {
+        currentThemeIndex = -1;
+        ApplyTheme(defaultTheme, instant: false);
+    }
+
+    // ===== Internal =====
+
+    private void HandleScoreUpdated(int score)
+    {
+        if (scoreThresholds == null || themes == null)
+            return;
+
+        for (int i = scoreThresholds.Length - 1; i >= 0; i--)
+        {
+            if (score >= scoreThresholds[i] && i < themes.Length)
+            {
+                SwitchToTheme(i);
+                return;
+            }
+        }
+    }
+
+    private void ApplyTheme(ThemeData theme, bool instant)
+    {
+        if (theme == null)
+            return;
+
+        currentTheme = theme;
+        float duration = instant ? 0f : theme.transitionDuration;
+
+        transitionSequence?.Kill();
+        transitionSequence = DOTween.Sequence();
+
+        // Camera background color
+        if (mainCamera != null)
+        {
+            if (instant)
+                mainCamera.backgroundColor = theme.cameraBackgroundColor;
+            else
+                transitionSequence.Join(DOTween.To(() => mainCamera.backgroundColor,
+                    c => mainCamera.backgroundColor = c,
+                    theme.cameraBackgroundColor, duration));
+        }
+
+        // Background SpriteRenderer
+        if (backgroundRenderer != null)
+        {
+            if (theme.backgroundSprite != null)
+                backgroundRenderer.sprite = theme.backgroundSprite;
+
+            if (instant)
+                backgroundRenderer.color = theme.backgroundTint;
+            else
+                transitionSequence.Join(backgroundRenderer.DOColor(theme.backgroundTint, duration));
+        }
+
+        // Background UI Image
+        if (backgroundImage != null)
+        {
+            if (theme.backgroundSprite != null)
+                backgroundImage.sprite = theme.backgroundSprite;
+
+            if (instant)
+                backgroundImage.color = theme.backgroundTint;
+            else
+                transitionSequence.Join(backgroundImage.DOColor(theme.backgroundTint, duration));
+        }
+
+        // Grid cells — apply sprite and/or color
+        if (gridBoard != null)
+        {
+            var gridCells = gridBoard.GetComponentsInChildren<GridCell>();
+            foreach (var cell in gridCells)
+            {
+                if (theme.gridCellSprite != null)
+                    cell.ApplyTheme(theme.gridCellSprite, theme.gridCellEmptyColor);
+                else
+                    cell.ApplyThemeColor(theme.gridCellEmptyColor);
+            }
+        }
+
+        // UI images tint
+        foreach (var img in uiImages)
+        {
+            if (img == null) continue;
+            if (instant)
+                img.color = theme.uiPrimaryColor;
+            else
+                transitionSequence.Join(img.DOColor(theme.uiPrimaryColor, duration));
+        }
+
+        // Notify all ThemeBlock components (shapes + placed blocks)
+        OnThemeChanged?.Invoke(theme, instant);
+    }
+}

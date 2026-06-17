@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3620437204489489700}
   - component: {fileID: 2666981065092985072}
   - component: {fileID: 1976736116424046123}
+  - component: {fileID: 7075935954567251829}
   m_Layer: 7
   m_Name: shape 2 (4)
   m_TagString: Untagged
@@ -154,12 +155,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &7075935954567251829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2954536680269060773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &4688642164045554299
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,6 +349,7 @@ GameObject:
   - component: {fileID: 6811481859926199205}
   - component: {fileID: 6964560950169279423}
   - component: {fileID: 5380709252816838713}
+  - component: {fileID: 1891111422820344221}
   m_Layer: 7
   m_Name: shape 2
   m_TagString: Untagged
@@ -478,12 +492,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &1891111422820344221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5589737940483789438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &6080907145373906018
 GameObject:
   m_ObjectHideFlags: 0
@@ -496,6 +522,7 @@ GameObject:
   - component: {fileID: 8857699429556757480}
   - component: {fileID: 5506151844401998706}
   - component: {fileID: 7524776692050404798}
+  - component: {fileID: 9127788897417428546}
   m_Layer: 7
   m_Name: shape 2 (1)
   m_TagString: Untagged
@@ -638,12 +665,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &9127788897417428546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6080907145373906018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &6950227512667583132
 GameObject:
   m_ObjectHideFlags: 0
@@ -656,6 +695,7 @@ GameObject:
   - component: {fileID: 7230196327311059204}
   - component: {fileID: 4701147761564407219}
   - component: {fileID: 581776120955497160}
+  - component: {fileID: 3647151427251592678}
   m_Layer: 7
   m_Name: shape 2 (2)
   m_TagString: Untagged
@@ -798,12 +838,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &3647151427251592678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6950227512667583132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &7972883958710154990
 GameObject:
   m_ObjectHideFlags: 0
@@ -816,6 +868,7 @@ GameObject:
   - component: {fileID: 8042800776931540202}
   - component: {fileID: 7853941414670585970}
   - component: {fileID: 3977019230807889638}
+  - component: {fileID: 5913066766698559752}
   m_Layer: 7
   m_Name: shape 2 (3)
   m_TagString: Untagged
@@ -958,9 +1011,21 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &5913066766698559752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972883958710154990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock

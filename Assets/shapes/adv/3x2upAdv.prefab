@@ -316,7 +316,7 @@ MonoBehaviour:
   symbolType: 1
   symbolSprite: {fileID: -1587408664068877573, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 1
   entryDuration: 0.6
   entryEase: 27
@@ -476,7 +476,7 @@ MonoBehaviour:
   symbolType: 1
   symbolSprite: {fileID: -1587408664068877573, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 1
   entryDuration: 0.6
   entryEase: 27
@@ -636,7 +636,7 @@ MonoBehaviour:
   symbolType: 1
   symbolSprite: {fileID: -1587408664068877573, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 1
   entryDuration: 0.6
   entryEase: 27
@@ -796,7 +796,7 @@ MonoBehaviour:
   symbolType: 1
   symbolSprite: {fileID: -1587408664068877573, guid: abcb5894cd10c414fbce9f3b85425106, type: 3}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 1
   entryDuration: 0.6
   entryEase: 27

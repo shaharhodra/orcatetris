@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8229056356989275508}
   - component: {fileID: 4422256332039176070}
   - component: {fileID: 826389097983443342}
+  - component: {fileID: 4831257491606771095}
   m_Layer: 7
   m_Name: 1 (6)
   m_TagString: Untagged
@@ -154,12 +155,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &4831257491606771095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 546002855290556148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &4960436804942921456
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,6 +345,7 @@ GameObject:
   - component: {fileID: 3100763931917553581}
   - component: {fileID: 3711851573702511251}
   - component: {fileID: 1548927567478898921}
+  - component: {fileID: 5435882437894684391}
   m_Layer: 7
   m_Name: 1 (4)
   m_TagString: Untagged
@@ -474,12 +488,24 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &5435882437894684391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236260893126655319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock
 --- !u!1 &7449958383518670219
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,6 +518,7 @@ GameObject:
   - component: {fileID: 7441333679815498344}
   - component: {fileID: 6121253907625375576}
   - component: {fileID: 906009847340732774}
+  - component: {fileID: 8887113249198465639}
   m_Layer: 7
   m_Name: 1 (5)
   m_TagString: Untagged
@@ -634,9 +661,21 @@ MonoBehaviour:
   symbolType: 0
   symbolSprite: {fileID: 0}
   sortingOrder: 10
-  iconScale: 0.4
+  iconScale: 0.6
   animateEntry: 0
   entryDuration: 0.6
   entryEase: 27
   entryDistance: 8
   entryDelay: 0
+--- !u!114 &8887113249198465639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7449958383518670219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4722cbc5d1c35da40ab55ef01722f986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeBlock

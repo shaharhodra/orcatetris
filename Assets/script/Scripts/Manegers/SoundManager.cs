@@ -20,6 +20,22 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip combo4Clip;          // מחיקה של 4
     [SerializeField] private AudioClip combo5PlusClip;      // מחיקה של 5+
 
+    [Header("Line Clear")]
+    [SerializeField] private AudioClip lineClearClip;       // פירוק שורה
+
+    [Header("Target Symbols")]
+    [SerializeField] private AudioClip symbolGrowClip;          // סמל גדל (scale up)
+    [SerializeField] private AudioClip symbolReachedTargetClip; // סמל מגיע למטרה
+
+    [Header("Coins")]
+    [SerializeField] private AudioClip coinsClip;           // מטבעות עולות
+
+    [Header("Popups")]
+    [SerializeField] private AudioClip amazingPopupClip;    // פופאפ מדהים
+
+    [Header("Buttons")]
+    [SerializeField] private AudioClip buttonClickClip;     // לחיצה על כפתור (הגדרות, ניווט וכו')
+
     private void Awake()
     {
         if (instance == null)
@@ -79,6 +95,51 @@ public class SoundManager : MonoBehaviour
         }
 
        // Debug.Log($"Playing combo sound for {clearedLines} lines cleared.");
+    }
+
+    public void PlayLineClear()
+    {
+        PlayClip(lineClearClip);
+    }
+
+    public float SymbolGrowClipLength => symbolGrowClip != null ? symbolGrowClip.length : 0f;
+    public float SymbolReachedTargetClipLength => symbolReachedTargetClip != null ? symbolReachedTargetClip.length : 0f;
+
+    public void PlaySymbolGrow(float pitch = 1f)
+    {
+        if (symbolGrowClip == null || audioSource == null)
+            return;
+
+        float prevPitch = audioSource.pitch;
+        audioSource.pitch = pitch;
+        audioSource.PlayOneShot(symbolGrowClip);
+        audioSource.pitch = prevPitch;
+    }
+
+    public void PlaySymbolReachedTarget(float pitch = 1f)
+    {
+        if (symbolReachedTargetClip == null || audioSource == null)
+            return;
+
+        float prevPitch = audioSource.pitch;
+        audioSource.pitch = pitch;
+        audioSource.PlayOneShot(symbolReachedTargetClip);
+        audioSource.pitch = prevPitch;
+    }
+
+    public void PlayCoins()
+    {
+        PlayClip(coinsClip);
+    }
+
+    public void PlayAmazingPopup()
+    {
+        PlayClip(amazingPopupClip);
+    }
+
+    public void PlayButtonClick()
+    {
+        PlayClip(buttonClickClip);
     }
 
     // גנרי – אם תרצה להשמיע קליפ ספציפי מבחוץ

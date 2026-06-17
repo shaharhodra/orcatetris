@@ -145,8 +145,12 @@ public class GridPlacer : MonoBehaviour
 
             if (SoundManager.instance != null)
             {
+                SoundManager.instance.PlayLineClear();
                 SoundManager.instance.PlayCombo(clearResult.LinesCleared);
             }
+
+            if (board.IsBoardEmpty() && ThemeManager.instance != null)
+                ThemeManager.instance.TriggerBoardCleared();
 
             OnLinesCleared?.Invoke(clearResult);
         }

@@ -231,11 +231,15 @@ public class AdventureTargetUI : MonoBehaviour
         }
     }
 
+    [Header("Stagger")]
+    [SerializeField] private float symbolStaggerDelay = 0.1f;
+
     private void HandleClearedSymbolVisuals(List<ClearedSymbolVisual> visuals)
     {
         if (visuals == null)
             return;
 
+        int staggerIndex = 0;
         foreach (var visual in visuals)
         {
             if (visual == null || !entries.ContainsKey(visual.Type))
@@ -271,8 +275,26 @@ public class AdventureTargetUI : MonoBehaviour
                 sr.color = c;
             }
 
+            float delay = staggerIndex * symbolStaggerDelay;
+            staggerIndex++;
+
             Sequence seq = DOTween.Sequence();
             seq.SetTarget(flyingTransform);
+            seq.AppendInterval(delay);
+
+            // צליל גדילה - בתחילת הגדילה
+            seq.AppendCallback(() =>
+            {
+                if (SoundManager.instance != null && SoundManager.instance.SymbolGrowClipLength > 0f)
+                {
+                    float pitch = SoundManager.instance.SymbolGrowClipLength / symbolPreFlyScaleDuration;
+                    SoundManager.instance.PlaySymbolGrow(pitch);
+                }
+                else if (SoundManager.instance != null)
+                {
+                    SoundManager.instance.PlaySymbolGrow();
+                }
+            });
             seq.Append(flyingTransform.DOScale(baseScale * symbolPreFlyScaleMultiplier, symbolPreFlyScaleDuration).SetEase(symbolPreFlyScaleEase));
 
             Tween moveTween = flyingTransform.DOMove(targetPosition, symbolFlyDuration).SetEase(symbolFlyEase);
@@ -283,6 +305,17 @@ public class AdventureTargetUI : MonoBehaviour
 
             seq.OnComplete(() =>
             {
+                // צליל הגעה למטרה
+                if (SoundManager.instance != null && SoundManager.instance.SymbolReachedTargetClipLength > 0f)
+                {
+                    float pitch = SoundManager.instance.SymbolReachedTargetClipLength / symbolFlyDuration;
+                    SoundManager.instance.PlaySymbolReachedTarget(pitch);
+                }
+                else if (SoundManager.instance != null)
+                {
+                    SoundManager.instance.PlaySymbolReachedTarget();
+                }
+
                 if (entry.Root != null)
                 {
                     entry.Root.transform.DOKill(true);

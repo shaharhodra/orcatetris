@@ -53,6 +53,9 @@ public class CoinUIController : MonoBehaviour
 
         if (initialized)
         {
+            if (SoundManager.instance != null)
+                SoundManager.instance.PlayCoins();
+
             punchTween?.Kill(true);
             _coinsText.rectTransform.localScale = Vector3.one;
             punchTween = _coinsText.rectTransform
