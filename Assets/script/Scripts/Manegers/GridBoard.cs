@@ -591,6 +591,15 @@ public class GridBoard : MonoBehaviour
         seq.Append(t.DOJump(jumpTarget, clearJumpPower, 1, clearJumpDuration).SetEase(Ease.OutQuad));
         seq.Append(t.DOMove(fallTarget, clearFallDuration).SetEase(Ease.InQuad));
         seq.Join(t.DORotate(new Vector3(0f, 0f, Random.Range(-180f, 180f)), clearFallDuration, RotateMode.FastBeyond360));
+
+        // Fade out all sprites during the fall
+        var sprites = block.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var sr in sprites)
+        {
+            if (sr != null)
+                seq.Join(sr.DOFade(0f, clearFallDuration));
+        }
+
         seq.OnComplete(() =>
         {
             if (block != null)

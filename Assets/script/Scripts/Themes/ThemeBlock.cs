@@ -37,17 +37,22 @@ public class ThemeBlock : MonoBehaviour
         if (sr == null || theme == null)
             return;
 
+        // Lazy-capture originals the first time we run, after sprite is guaranteed set
+        if (originalSprite == null && sr.sprite != null)
+        {
+            originalSprite = sr.sprite;
+            originalScale  = transform.localScale;
+        }
+
         if (theme.blockSprite != null)
         {
-            sr.sprite = theme.blockSprite;
-
-            // Compensate scale so visual size stays consistent with original prefab sprite
-            if (originalSprite != null)
+            // Only compensate if we have a valid reference and sprites differ in size
+            if (originalSprite != null && originalSprite != theme.blockSprite)
             {
                 Vector2 origSize = originalSprite.bounds.size;
-                Vector2 newSize = theme.blockSprite.bounds.size;
+                Vector2 newSize  = theme.blockSprite.bounds.size;
 
-                if (newSize.x > 0f && newSize.y > 0f)
+                if (origSize.x > 0f && newSize.x > 0f)
                 {
                     transform.localScale = new Vector3(
                         originalScale.x * origSize.x / newSize.x,
@@ -55,6 +60,12 @@ public class ThemeBlock : MonoBehaviour
                         originalScale.z);
                 }
             }
+            else if (originalSprite == theme.blockSprite)
+            {
+                transform.localScale = originalScale;
+            }
+
+            sr.sprite = theme.blockSprite;
         }
         else
         {
