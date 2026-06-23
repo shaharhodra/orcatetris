@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public class TutorialManager : MonoBehaviour
+public class TutorialManager :Singleton<TutorialManager>
 {
     public event Action OnTutorialCompleted;
     public event Action<TutorialScripableObject.TutorialData> OnTutorialStepShown;    
@@ -38,5 +38,19 @@ public class TutorialManager : MonoBehaviour
     {
         IsTutorialCompleted = PlayerPrefs.GetInt("DidCompleteTutorial")==1;
 
+    }
+
+    public void NextTutorialStep()
+    {
+        Tutorialindex++;
+        if (Tutorialindex >= _tutorialData.Tutorials.Count)
+        {
+            SetTutorialCompleted();
+            OnTutorialCompleted?.Invoke();
+        }
+        else
+        {
+            ShowTutorial();
+        }
     }
 }

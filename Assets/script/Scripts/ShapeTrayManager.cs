@@ -363,6 +363,9 @@ public class ShapeTrayManager : MonoBehaviour
             UpdateDifficultyBasedOnGridSpace();
         }
 
+        // Pick a balanced set of 3 shapes using bag system, then guarantee at least one is placeable
+        var selectedPrefabs = PickBalancedClassicSet(classicShapePrefabs);
+
         for (int i = 0; i < 3; i++)
         {
             var slot = slots[i];
@@ -371,26 +374,8 @@ public class ShapeTrayManager : MonoBehaviour
 
             Shape shape = null;
 
-            // In Classic mode we do NOT use addressables for random shapes,
-            // to avoid accidentally spawning adventure-only prefabs.
-            if (!isClassicMode && useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
-            {
-                var goPrefab = GetShapePrefabBySpaceAwareDifficulty(loadedPrefabs);
-                var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
-                shape = go != null ? go.GetComponent<Shape>() : null;
-            }
-
-            if (shape == null)
-            {
-                if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
-                    continue;
-
-                var prefab = GetShapePrefabBySpaceAwareDifficulty(classicShapePrefabs);
-                if (prefab == null)
-                    continue;
-
-                shape = Instantiate(prefab, slot.position, slot.rotation, slot);
-            }
+            if (i < selectedPrefabs.Count && selectedPrefabs[i] != null)
+                shape = Instantiate(selectedPrefabs[i], slot.position, slot.rotation, slot);
 
             if (shape == null)
                 continue;
@@ -401,6 +386,9 @@ public class ShapeTrayManager : MonoBehaviour
             if (handler != null)
                 handler.Init(board, placer, shape);
         }
+
+        // If none of the 3 can be placed, swap the hardest one for the simplest placeable shape
+        EnsureAtLeastOnePlaceable(classicShapePrefabs);
 
         CheckNoMovesAndMaybeRevive();
     }
@@ -730,6 +718,219 @@ public class ShapeTrayManager : MonoBehaviour
             LoadAddressablesAndRefill();
         else
             RefillIfNeeded();
+    }
+
+    // Analyzes the grid and returns shapes that together can help clear a row or column.
+    // Falls back to balanced random if no clear opportunity is found.
+    private List<Shape> PickBalancedClassicSet(Shape[] prefabs)
+    {
+        var result = new List<Shape>();
+        if (prefabs == null || prefabs.Length == 0)
+            return result;
+
+        float spaceRatio = GetAvailableSpaceRatio();
+        int maxComplexity = GetMaxComplexityForSpace(spaceRatio);
+
+        var pool = prefabs.Where(p => p != null && GetShapeComplexity(p) <= maxComplexity).ToList();
+        if (pool.Count == 0)
+            pool = prefabs.Where(p => p != null).ToList();
+
+        // Try to find shapes that can contribute to clearing a nearly-full line
+        var clearOpportunity = TryPickClearOpportunitySet(pool, spaceRatio);
+        if (clearOpportunity != null && clearOpportunity.Count == 3)
+            return clearOpportunity;
+
+        // Fallback: size-balanced random set
+        var small  = pool.Where(p => GetShapeComplexity(p) <= 1).ToList();
+        var medium = pool.Where(p => GetShapeComplexity(p) == 2).ToList();
+
+        var s0pool = small.Count > 0 ? small : (medium.Count > 0 ? medium : pool);
+        result.Add(s0pool[Random.Range(0, s0pool.Count)]);
+
+        var s1pool = medium.Count > 0 ? medium : pool;
+        result.Add(s1pool[Random.Range(0, s1pool.Count)]);
+
+        result.Add(pool[Random.Range(0, pool.Count)]);
+
+        return result;
+    }
+
+    // Returns how many cells are missing in each row and column
+    private void GetLineMissingCounts(out int[] rowMissing, out int[] colMissing)
+    {
+        rowMissing = new int[board.height];
+        colMissing = new int[board.width];
+
+        for (int y = 0; y < board.height; y++)
+        {
+            int missing = 0;
+            for (int x = 0; x < board.width; x++)
+                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            rowMissing[y] = missing;
+        }
+
+        for (int x = 0; x < board.width; x++)
+        {
+            int missing = 0;
+            for (int y = 0; y < board.height; y++)
+                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            colMissing[x] = missing;
+        }
+    }
+
+    // Check if placing this shape at this position covers any nearly-complete line
+    private bool ShapeHelpsCompleteLine(Shape prefab, int[] rowMissing, int[] colMissing, int nearThreshold)
+    {
+        var cells = prefab.GetCells(1f);
+        if (cells == null) return false;
+
+        var rowCoverage = new Dictionary<int, int>();
+        var colCoverage = new Dictionary<int, int>();
+
+        foreach (var offset in cells)
+        {
+            // We care about the row/col index relative to the shape, not absolute position
+            int row = offset.y;
+            int col = offset.x;
+            if (!rowCoverage.ContainsKey(row)) rowCoverage[row] = 0;
+            if (!colCoverage.ContainsKey(col)) colCoverage[col] = 0;
+            rowCoverage[row]++;
+            colCoverage[col]++;
+        }
+
+        // Check if this shape spans a nearly-full row/col and fills enough of its gaps
+        for (int y = 0; y < board.height; y++)
+        {
+            if (rowMissing[y] > 0 && rowMissing[y] <= nearThreshold)
+            {
+                foreach (var kv in rowCoverage)
+                    if (kv.Value >= Mathf.Min(rowMissing[y], kv.Value))
+                        return true;
+            }
+        }
+        for (int x = 0; x < board.width; x++)
+        {
+            if (colMissing[x] > 0 && colMissing[x] <= nearThreshold)
+            {
+                foreach (var kv in colCoverage)
+                    if (kv.Value >= Mathf.Min(colMissing[x], kv.Value))
+                        return true;
+            }
+        }
+        return false;
+    }
+
+    // Try to build a set where at least 1 shape can contribute to completing a line
+    private List<Shape> TryPickClearOpportunitySet(List<Shape> pool, float spaceRatio)
+    {
+        if (board == null) return null;
+
+        // Only analyze when board has some content (otherwise any shape is fine)
+        if (spaceRatio > 0.75f) return null;
+
+        GetLineMissingCounts(out int[] rowMissing, out int[] colMissing);
+
+        // nearThreshold: how many cells missing to still count as "nearly full"
+        int nearThreshold = spaceRatio < 0.4f ? 2 : 3;
+
+        bool anyNearlyFull = rowMissing.Any(m => m > 0 && m <= nearThreshold)
+                          || colMissing.Any(m => m > 0 && m <= nearThreshold);
+
+        if (!anyNearlyFull) return null;
+
+        // Shapes that can help fill a nearly-complete line
+        var helpers = pool.Where(p => ShapeHelpsCompleteLine(p, rowMissing, colMissing, nearThreshold)).ToList();
+        // Shapes that are placeable anywhere (fill in the rest of the tray)
+        var placeable = pool.Where(p => HasAnyMoveForShape(p)).ToList();
+        if (placeable.Count == 0) placeable = pool;
+
+        if (helpers.Count == 0) return null;
+
+        var result = new List<Shape>();
+
+        // Slot 0: a helper shape
+        result.Add(helpers[Random.Range(0, helpers.Count)]);
+
+        // Slot 1: another helper if possible, otherwise any placeable
+        var helpers2 = helpers.Where(p => p != result[0]).ToList();
+        result.Add(helpers2.Count > 0
+            ? helpers2[Random.Range(0, helpers2.Count)]
+            : placeable[Random.Range(0, placeable.Count)]);
+
+        // Slot 2: small/simple filler to not overwhelm the board
+        var fillers = placeable.Where(p => GetShapeComplexity(p) <= 2).ToList();
+        result.Add(fillers.Count > 0
+            ? fillers[Random.Range(0, fillers.Count)]
+            : placeable[Random.Range(0, placeable.Count)]);
+
+        return result;
+    }
+
+    // If no active shape can be placed on the board, replace the most complex one
+    // with the simplest shape that actually fits somewhere.
+    private void EnsureAtLeastOnePlaceable(Shape[] prefabs)
+    {
+        if (board == null || placer == null || activeShapes.Count == 0)
+            return;
+
+        if (HasAnyMove())
+            return;
+
+        // Find simplest placeable prefab
+        var candidates = prefabs != null
+            ? prefabs.Where(p => p != null).OrderBy(p => GetShapeComplexity(p)).ToList()
+            : new List<Shape>();
+
+        Shape placeablePrefab = null;
+        foreach (var candidate in candidates)
+        {
+            var temp = Instantiate(candidate);
+            temp.gameObject.SetActive(false);
+            if (HasAnyMoveForShape(temp))
+            {
+                placeablePrefab = candidate;
+                Destroy(temp.gameObject);
+                break;
+            }
+            Destroy(temp.gameObject);
+        }
+
+        if (placeablePrefab == null)
+            return; // truly no move possible — revive will handle it
+
+        // Find most complex active shape and replace it
+        Shape toReplace = activeShapes
+            .Where(s => s != null)
+            .OrderByDescending(s => GetShapeComplexity(s))
+            .FirstOrDefault();
+
+        if (toReplace == null)
+            return;
+
+        int slotIndex = -1;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null && toReplace.transform.parent == slots[i])
+            {
+                slotIndex = i;
+                break;
+            }
+        }
+
+        if (slotIndex < 0)
+            return;
+
+        activeShapes.Remove(toReplace);
+        Destroy(toReplace.gameObject);
+
+        var replacement = Instantiate(placeablePrefab, slots[slotIndex].position, slots[slotIndex].rotation, slots[slotIndex]);
+        if (replacement != null)
+        {
+            activeShapes.Add(replacement);
+            var handler = replacement.GetComponent<ShapeDragHandler>();
+            if (handler != null)
+                handler.Init(board, placer, replacement);
+        }
     }
 
     private GameObject GetShapePrefabBySpaceAwareDifficulty(List<GameObject> prefabs)

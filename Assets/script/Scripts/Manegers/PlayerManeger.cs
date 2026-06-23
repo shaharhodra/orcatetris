@@ -12,6 +12,22 @@ public class PlayerManeger : Singleton<PlayerManeger>
     {
         public int HighestUnlockedLevel;
         public int Coins;
+        public int DisplayLevel; // visual-only level shown to player, not tied to JSON index
+        public string LastBonusDate; // yyyy-MM-dd of last daily bonus grant
+    }
+
+    public bool IsDailyBonusAvailable()
+    {
+        if (PlayerProgress == null) return false;
+        if (string.IsNullOrEmpty(PlayerProgress.LastBonusDate)) return true;
+        return PlayerProgress.LastBonusDate != System.DateTime.Now.ToString("yyyy-MM-dd");
+    }
+
+    public void MarkDailyBonusUsed()
+    {
+        if (PlayerProgress == null) return;
+        PlayerProgress.LastBonusDate = System.DateTime.Now.ToString("yyyy-MM-dd");
+        SavePlayerProgress();
     }
 
     public event Action<int> OnCoinsUpdatedEvent;
@@ -40,7 +56,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                HighestUnlockedLevel = 1
+                HighestUnlockedLevel = 1,
+                DisplayLevel = 1
             };
             return;
         }
@@ -58,14 +75,16 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                HighestUnlockedLevel = 1
+                HighestUnlockedLevel = 1,
+                DisplayLevel = 1
             };
         }
 
         if (PlayerProgress.HighestUnlockedLevel <= 0)
-        {
             PlayerProgress.HighestUnlockedLevel = 1;
-        }
+
+        if (PlayerProgress.DisplayLevel <= 0)
+            PlayerProgress.DisplayLevel = PlayerProgress.HighestUnlockedLevel;
     }
 
     public int GetCoins()
@@ -125,6 +144,7 @@ public class PlayerManeger : Singleton<PlayerManeger>
         PlayerProgress = new PlayerProgressData
         {
             HighestUnlockedLevel = 1,
+            DisplayLevel = 1,
             Coins = 0
         };
 

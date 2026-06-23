@@ -16,11 +16,11 @@ MonoBehaviour:
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
   backgroundSprite: {fileID: -1554033469366932636, guid: 4472f3a436c63944283978f529c288a7, type: 3}
   backgroundTint: {r: 1, g: 1, b: 1, a: 1}
-  gridCellEmptyColor: {r: 0.69182384, g: 0.35984465, b: 0.036984242, a: 0.05}
+  gridCellEmptyColor: {r: 0.10062885, g: 0.10062885, b: 0.10062885, a: 0.05}
   gridCellOccupiedColor: {r: 0.9411864, g: 0.084905505, b: 1, a: 1}
-  blockSprite: {fileID: -4683106803110754096, guid: ea6b2e8f32454dd45907b2e46d999487, type: 3}
+  blockSprite: {fileID: -1775993598289667745, guid: a7a8bfb93ed480a42bcd5004bb1d373b, type: 3}
   blockColor: {r: 0.10432856, g: 0.5660378, b: 0, a: 1}
-  gridCellSprite: {fileID: -4683106803110754096, guid: ea6b2e8f32454dd45907b2e46d999487, type: 3}
+  gridCellSprite: {fileID: -62245763954740697, guid: bfef157fcd539f94599f40f672feaf6d, type: 3}
   uiPrimaryColor: {r: 1, g: 1, b: 1, a: 1}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   transitionDuration: 1.5

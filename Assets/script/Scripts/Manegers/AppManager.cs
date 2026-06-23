@@ -155,6 +155,14 @@ public class AppManager : Singleton<AppManager>
     public void LoadAdventureLobby()
     {
         SetGameModeAdventure();
+
+        // No daily bonus available — skip lobby and go straight to the game
+        if (PlayerManeger.instance != null && !PlayerManeger.instance.IsDailyBonusAvailable())
+        {
+            SceneManager.LoadScene(classicGameSceneBuildIndex);
+            return;
+        }
+
         SceneManager.LoadScene(adventureLobbySceneBuildIndex);
     }
 

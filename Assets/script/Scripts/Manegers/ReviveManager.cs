@@ -9,6 +9,8 @@ using DG.Tweening;
 
 public class ReviveManager : MonoBehaviour
 {
+    public event Action OnGameOver;
+
     [SerializeField] private GridBoard board;
     [SerializeField] private int maxRevives = 3;
     [SerializeField] private GameObject revivePopup;
@@ -358,15 +360,23 @@ public class ReviveManager : MonoBehaviour
     private void TriggerGameOver()
     {
         Debug.Log("[ReviveManager] TriggerGameOver called");
-        
+
+        // In Adventure mode, fire event for AdventureLevelFailPopup
+        bool isAdventure = GameManager.instance != null
+            && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic;
+
+        if (isAdventure)
+        {
+            Debug.Log("[ReviveManager] Adventure mode — firing OnGameOver event");
+            OnGameOver?.Invoke();
+            return;
+        }
+
+        // Classic mode — use existing PopUpService
         if (popUpService != null)
         {
             popUpService.OnPopupDismissed += OnGameOverPopupDismissed;
-            
-            // Use OnLose for both Classic and Adventure modes
-            // The popup can check the game mode internally and display accordingly
             PopUpCondition popupCondition = PopUpCondition.OnLose;
-                
             Debug.Log($"[ReviveManager] Using popup condition: {popupCondition}");
             popUpService.RunIfConditionMetAndStay(popupCondition);
         }

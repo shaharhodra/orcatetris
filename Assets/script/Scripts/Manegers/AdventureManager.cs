@@ -148,37 +148,7 @@ public class AdventureManager : MonoBehaviour
         if (debugLogs)
             Debug.Log("[AdventureManager] All targets completed!");
 
+        // AdventureLevelCompletePopup listens to this event and handles the win UI + level advance
         OnAllTargetsCompleted?.Invoke();
-
-        // Advance to next level
-        var levelData = AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
-        int currentLevel = levelData != null ? levelData.Level : 0;
-
-        if (currentLevel > 0)
-        {
-            GameManager.instance.SetLevelCompleted(currentLevel);
-
-            if (debugLogs)
-                Debug.Log($"[AdventureManager] Level {currentLevel} completed, advancing...");
-        }
-
-        // Show win popup, then reload scene to load next level
-        if (winPopUpService != null)
-        {
-            winPopUpService.OnPopupDismissed += OnWinPopupDismissed;
-            winPopUpService.RunIfConditionMetAndStay(PopUpCondition.OnWin);
-        }
-        else
-        {
-            GameManager.instance.ReloadCurrentScene();
-        }
-    }
-
-    private void OnWinPopupDismissed()
-    {
-        if (winPopUpService != null)
-            winPopUpService.OnPopupDismissed -= OnWinPopupDismissed;
-
-        GameManager.instance.ReloadCurrentScene();
     }
 }
