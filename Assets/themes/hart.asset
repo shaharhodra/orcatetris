@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThemeData
   themeName: hart
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
-  backgroundSprite: {fileID: -1511900919653027961, guid: c53e2ab85d6f87048a60368535bb1771, type: 3}
-  backgroundTint: {r: 1, g: 1, b: 1, a: 1}
+  backgroundSprite: {fileID: -6292356986972372547, guid: 894e6fe19662cb34da2f2741be194393, type: 3}
+  backgroundTint: {r: 0.6603774, g: 0, b: 0, a: 1}
   gridCellEmptyColor: {r: 0.30817598, g: 0.30817598, b: 0.30817598, a: 0.05}
   gridCellOccupiedColor: {r: 1, g: 1, b: 1, a: 1}
   blockSprite: {fileID: -1775993598289667745, guid: a7a8bfb93ed480a42bcd5004bb1d373b, type: 3}
-  blockColor: {r: 0.54088044, g: 0.011906084, b: 0.011906084, a: 1}
+  blockColor: {r: 0.3679245, g: 0.0017354971, b: 0.0017354971, a: 1}
   gridCellSprite: {fileID: -62245763954740697, guid: bfef157fcd539f94599f40f672feaf6d, type: 3}
   uiPrimaryColor: {r: 1, g: 1, b: 1, a: 1}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}

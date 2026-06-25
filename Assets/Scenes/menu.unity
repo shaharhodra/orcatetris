@@ -478,6 +478,7 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 409212566}
   condition: 0
+  allowWhileFirstTutorialStepActive: 0
   _scoreText: {fileID: 0}
   _maxScoreText: {fileID: 0}
   _restartButton: {fileID: 0}
@@ -1600,6 +1601,7 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 760896612}
   condition: 0
+  allowWhileFirstTutorialStepActive: 0
   _scoreText: {fileID: 0}
   _maxScoreText: {fileID: 0}
   _restartButton: {fileID: 0}
@@ -3216,14 +3218,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3412,14 +3414,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1511900919653027961, guid: c53e2ab85d6f87048a60368535bb1771, type: 3}
+  m_Sprite: {fileID: -6292356986972372547, guid: 894e6fe19662cb34da2f2741be194393, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4139,6 +4141,7 @@ MonoBehaviour:
   _overlay: {fileID: 1031007966}
   _popUpRect: {fileID: 1887066882}
   condition: 0
+  allowWhileFirstTutorialStepActive: 0
   _scoreText: {fileID: 0}
   _maxScoreText: {fileID: 0}
   _restartButton: {fileID: 0}

@@ -20,6 +20,7 @@ public class PopUpService : MonoBehaviour
     [SerializeField] private Image _overlay;
     [SerializeField] private RectTransform _popUpRect;
     [SerializeField] private PopUpCondition condition = PopUpCondition.None; 
+    [SerializeField] private bool allowWhileFirstTutorialStepActive;
 
     [Header("Game Over Score")]
     [SerializeField] private TextMeshProUGUI _scoreText;
@@ -34,6 +35,18 @@ public class PopUpService : MonoBehaviour
 
     private Tween scoreCountTween;
     private Sequence elementsSequence;
+
+    private bool IsBlockedByFirstTutorialStep()
+    {
+        if (allowWhileFirstTutorialStepActive)
+            return false;
+
+        if (TutorialManager.instance == null)
+            return false;
+
+        return !TutorialManager.instance.IsTutorialCompleted
+            && TutorialManager.instance.Tutorialindex == 0;
+    }
 
     // אירוע שנשלח כשהשחקן סוגר את הפופאפ ידנית (בלחיצת כפתור)
     public event Action OnPopupDismissed;
@@ -115,6 +128,9 @@ public class PopUpService : MonoBehaviour
     // מפעיל את רצף הפתיחה-סגירה רק אם הטריגר שהתקבל מתאים ל-condition שמוגדר באינספקטור
     public void RunIfConditionMet(PopUpCondition trigger)
     {
+        if (IsBlockedByFirstTutorialStep())
+            return;
+
         if (trigger == condition)
         {
             RunPopupSequenceAsync().Forget();
@@ -124,6 +140,9 @@ public class PopUpService : MonoBehaviour
     // פותח את הפופאפ ומשאיר אותו פתוח עד שהשחקן לוחץ כפתור
     public void RunIfConditionMetAndStay(PopUpCondition trigger)
     {
+        if (IsBlockedByFirstTutorialStep())
+            return;
+
         if (trigger == condition)
         {
             ShowAndStay();
@@ -132,6 +151,9 @@ public class PopUpService : MonoBehaviour
 
     public void ShowAndStay()
     {
+        if (IsBlockedByFirstTutorialStep())
+            return;
+
         IsActive = true;
         if (SoundManager.instance != null)
             SoundManager.instance.PlayAmazingPopup();

@@ -103,7 +103,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
         if (overlay != null)
         {
-            overlay.color = new Color(0, 0, 0, 0);
+            //overlay.color = new Color(0, 0, 0, 0);
             overlay.DOFade(0.7f, overlayFadeDuration).SetUpdate(true);
         }
 

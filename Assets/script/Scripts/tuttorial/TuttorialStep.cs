@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class TuttorialStep : MonoBehaviour
 {
@@ -8,6 +9,35 @@ public class TuttorialStep : MonoBehaviour
     [SerializeField] private Image _stepImage;
     [SerializeField] private Animation _animation;
     [SerializeField] private Button _button;
+
+    private Tween _fallbackTween;
+
+    private void OnEnable()
+    {
+        if (TutorialManager.instance != null)
+            TutorialManager.instance.OnTutorialStepShown += HandleTutorialStepShown;
+
+        if (TutorialManager.instance != null)
+            TutorialManager.instance.ShowTutorial();
+    }
+
+    private void OnDisable()
+    {
+        _fallbackTween?.Kill();
+        _fallbackTween = null;
+
+        if (TutorialManager.instance != null)
+            TutorialManager.instance.OnTutorialStepShown -= HandleTutorialStepShown;
+    }
+
+    private void HandleTutorialStepShown(TutorialScripableObject.TutorialData data)
+    {
+        if (data == null)
+            return;
+
+        SetStep(data.description, data.icon);
+        PlayAnimation();
+    }
 
 
     public void SetStep(string text, Sprite image = null)
@@ -25,12 +55,25 @@ public class TuttorialStep : MonoBehaviour
 
     public void PlayAnimation()
     {
-        _animation.Play();
+        _fallbackTween?.Kill();
+        _fallbackTween = null;
+
+        if (_animation != null && Time.timeScale > 0f)
+        {
+            _animation.Play();
+            return;
+        }
+
+        var t = transform;
+        t.localScale = Vector3.one;
+        _fallbackTween = t.DOPunchScale(new Vector3(0.08f, 0.08f, 0f), 0.35f, 8, 0.9f)
+            .SetUpdate(true);
     }
 
     public void OnButtonClick()
     {
-        _button.interactable = false;
+        Debug.Log("Button clicked");
+		_button.interactable = false;
         TutorialManager.instance.NextTutorialStep();    
     }
 }   

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThemeData
   themeName: send
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
-  backgroundSprite: {fileID: -1511900919653027961, guid: c53e2ab85d6f87048a60368535bb1771, type: 3}
-  backgroundTint: {r: 1, g: 1, b: 1, a: 1}
+  backgroundSprite: {fileID: -6292356986972372547, guid: 894e6fe19662cb34da2f2741be194393, type: 3}
+  backgroundTint: {r: 0.7735849, g: 0.5551163, b: 0.040138844, a: 1}
   gridCellEmptyColor: {r: 0.5921569, g: 0.517699, b: 0, a: 0.05}
-  gridCellOccupiedColor: {r: 0, g: 0.5283019, b: 0.14251177, a: 1}
+  gridCellOccupiedColor: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 1}
   blockSprite: {fileID: -1775993598289667745, guid: a7a8bfb93ed480a42bcd5004bb1d373b, type: 3}
   blockColor: {r: 0.54088044, g: 0.54088044, b: 0.54088044, a: 1}
   gridCellSprite: {fileID: -62245763954740697, guid: bfef157fcd539f94599f40f672feaf6d, type: 3}
