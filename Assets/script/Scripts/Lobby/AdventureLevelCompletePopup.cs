@@ -55,8 +55,13 @@ public class AdventureLevelCompletePopup : MonoBehaviour
 
     private void HandleLevelComplete()
     {
+        Debug.Log("[CompletePopup] HandleLevelComplete fired!");
+
         if (isShowing)
             return;
+
+        // Re-enable so coroutine can run (popupRoot.SetActive(false) may have disabled us)
+        gameObject.SetActive(true);
 
         StartCoroutine(ShowCompleteSequence());
     }

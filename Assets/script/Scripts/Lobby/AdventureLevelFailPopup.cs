@@ -30,12 +30,17 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"[FailPopup] Start() — AppManager: {AppManager.instance != null}, GameMode: {(AppManager.instance != null ? AppManager.instance.CurrentGameMode.ToString() : "N/A")}");
+
         if (popupRoot != null)
             popupRoot.SetActive(false);
 
         // Only active in Adventure mode
         if (AppManager.instance == null || AppManager.instance.CurrentGameMode != AppManager.GameMode.Adventure)
+        {
+            Debug.Log("[FailPopup] Not Adventure mode, skipping.");
             return;
+        }
 
         if (retryButton != null)
             retryButton.onClick.AddListener(OnRetryClicked);
@@ -43,6 +48,8 @@ public class AdventureLevelFailPopup : MonoBehaviour
         // Listen to ReviveManager's game over event for Adventure mode
         if (reviveManager == null)
             reviveManager = FindFirstObjectByType<ReviveManager>();
+
+        Debug.Log($"[FailPopup] ReviveManager found: {reviveManager != null}");
 
         if (reviveManager != null)
             reviveManager.OnGameOver += HandleGameOver;
@@ -56,6 +63,8 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
     private void HandleGameOver()
     {
+        Debug.Log("[FailPopup] HandleGameOver fired!");
+
         // Only handle Adventure mode
         if (AppManager.instance == null || AppManager.instance.CurrentGameMode != AppManager.GameMode.Adventure)
             return;
@@ -65,6 +74,8 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
     public void Show()
     {
+        Debug.Log("[FailPopup] Show() called!");
+
         if (isShowing)
             return;
 
