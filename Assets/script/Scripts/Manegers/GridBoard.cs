@@ -539,15 +539,51 @@ public class GridBoard : MonoBehaviour
             placedBlocks[x, y] = null;
         }
 
+        // Also check for initial blocks by name (fallback)
         string initialBlockName = $"InitialBlock_{x}_{y}";
         Transform initialBlock = transform.Find(initialBlockName);
-        if (blockToAnimate == null && initialBlock != null)
-            blockToAnimate = initialBlock.gameObject;
+        if (initialBlock != null)
+        {
+            if (blockToAnimate == null)
+                blockToAnimate = initialBlock.gameObject;
+            else if (initialBlock.gameObject != blockToAnimate)
+                Destroy(initialBlock.gameObject); // Destroy duplicate
+        }
 
         if (blockToAnimate != null)
             AnimateAndDestroyClearedBlock(blockToAnimate);
 
+        // Destroy any orphaned blocks sitting at this cell position
+        DestroyOrphanedBlocksAt(x, y);
+
         ClearSymbolAt(x, y);
+    }
+
+    /// <summary>
+    /// Safety sweep: destroy any child objects sitting at a cell position
+    /// that aren't GridCells. Prevents leftover visual blocks after clearing.
+    /// </summary>
+    private void DestroyOrphanedBlocksAt(int x, int y)
+    {
+        Vector3 cellWorldPos = GridToWorld(new Vector2Int(x, y));
+        float threshold = cellSize * 0.4f;
+
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            var child = transform.GetChild(i);
+            if (child == null)
+                continue;
+
+            // Skip GridCell objects — those are the grid itself
+            if (child.GetComponent<GridCell>() != null)
+                continue;
+
+            float dist = Vector2.Distance(child.position, cellWorldPos);
+            if (dist < threshold)
+            {
+                Destroy(child.gameObject);
+            }
+        }
     }
 
     private ClearedSymbolVisual CaptureSymbolVisual(int x, int y)
@@ -588,6 +624,7 @@ public class GridBoard : MonoBehaviour
         Vector3 fallTarget = jumpTarget + Vector3.down * clearFallDistance;
 
         Sequence seq = DOTween.Sequence();
+        seq.SetUpdate(true); // Run in unscaled time so pausing doesn't leave blocks stuck
         seq.Append(t.DOJump(jumpTarget, clearJumpPower, 1, clearJumpDuration).SetEase(Ease.OutQuad));
         seq.Append(t.DOMove(fallTarget, clearFallDuration).SetEase(Ease.InQuad));
         seq.Join(t.DORotate(new Vector3(0f, 0f, Random.Range(-180f, 180f)), clearFallDuration, RotateMode.FastBeyond360));

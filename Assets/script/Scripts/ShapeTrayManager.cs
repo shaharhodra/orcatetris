@@ -740,17 +740,21 @@ public class ShapeTrayManager : MonoBehaviour
         if (clearOpportunity != null && clearOpportunity.Count == 3)
             return clearOpportunity;
 
-        // Fallback: size-balanced random set
+        // Fallback: bias toward small/medium shapes for easier gameplay
         var small  = pool.Where(p => GetShapeComplexity(p) <= 1).ToList();
-        var medium = pool.Where(p => GetShapeComplexity(p) == 2).ToList();
+        var medium = pool.Where(p => GetShapeComplexity(p) <= 2).ToList();
 
+        // Slot 0: always small if available
         var s0pool = small.Count > 0 ? small : (medium.Count > 0 ? medium : pool);
         result.Add(s0pool[Random.Range(0, s0pool.Count)]);
 
+        // Slot 1: small or medium
         var s1pool = medium.Count > 0 ? medium : pool;
         result.Add(s1pool[Random.Range(0, s1pool.Count)]);
 
-        result.Add(pool[Random.Range(0, pool.Count)]);
+        // Slot 2: medium or smaller (avoid large shapes)
+        var s2pool = medium.Count > 0 ? medium : pool;
+        result.Add(s2pool[Random.Range(0, s2pool.Count)]);
 
         return result;
     }
@@ -825,13 +829,13 @@ public class ShapeTrayManager : MonoBehaviour
     {
         if (board == null) return null;
 
-        // Only analyze when board has some content (otherwise any shape is fine)
-        if (spaceRatio > 0.75f) return null;
+        // Analyze earlier so we give helpful shapes sooner
+        if (spaceRatio > 0.85f) return null;
 
         GetLineMissingCounts(out int[] rowMissing, out int[] colMissing);
 
-        // nearThreshold: how many cells missing to still count as "nearly full"
-        int nearThreshold = spaceRatio < 0.4f ? 2 : 3;
+        // nearThreshold: generous — consider lines nearly full even with more gaps
+        int nearThreshold = spaceRatio < 0.4f ? 3 : 4;
 
         bool anyNearlyFull = rowMissing.Any(m => m > 0 && m <= nearThreshold)
                           || colMissing.Any(m => m > 0 && m <= nearThreshold);
@@ -1011,11 +1015,12 @@ public class ShapeTrayManager : MonoBehaviour
 
     private int GetMaxComplexityForSpace(float spaceRatio)
     {
-        if (spaceRatio >= 0.7f)
+        // Easier thresholds: smaller shapes appear sooner
+        if (spaceRatio >= 0.8f)
             return 4;
-        else if (spaceRatio >= 0.5f)
+        else if (spaceRatio >= 0.6f)
             return 3;
-        else if (spaceRatio >= 0.3f)
+        else if (spaceRatio >= 0.4f)
             return 2;
         else
             return 1;
