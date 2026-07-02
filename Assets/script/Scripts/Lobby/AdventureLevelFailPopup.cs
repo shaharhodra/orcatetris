@@ -80,7 +80,7 @@ public class AdventureLevelFailPopup : MonoBehaviour
             return;
 
         isShowing = true;
-        Time.timeScale = 0f;
+        ShapeDragHandler.InputBlocked = true;
 
         var levelData = AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
         int levelNum = levelData != null ? levelData.Level : 0;
@@ -96,8 +96,7 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
         if (overlay != null)
         {
-            overlay.color = new Color(0, 0, 0, 0);
-            overlay.DOFade(0.8f, overlayFadeDuration).SetUpdate(true);
+            overlay.gameObject.SetActive(true);
         }
 
         if (popupPanel != null)
@@ -116,7 +115,7 @@ public class AdventureLevelFailPopup : MonoBehaviour
             SoundManager.instance.PlayButtonClick();
 
         isShowing = false;
-        Time.timeScale = 1f;
+        ShapeDragHandler.InputBlocked = false;
 
         // Reload same scene (same level)
         GameManager.instance.ReloadCurrentScene();

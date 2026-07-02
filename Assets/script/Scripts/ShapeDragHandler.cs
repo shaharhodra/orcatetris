@@ -4,6 +4,7 @@ using DG.Tweening;
 
 public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    public static bool InputBlocked;
     [SerializeField] private GridBoard board;
     [SerializeField] private GridPlacer boardPlacer;
     [SerializeField] private Shape shape;
@@ -69,6 +70,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (InputBlocked)
+            return;
+
         if (isPlaced)
             return;
 
@@ -111,6 +115,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (InputBlocked)
+            return;
+
         if (isPlaced)
             return;
 
@@ -135,6 +142,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (InputBlocked)
+            return;
+
         if (isPlaced)
             return;
 
@@ -193,6 +203,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (InputBlocked)
+            return;
+
         if (isPlaced)
             return;
 

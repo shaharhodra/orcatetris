@@ -42,15 +42,15 @@ public class LobbyLevelManager : MonoBehaviour
 
         int highest = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel;
 
-        // If no bonus was granted today, keep DisplayLevel in sync with real level
+        // Keep DisplayLevel in sync with real level, but do not reduce it (daily bonus may temporarily increase it)
         var prog = PlayerManeger.instance.PlayerProgress;
-        if (!PlayerManeger.instance.IsDailyBonusAvailable() && prog.DisplayLevel < highest)
+        if (prog.DisplayLevel < highest)
             prog.DisplayLevel = highest;
 
         int display = prog.DisplayLevel;
 
         if (currentLevelLabel != null)
-            currentLevelLabel.text = $"Level {display}";
+            currentLevelLabel.text = $"Level {Mathf.Max(0, display) + 1}";
 
         LobbyLevelCell currentCell = null; // exact match: the level the player is about to play
         int coverAnimIndex = 0;

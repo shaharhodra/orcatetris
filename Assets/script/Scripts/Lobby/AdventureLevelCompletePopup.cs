@@ -73,8 +73,7 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         // Small delay to let clear animations finish
         yield return new WaitForSeconds(showDelay);
 
-        // Pause gameplay
-        Time.timeScale = 0f;
+        ShapeDragHandler.InputBlocked = true;
 
         // Play confetti
         if (confettiParticles != null)
@@ -103,8 +102,7 @@ public class AdventureLevelCompletePopup : MonoBehaviour
 
         if (overlay != null)
         {
-            overlay.color = new Color(0, 0, 0, 0);
-            overlay.DOFade(0.75f, overlayFadeDuration).SetUpdate(true);
+            overlay.gameObject.SetActive(true);
         }
 
         if (popupPanel != null)
@@ -124,15 +122,13 @@ public class AdventureLevelCompletePopup : MonoBehaviour
 
         isShowing = false;
 
-        // Advance level
-        var levelData = AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
-        int currentLevel = levelData != null ? levelData.Level : 0;
+        // Advance level (0-based)
+        int completedIndex = 0;
+        if (PlayerManeger.instance != null && PlayerManeger.instance.PlayerProgress != null)
+            completedIndex = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel;
+        GameManager.instance.SetLevelCompleted(completedIndex);
 
-        if (currentLevel > 0)
-            GameManager.instance.SetLevelCompleted(currentLevel);
-
-        // Resume time and reload scene for next level
-        Time.timeScale = 1f;
+        ShapeDragHandler.InputBlocked = false;
 
         if (confettiParticles != null)
             confettiParticles.Stop(true);

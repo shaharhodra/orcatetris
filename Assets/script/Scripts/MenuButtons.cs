@@ -15,7 +15,7 @@ public class MenuButtons : MonoBehaviour
         if (SoundManager.instance != null)
             SoundManager.instance.PlayButtonClick();
         if (AppManager.instance != null)
-            AppManager.instance.LoadAdventureLobby();
+            AppManager.instance.StartAdventureGameFromLobby();
     }
 
     public void OnAdventureStartFromLobby()

@@ -24,7 +24,7 @@ public class MenuController : MonoBehaviour
             adventureButton.onClick.AddListener(() =>
             {
                 if (AppManager.instance != null)
-                    AppManager.instance.LoadAdventureLobby();
+                    AppManager.instance.StartAdventureGameFromLobby();
             });
         }
     }

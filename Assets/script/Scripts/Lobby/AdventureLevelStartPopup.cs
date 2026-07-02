@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Shows level number, target symbols + counts, and a Start button before gameplay begins.
@@ -17,6 +18,19 @@ public class AdventureLevelStartPopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelNumberText;
     [SerializeField] private Button startButton;
 
+    [Header("Auto Start")]
+    [SerializeField] private bool autoStart = true;
+    [SerializeField, Min(0f)] private float autoStartDelay = 1.0f;
+
+    [Header("Target Layout")]
+    [SerializeField] private float targetItemPreferredSize = 110f;
+
+    [Header("Target Icons")]
+    [Tooltip("Optional: assign sprites by ColectionTypes index (Circles, Squares, Stars, Triangles). If empty, tries to fetch once from AdventureTargetUI.")]
+    [SerializeField] private Sprite[] targetSymbolSprites;
+
+    private static Sprite[] cachedTargetSymbolSprites;
+
     [Header("Target Display")]
     [SerializeField] private Transform targetsContainer;
     [SerializeField] private GameObject targetItemPrefab; // Should have Image + TMP_Text children
@@ -27,6 +41,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
     [SerializeField] private Ease panelEase = Ease.OutBack;
 
     private bool isShowing;
+    private Tween autoStartTween;
 
     private void Start()
     {
@@ -53,6 +68,9 @@ public class AdventureLevelStartPopup : MonoBehaviour
         if (startButton != null)
             startButton.onClick.AddListener(OnStartClicked);
 
+        if (startButton != null)
+            startButton.gameObject.SetActive(!autoStart);
+
         // Wait for level data then show
         if (AppManager.instance.CurrentLevelData != null)
         {
@@ -68,6 +86,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
     private void OnDestroy()
     {
+        autoStartTween?.Kill();
         if (AppManager.instance != null)
             AppManager.instance.OnDataLoaded -= HandleDataLoaded;
     }
@@ -87,8 +106,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
         isShowing = true;
 
-        // Pause gameplay
-        Time.timeScale = 0f;
+        ShapeDragHandler.InputBlocked = true;
 
         // Set level number
         if (levelNumberText != null)
@@ -103,14 +121,23 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
         if (overlay != null)
         {
-            //overlay.color = new Color(0, 0, 0, 0);
-            overlay.DOFade(0.7f, overlayFadeDuration).SetUpdate(true);
+            overlay.gameObject.SetActive(true);
         }
 
         if (popupPanel != null)
         {
             popupPanel.localScale = Vector3.zero;
             popupPanel.DOScale(1f, panelScaleDuration).SetEase(panelEase).SetUpdate(true);
+        }
+
+        if (autoStart)
+        {
+            autoStartTween?.Kill();
+            autoStartTween = DOVirtual.DelayedCall(autoStartDelay, () =>
+            {
+                if (this != null)
+                    OnStartClicked();
+            }).SetUpdate(true);
         }
     }
 
@@ -126,6 +153,31 @@ public class AdventureLevelStartPopup : MonoBehaviour
         if (targets == null || targets.Count == 0)
             return;
 
+        Sprite[] symbolSprites = null;
+        if (targetSymbolSprites != null && targetSymbolSprites.Length > 0)
+        {
+            symbolSprites = targetSymbolSprites;
+        }
+        else if (cachedTargetSymbolSprites != null && cachedTargetSymbolSprites.Length > 0)
+        {
+            symbolSprites = cachedTargetSymbolSprites;
+        }
+        else
+        {
+            var adventureUI = FindObjectOfType<AdventureTargetUI>();
+            if (adventureUI != null)
+            {
+                var field = typeof(AdventureTargetUI).GetField("symbolSprites",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field != null)
+                {
+                    symbolSprites = field.GetValue(adventureUI) as Sprite[];
+                    if (symbolSprites != null && symbolSprites.Length > 0)
+                        cachedTargetSymbolSprites = symbolSprites;
+                }
+            }
+        }
+
         foreach (var target in targets)
         {
             if (target.Target <= 0)
@@ -134,22 +186,51 @@ public class AdventureLevelStartPopup : MonoBehaviour
             var item = Instantiate(targetItemPrefab, targetsContainer);
             item.SetActive(true);
 
-            // Set icon color
-            var icon = item.GetComponentInChildren<Image>();
-            if (icon != null && icon.transform != item.transform)
-                icon.color = target.Color;
+            var itemRt = item.GetComponent<RectTransform>();
+            if (itemRt != null)
+                itemRt.localScale = Vector3.one;
+
+            var layout = item.GetComponent<LayoutElement>();
+            if (layout == null)
+                layout = item.AddComponent<LayoutElement>();
+            layout.minWidth = targetItemPreferredSize;
+            layout.minHeight = targetItemPreferredSize;
+            layout.preferredWidth = targetItemPreferredSize;
+            layout.preferredHeight = targetItemPreferredSize;
+            layout.flexibleWidth = 0f;
+            layout.flexibleHeight = 0f;
+
+            var icon = item.GetComponentsInChildren<Image>(true).FirstOrDefault();
+            if (icon != null)
+            {
+                int idx = (int)target.TargetItem;
+                if (symbolSprites != null && idx >= 0 && idx < symbolSprites.Length && symbolSprites[idx] != null)
+                    icon.sprite = symbolSprites[idx];
+
+                var c = target.Color;
+                if (c.r == 0f && c.g == 0f && c.b == 0f && c.a == 0f)
+                    c = Color.white;
+                c.a = 1f;
+                icon.color = c;
+                icon.gameObject.SetActive(true);
+            }
 
             // Set count text
-            var countText = item.GetComponentInChildren<TextMeshProUGUI>();
+            var countText = item.GetComponentsInChildren<TextMeshProUGUI>(true).FirstOrDefault();
             if (countText != null)
                 countText.text = $"x{target.Target}";
         }
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(targetsContainer as RectTransform);
     }
 
     private void OnStartClicked()
     {
         if (!isShowing)
             return;
+
+        autoStartTween?.Kill();
 
         if (SoundManager.instance != null)
             SoundManager.instance.PlayButtonClick();
@@ -161,15 +242,14 @@ public class AdventureLevelStartPopup : MonoBehaviour
             seq.Append(popupPanel.DOScale(0f, 0.25f).SetEase(Ease.InBack));
 
         if (overlay != null)
-            seq.Append(overlay.DOFade(0f, 0.2f));
+            seq.AppendCallback(() => overlay.gameObject.SetActive(false));
 
         seq.OnComplete(() =>
         {
             if (popupRoot != null)
                 popupRoot.SetActive(false);
 
-            // Resume gameplay
-            Time.timeScale = 1f;
+            ShapeDragHandler.InputBlocked = false;
             isShowing = false;
         });
     }

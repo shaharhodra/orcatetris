@@ -2,8 +2,8 @@
   "Level": 2,
   "LevelType": 1,
   "TimeInSeconds": 0,
-  "GridRows": 6,
-  "GridColumns": 6,
+  "GridRows": 8,
+  "GridColumns": 8,
   "LevelName": "Level 2",
   "DifficultyLevel": 2,
   "DifficultyThreshold": 0,
@@ -16,60 +16,61 @@
   ],
 
   "InitialBlocks": [
-    { "x": 0, "y": 0},
-    { "x": 1, "y": 0},
-    { "x": 2, "y": 0},
     { "x": 3, "y": 0},
-    { "x": 5, "y": 0},
-
-    { "x": 0, "y": 1},
-    { "x": 1, "y": 1},
-    { "x": 2, "y": 1, "Symbol": 0},
     { "x": 3, "y": 1},
-    { "x": 5, "y": 1},
+    { "x": 3, "y": 2},
+    { "x": 3, "y": 3},
+    { "x": 2, "y": 3},
+    { "x": 1, "y": 3, "Symbol": 0},
+    { "x": 4, "y": 3},
+    { "x": 5, "y": 5},
+    { "x": 0, "y": 4},
+    { "x": 1, "y": 4},
+    { "x": 2, "y": 4},
+    { "x": 4, "y": 4, "Symbol": 0},
+    { "x": 5, "y": 4, "Symbol": 0},
+    { "x": 0, "y": 5},
+    { "x": 1, "y": 5},
+    { "x": 4, "y": 5},
+    { "x": 6, "y": 5},
+    { "x": 5, "y": 6},
+    { "x": 6, "y": 6}
 
-    { "x": 0, "y": 2 },
-    { "x": 1, "y": 2 },
-    { "x": 2, "y": 2 },
-    { "x": 3, "y": 2 },
-    { "x": 5, "y": 2 }
+
+
+
 
   ],
 
   "ShapeWaves": [
     {
       "Shapes": [
-        { "Name": "l2vertical", "Symbols": [
-          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } },
-          { "Type": 0, "Position": { "x": 0.0, "y": 1.0 } },
-          { "Type": 0, "Position": { "x": 0.0, "y": 2.0 } } ] },
+        { "Name": "Jsmall3"},
 
-        { "Name": "Jsmall"},
+        { "Name": "L 1"},
 
-        { "Name": "singel"}
+        { "Name": "3x3", "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] }
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "singel", "Symbols": [
-          { "Type": 0, "Position": { "x": 2.0, "y": 0.0 } } ] },
-
-        { "Name": "singel", "Symbols": [
-          { "Type": 0, "Position": { "x": 2.0, "y": 0.0 } } ] },
-
-
-        { "Name": "plasDowne"}
+        { "Name": "Jsmall3", "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] },
+      { "Name": "plasDowne"}
       ]
     },
 
     {
       "Shapes": [
-        { "Name": "singel" },
+        { "Name": "singel" , "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] },
 
         { "Name": "lineof2" },
 
-        { "Name": "singel" }
+        { "Name": "singel" , "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] }
       ]
     }
 

@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 4989866849646737954}
   - component: {fileID: 2170397571013899497}
   m_Layer: 7
-  m_Name: Jsmall
+  m_Name: Jsmall 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

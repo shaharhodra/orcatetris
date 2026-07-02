@@ -7,12 +7,16 @@ public class CoinUIController : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _coinsText;
 
+    [Header("Coins SFX")]
+    [SerializeField, Min(0f)] private float coinsSfxCooldown = 1.0f;
+
     [Header("Punch Animation")]
     [SerializeField] private float punchScale = 0.3f;
     [SerializeField] private float punchDuration = 0.3f;
 
     private Tween punchTween;
     private bool initialized;
+    private float lastCoinsSfxTime = -999f;
 
     void Start()
     {
@@ -54,7 +58,14 @@ public class CoinUIController : MonoBehaviour
         if (initialized)
         {
             if (SoundManager.instance != null)
-                SoundManager.instance.PlayCoins();
+            {
+                float now = Time.unscaledTime;
+                if (coinsSfxCooldown <= 0f || now - lastCoinsSfxTime >= coinsSfxCooldown)
+                {
+                    lastCoinsSfxTime = now;
+                    SoundManager.instance.PlayCoins();
+                }
+            }
 
             punchTween?.Kill(true);
             _coinsText.rectTransform.localScale = Vector3.one;

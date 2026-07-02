@@ -192,8 +192,8 @@ public class GameManager : Singleton<GameManager>
             return;
         }
 
-        // Adventure mode: single shared GameScene, level is chosen purely by player progress (HighestUnlockedLevel)
-        int index = Mathf.Max(0, PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel - 1);
+        // Adventure mode: single shared GameScene, level is chosen purely by player progress (0-based HighestUnlockedLevel)
+        int index = Mathf.Max(0, PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel);
 
         if (useAddressablesForLevels)
         {

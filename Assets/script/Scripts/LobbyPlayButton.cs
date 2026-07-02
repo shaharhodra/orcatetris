@@ -22,8 +22,9 @@ public class LobbyPlayButton : MonoBehaviour
         if (levelLabel == null || PlayerManeger.instance == null)
             return;
 
-        int level = PlayerManeger.instance.PlayerProgress.DisplayLevel;
-        levelLabel.text = $"Level {level}";
+        int levelIndex = PlayerManeger.instance.PlayerProgress.DisplayLevel;
+        int displayLevel = Mathf.Max(0, levelIndex) + 1;
+        levelLabel.text = $"Level {displayLevel}";
     }
 
     public void OnPlayClicked()

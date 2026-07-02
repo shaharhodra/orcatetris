@@ -35,6 +35,10 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private bool useSpaceAwareDifficulty = true;
     [SerializeField] private float minSpaceRatioForComplexShapes = 0.4f;
 
+    [Header("Assist Mode")]
+    [SerializeField] private bool useSmartBestShapes;
+    [SerializeField] private int smartBestShapesPoolLimit = 50;
+
     private readonly List<Shape> activeShapes = new List<Shape>();
     private bool noMovesReviveTriggered;
 
@@ -55,6 +59,183 @@ public class ShapeTrayManager : MonoBehaviour
     {
         if (placer != null)
             placer.OnShapePlaced += HandleShapePlaced;
+    }
+
+    private struct ShapeCandidateScore
+    {
+        public Shape Prefab;
+        public int BestScore;
+        public int BestClearedLines;
+        public int BestFilledCells;
+    }
+
+    private List<Shape> PickSmartBestSet(Shape[] prefabs)
+    {
+        var result = new List<Shape>();
+        if (prefabs == null || prefabs.Length == 0)
+            return result;
+
+        if (board == null)
+            return PickBalancedClassicSet(prefabs);
+
+        var pool = prefabs.Where(p => p != null).Distinct().ToList();
+        if (pool.Count == 0)
+            return result;
+
+        if (smartBestShapesPoolLimit > 0 && pool.Count > smartBestShapesPoolLimit)
+            pool = pool.OrderBy(_ => Random.value).Take(smartBestShapesPoolLimit).ToList();
+
+        var scored = new List<ShapeCandidateScore>(pool.Count);
+        foreach (var prefab in pool)
+        {
+            var score = EvaluateBestPlacementScore(prefab);
+            if (score.BestScore <= int.MinValue / 2)
+                continue;
+            scored.Add(score);
+        }
+
+        // If everything is unplaceable, fall back to existing logic
+        if (scored.Count == 0)
+            return PickBalancedClassicSet(prefabs);
+
+        // Pick top 3 by best achievable outcome
+        var top = scored
+            .OrderByDescending(s => s.BestClearedLines)
+            .ThenByDescending(s => s.BestScore)
+            .ThenByDescending(s => s.BestFilledCells)
+            .Take(3)
+            .Select(s => s.Prefab)
+            .ToList();
+
+        // Ensure exactly 3 results (fill with placeable shapes if needed)
+        result.AddRange(top);
+
+        if (result.Count < 3)
+        {
+            var fillers = scored
+                .OrderByDescending(s => s.BestScore)
+                .Select(s => s.Prefab)
+                .Where(p => !result.Contains(p))
+                .ToList();
+
+            foreach (var f in fillers)
+            {
+                result.Add(f);
+                if (result.Count == 3)
+                    break;
+            }
+        }
+
+        // Last-resort: duplicates allowed to keep tray full
+        while (result.Count < 3)
+            result.Add(pool[Random.Range(0, pool.Count)]);
+
+        return result;
+    }
+
+    private ShapeCandidateScore EvaluateBestPlacementScore(Shape prefab)
+    {
+        var candidate = new ShapeCandidateScore
+        {
+            Prefab = prefab,
+            BestScore = int.MinValue,
+            BestClearedLines = 0,
+            BestFilledCells = 0
+        };
+
+        if (prefab == null || board == null)
+            return candidate;
+
+        var offsets = prefab.GetCells(board.cellSize);
+        if (offsets == null || offsets.Length == 0)
+            return candidate;
+
+        // Precompute missing counts in current grid
+        int[] rowMissing = new int[board.height];
+        int[] colMissing = new int[board.width];
+
+        for (int y = 0; y < board.height; y++)
+        {
+            int missing = 0;
+            for (int x = 0; x < board.width; x++)
+                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            rowMissing[y] = missing;
+        }
+        for (int x = 0; x < board.width; x++)
+        {
+            int missing = 0;
+            for (int y = 0; y < board.height; y++)
+                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            colMissing[x] = missing;
+        }
+
+        // Try every anchor cell as a potential placement
+        for (int ax = 0; ax < board.width; ax++)
+        {
+            for (int ay = 0; ay < board.height; ay++)
+            {
+                var anchor = new Vector2Int(ax, ay);
+                if (!CanPlaceOffsetsAt(anchor, offsets))
+                    continue;
+
+                // Simulate effect on line completion without mutating the board
+                int filledCells = offsets.Length;
+
+                // Count how many new cells we cover per row/col
+                var filledInRow = new Dictionary<int, int>();
+                var filledInCol = new Dictionary<int, int>();
+
+                foreach (var off in offsets)
+                {
+                    var cell = anchor + off;
+                    if (!filledInRow.ContainsKey(cell.y)) filledInRow[cell.y] = 0;
+                    if (!filledInCol.ContainsKey(cell.x)) filledInCol[cell.x] = 0;
+                    filledInRow[cell.y]++;
+                    filledInCol[cell.x]++;
+                }
+
+                int clearedLines = 0;
+                foreach (var kv in filledInRow)
+                {
+                    int y = kv.Key;
+                    if (y >= 0 && y < rowMissing.Length && rowMissing[y] == kv.Value)
+                        clearedLines++;
+                }
+                foreach (var kv in filledInCol)
+                {
+                    int x = kv.Key;
+                    if (x >= 0 && x < colMissing.Length && colMissing[x] == kv.Value)
+                        clearedLines++;
+                }
+
+                // Score: prioritize clears heavily, then general fill.
+                // This is intentionally generous to make the game easier.
+                int score = (clearedLines * 1000) + (filledCells * 10);
+
+                if (score > candidate.BestScore)
+                {
+                    candidate.BestScore = score;
+                    candidate.BestClearedLines = clearedLines;
+                    candidate.BestFilledCells = filledCells;
+                }
+            }
+        }
+
+        return candidate;
+    }
+
+    private bool CanPlaceOffsetsAt(Vector2Int anchor, Vector2Int[] offsets)
+    {
+        if (board == null || offsets == null)
+            return false;
+
+        foreach (var off in offsets)
+        {
+            var cell = anchor + off;
+            if (!board.IsInside(cell) || board.IsOccupied(cell))
+                return false;
+        }
+        return true;
     }
 
     private void OnDisable()
@@ -364,7 +545,9 @@ public class ShapeTrayManager : MonoBehaviour
         }
 
         // Pick a balanced set of 3 shapes using bag system, then guarantee at least one is placeable
-        var selectedPrefabs = PickBalancedClassicSet(classicShapePrefabs);
+        var selectedPrefabs = useSmartBestShapes
+            ? PickSmartBestSet(classicShapePrefabs)
+            : PickBalancedClassicSet(classicShapePrefabs);
 
         for (int i = 0; i < 3; i++)
         {

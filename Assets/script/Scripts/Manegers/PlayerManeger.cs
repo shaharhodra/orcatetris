@@ -6,6 +6,8 @@ using System;
 public class PlayerManeger : Singleton<PlayerManeger>
 {
     public PlayerProgressData PlayerProgress { get; private set; }
+
+    [SerializeField] private bool enableDailyBonus = true;
     
     [Serializable]
     public class PlayerProgressData
@@ -18,6 +20,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
 
     public bool IsDailyBonusAvailable()
     {
+        if (!enableDailyBonus)
+            return false;
         if (PlayerProgress == null) return false;
         if (string.IsNullOrEmpty(PlayerProgress.LastBonusDate)) return true;
         return PlayerProgress.LastBonusDate != System.DateTime.Now.ToString("yyyy-MM-dd");
@@ -25,6 +29,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
 
     public void MarkDailyBonusUsed()
     {
+        if (!enableDailyBonus)
+            return;
         if (PlayerProgress == null) return;
         PlayerProgress.LastBonusDate = System.DateTime.Now.ToString("yyyy-MM-dd");
         SavePlayerProgress();
@@ -56,8 +62,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                HighestUnlockedLevel = 1,
-                DisplayLevel = 1
+                HighestUnlockedLevel = 0,
+                DisplayLevel = 0
             };
             return;
         }
@@ -75,15 +81,15 @@ public class PlayerManeger : Singleton<PlayerManeger>
         {
             PlayerProgress = new PlayerProgressData
             {
-                HighestUnlockedLevel = 1,
-                DisplayLevel = 1
+                HighestUnlockedLevel = 0,
+                DisplayLevel = 0
             };
         }
 
-        if (PlayerProgress.HighestUnlockedLevel <= 0)
-            PlayerProgress.HighestUnlockedLevel = 1;
+        if (PlayerProgress.HighestUnlockedLevel < 0)
+            PlayerProgress.HighestUnlockedLevel = 0;
 
-        if (PlayerProgress.DisplayLevel <= 0)
+        if (PlayerProgress.DisplayLevel < 0)
             PlayerProgress.DisplayLevel = PlayerProgress.HighestUnlockedLevel;
     }
 
@@ -143,8 +149,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
     {
         PlayerProgress = new PlayerProgressData
         {
-            HighestUnlockedLevel = 1,
-            DisplayLevel = 1,
+            HighestUnlockedLevel = 0,
+            DisplayLevel = 0,
             Coins = 0
         };
 
