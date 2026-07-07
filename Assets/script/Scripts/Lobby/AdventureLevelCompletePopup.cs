@@ -1,16 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
-using System.Collections;
 
 /// <summary>
-/// Shows a "Level Complete!" popup with confetti particles, then transitions to next level.
-/// Listens to AdventureManager.OnAllTargetsCompleted.
+/// Simple, clean popup for Adventure level completion.
 /// </summary>
 public class AdventureLevelCompletePopup : MonoBehaviour
 {
-    [Header("UI References")]
+    [Header("UI")]
     [SerializeField] private GameObject popupRoot;
     [SerializeField] private Image overlay;
     [SerializeField] private RectTransform popupPanel;
@@ -18,87 +16,97 @@ public class AdventureLevelCompletePopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private Button nextLevelButton;
 
-    [Header("Confetti")]
-    [SerializeField] private ParticleSystem confettiParticles;
+    [Header("Effects")]
+    [SerializeField] private ParticleSystem confetti;
 
-    [Header("Animation")]
+    [Header("Settings")]
+    [SerializeField] private float animDuration = 0.5f;
     [SerializeField] private float showDelay = 0.5f;
-    [SerializeField] private float overlayFadeDuration = 0.3f;
-    [SerializeField] private float panelScaleDuration = 0.5f;
-    [SerializeField] private Ease panelEase = Ease.OutBack;
 
-    [Header("References")]
-    [SerializeField] private AdventureManager adventureManager;
+    private AdventureManager adventureManager;
+    private bool isActive;
 
-    private bool isShowing;
+    private void Awake()
+    {
+        Debug.Log($"[CompletePopup] ===== AWAKE ===== on GameObject: {gameObject.name}, active={gameObject.activeInHierarchy}, enabled={enabled}");
+        
+        if (popupRoot != null)
+            popupRoot.SetActive(false);
+        else
+            Debug.LogError("[CompletePopup] popupRoot is NULL in Awake!");
+
+        if (nextLevelButton != null)
+            nextLevelButton.onClick.AddListener(OnNextLevel);
+        else
+            Debug.LogError("[CompletePopup] nextLevelButton is NULL in Awake!");
+    }
 
     private void Start()
     {
-        if (popupRoot != null)
-            popupRoot.SetActive(false);
-
-        if (adventureManager == null)
-            adventureManager = FindFirstObjectByType<AdventureManager>();
-
+        Debug.Log($"[CompletePopup] ===== START ===== on GameObject: {gameObject.name}");
+        
+        adventureManager = FindFirstObjectByType<AdventureManager>();
+        
         if (adventureManager != null)
-            adventureManager.OnAllTargetsCompleted += HandleLevelComplete;
-
-        if (nextLevelButton != null)
-            nextLevelButton.onClick.AddListener(OnNextLevelClicked);
+        {
+            adventureManager.OnAllTargetsCompleted += Show;
+            Debug.Log($"[CompletePopup] ✓ Successfully subscribed to AdventureManager.OnAllTargetsCompleted");
+        }
+        else
+        {
+            Debug.LogError($"[CompletePopup] ✗ AdventureManager NOT FOUND!");
+        }
     }
 
     private void OnDestroy()
     {
+        Debug.Log($"[CompletePopup] OnDestroy called");
         if (adventureManager != null)
-            adventureManager.OnAllTargetsCompleted -= HandleLevelComplete;
+            adventureManager.OnAllTargetsCompleted -= Show;
     }
 
-    private void HandleLevelComplete()
+    public void Show()
     {
-        Debug.Log("[CompletePopup] HandleLevelComplete fired!");
-
-        if (isShowing)
-            return;
-
-        // Re-enable so coroutine can run (popupRoot.SetActive(false) may have disabled us)
-        gameObject.SetActive(true);
-
-        StartCoroutine(ShowCompleteSequence());
-    }
-
-    private IEnumerator ShowCompleteSequence()
-    {
-        isShowing = true;
-
-        // Small delay to let clear animations finish
-        yield return new WaitForSeconds(showDelay);
-
-        ShapeDragHandler.InputBlocked = true;
-
-        // Play confetti
-        if (confettiParticles != null)
+        Debug.Log($"[CompletePopup] ===== SHOW ===== called! isActive={isActive}, gameObject.activeInHierarchy={gameObject.activeInHierarchy}");
+        
+        if (isActive)
         {
-            confettiParticles.gameObject.SetActive(true);
-            confettiParticles.Play(true);
+            Debug.LogWarning($"[CompletePopup] Already active, ignoring");
+            return;
         }
 
-        // Play sound
-        if (SoundManager.instance != null)
-            SoundManager.instance.PlayAmazingPopup();
+        isActive = true;
+        Debug.Log($"[CompletePopup] Invoking ShowInternal in {showDelay} seconds...");
+        Invoke(nameof(ShowInternal), showDelay);
+    }
 
-        // Set texts
-        var levelData = AppManager.instance != null ? AppManager.instance.CurrentLevelData : null;
-        int levelNum = levelData != null ? levelData.Level : 0;
+    private void ShowInternal()
+    {
+        Debug.Log($"[CompletePopup] ===== SHOW INTERNAL ===== displaying popup now!");
+        
+        ShapeDragHandler.InputBlocked = true;
+
+        // Update texts
+        int nextLevel = 1;
+        if (PlayerManeger.instance?.PlayerProgress != null)
+            nextLevel = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel + 2;
 
         if (titleText != null)
             titleText.text = "Level Complete!";
 
         if (levelText != null)
-            levelText.text = $"Level {levelNum}";
+            levelText.text = $"Next Level: {nextLevel}";
 
-        // Show popup
+        // Show UI
         if (popupRoot != null)
+        {
             popupRoot.SetActive(true);
+            Debug.Log("[CompletePopup] popupRoot activated");
+        }
+        else
+        {
+            Debug.LogError("[CompletePopup] popupRoot is NULL!");
+        }
 
         if (overlay != null)
         {
@@ -108,31 +116,65 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         if (popupPanel != null)
         {
             popupPanel.localScale = Vector3.zero;
-            popupPanel.DOScale(1f, panelScaleDuration).SetEase(panelEase).SetUpdate(true);
+            popupPanel.DOScale(1f, animDuration).SetEase(Ease.OutBack).SetUpdate(true);
+            Debug.Log("[CompletePopup] Panel scaling up");
         }
+
+        // Effects
+        if (confetti != null)
+        {
+            confetti.gameObject.SetActive(true);
+            confetti.Play();
+        }
+
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayAmazingPopup();
     }
 
-    private void OnNextLevelClicked()
+    private void OnNextLevel()
     {
-        if (!isShowing)
+        Debug.Log($"[CompletePopup] OnNextLevel clicked");
+        
+        if (!isActive)
             return;
 
         if (SoundManager.instance != null)
             SoundManager.instance.PlayButtonClick();
 
-        isShowing = false;
+        // Save progress
+        int currentLevel = 0;
+        if (PlayerManeger.instance?.PlayerProgress != null)
+            currentLevel = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel;
 
-        // Advance level (0-based)
-        int completedIndex = 0;
-        if (PlayerManeger.instance != null && PlayerManeger.instance.PlayerProgress != null)
-            completedIndex = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel;
-        GameManager.instance.SetLevelCompleted(completedIndex);
+        GameManager.instance.SetLevelCompleted(currentLevel);
 
+        // Hide and reload
+        Hide(() => GameManager.instance.ReloadCurrentScene());
+    }
+
+    private void Hide(System.Action onComplete)
+    {
+        Debug.Log("[CompletePopup] Hiding popup");
+        isActive = false;
         ShapeDragHandler.InputBlocked = false;
 
-        if (confettiParticles != null)
-            confettiParticles.Stop(true);
+        if (confetti != null)
+            confetti.Stop();
 
-        GameManager.instance.ReloadCurrentScene();
+        Sequence seq = DOTween.Sequence();
+
+        if (popupPanel != null)
+            seq.Append(popupPanel.DOScale(0f, animDuration * 0.5f).SetEase(Ease.InBack).SetUpdate(true));
+
+        if (overlay != null)
+            seq.Join(overlay.DOFade(0f, animDuration * 0.5f).SetUpdate(true));
+
+        seq.OnComplete(() =>
+        {
+            if (popupRoot != null)
+                popupRoot.SetActive(false);
+            
+            onComplete?.Invoke();
+        });
     }
 }

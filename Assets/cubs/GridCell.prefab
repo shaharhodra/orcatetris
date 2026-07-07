@@ -52,7 +52,7 @@ MonoBehaviour:
   previewClear: 0
   normalAlpha: 1
   hoverAlpha: 0.1
-  previewClearAlpha: 0.7
+  previewClearAlpha: 0.1
   normalColor: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
   previewClearColor: {r: 1, g: 1, b: 1, a: 1}
   _sprite: {fileID: 3347676569184785326}

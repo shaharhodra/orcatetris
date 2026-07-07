@@ -11,13 +11,23 @@ public class TutorialManager :Singleton<TutorialManager>
     public int Tutorialindex { get; private set; } = 0;
     public bool IsTutorialCompleted { get; private set; } = false;
 
-    void Start()
+    void OnEnable()
     {
         DidCompleteTutorial();
+		GameManager.instance.OnDataLoaded += HandleOnDataLoadedEvent;
 
+
+	}
+    void OnDisable()
+    {
+        GameManager.instance.OnDataLoaded -= HandleOnDataLoadedEvent;
     }
+    private void HandleOnDataLoadedEvent(LevelData levelData)
+    {
+        ShowTutorial();
+	}   
 
-    public void ShowTutorial()
+	public void ShowTutorial()
     {
         if (!IsTutorialCompleted && Tutorialindex < _tutorialData.Tutorials.Count)
         {

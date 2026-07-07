@@ -5,10 +5,13 @@ using DG.Tweening;
 
 public class TuttorialStep : MonoBehaviour
 {
-    [SerializeField] private TMP_Text _stepText;
+    public int StepIndex;
+	[SerializeField] private TMP_Text _stepText;
     [SerializeField] private Image _stepImage;
     [SerializeField] private Animation _animation;
+    [SerializeField] private AnimationClip _animationClip;
     [SerializeField] private Button _button;
+
 
     private Tween _fallbackTween;
 
@@ -60,7 +63,8 @@ public class TuttorialStep : MonoBehaviour
 
         if (_animation != null && Time.timeScale > 0f)
         {
-            _animation.Play();
+            _animation.clip = _animationClip;   
+			_animation.Play();
             return;
         }
 

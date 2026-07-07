@@ -154,7 +154,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
             Coins = 0
         };
 
-        try
+        PlayerPrefs.DeleteAll(); // Clear PlayerPrefs to ensure no old data remains
+		try
         {
             var json = JsonUtility.ToJson(PlayerProgress);
             File.WriteAllText(GetProgressFilePath(), json);
@@ -167,4 +168,6 @@ public class PlayerManeger : Singleton<PlayerManeger>
         OnCoinsUpdatedEvent?.Invoke(PlayerProgress.Coins);
         Debug.Log("[PlayerManeger] Progress reset to level 1 with 0 coins.");
     }
+    [System.NonSerialized]
+    public bool JustCompletedLevel;
 }

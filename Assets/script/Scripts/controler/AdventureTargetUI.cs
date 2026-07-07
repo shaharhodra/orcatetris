@@ -27,6 +27,9 @@ public class AdventureTargetUI : MonoBehaviour
     [SerializeField] private Ease symbolIntoTargetScaleEase = Ease.InBack;
     [SerializeField] private bool fadeSymbolIntoTarget = true;
 
+    [Header("Win Popup")]
+    [SerializeField] private AdventureLevelCompletePopup completePopup;
+
     [Header("UI Icon Scale")]
     [SerializeField] private float iconScale = 1.0f; // Scale for UI icons only
     [SerializeField] private Sprite[] symbolSprites;
@@ -369,11 +372,21 @@ public class AdventureTargetUI : MonoBehaviour
 
     private void HandleAllCompleted()
     {
-        // Optional: animate all entries or show a "level complete" effect
+        // Reset counters
         foreach (var kvp in entries)
         {
             if (kvp.Value.CountText != null)
                 kvp.Value.CountText.text = "0";
+        }
+
+        // Show victory popup
+        if (completePopup != null)
+        {
+            completePopup.Show();
+        }
+        else
+        {
+            Debug.LogWarning("[AdventureTargetUI] completePopup is not assigned in Inspector!");
         }
     }
 

@@ -148,7 +148,22 @@ public class AdventureManager : MonoBehaviour
         if (debugLogs)
             Debug.Log("[AdventureManager] All targets completed!");
 
+        // Check if anyone is listening
+        if (OnAllTargetsCompleted == null)
+            Debug.LogWarning("[AdventureManager] OnAllTargetsCompleted has no listeners! Victory popup may not be in scene.");
+        else
+        {
+            var listeners = OnAllTargetsCompleted.GetInvocationList();
+            Debug.Log($"[AdventureManager] OnAllTargetsCompleted has {listeners.Length} listener(s):");
+            foreach (var listener in listeners)
+            {
+                Debug.Log($"  - Listener: {listener.Method.Name} on {listener.Target?.GetType().Name ?? "null"}");
+            }
+        }
+
         // AdventureLevelCompletePopup listens to this event and handles the win UI + level advance
+        Debug.Log("[AdventureManager] Invoking OnAllTargetsCompleted...");
         OnAllTargetsCompleted?.Invoke();
+        Debug.Log("[AdventureManager] OnAllTargetsCompleted invoke finished.");
     }
 }

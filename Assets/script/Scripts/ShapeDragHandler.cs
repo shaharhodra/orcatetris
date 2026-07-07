@@ -10,7 +10,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [SerializeField] private Shape shape;
     [Header("Ghost Preview")]
     [SerializeField] private Shape ghostPrefab; // אופציונלי: אם לא הוגדר, נשתמש בעותק של הצורה עצמה
-    [SerializeField] private float ghostAlpha = 0.35f;
+    [SerializeField] private float ghostAlpha = 0.5f;
     [SerializeField, Min(0)] private int ghostSnapRadius = 0; // כמה תאים סביב התא המרכזי לחפש מיקום חוקי
     [SerializeField] private float minFingerOffsetX = 0f;
     [SerializeField] private float maxFingerOffsetX = 1.5f;
