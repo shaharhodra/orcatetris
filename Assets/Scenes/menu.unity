@@ -4363,6 +4363,7 @@ GameObject:
   - component: {fileID: 1872564981}
   - component: {fileID: 1872564982}
   - component: {fileID: 1872564980}
+  - component: {fileID: 1872564983}
   m_Layer: 0
   m_Name: AppManager
   m_TagString: Untagged
@@ -4473,6 +4474,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManeger
   IsDestroyOnLoad: 1
   enableDailyBonus: 1
+--- !u!114 &1872564983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1872564979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d591ad4ba8f64ec418d012d47832879e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnalyticsManager
+  IsDestroyOnLoad: 1
 --- !u!1 &1886051215
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using NUnit.Framework;
 
 // every manager will derive from the Singleton class - this makes sure there is only one single manager of this type in the whole app.
 public class AppManager : Singleton<AppManager>
@@ -112,21 +113,24 @@ public class AppManager : Singleton<AppManager>
 
     private void Start()
     {
+
         HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-        
-        
-	}
+        AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.GameStart.ToString());
+
+
+
+    }
 
     //private string GetProgressFilePath()
     //{
     //    return Path.Combine(Application.persistentDataPath, "player_progress.json");
     //}
 
-   
 
-   
 
-  
+
+
+
 
     public void DebugResetProgressToLevel1AndReloadScene()
     {
@@ -204,6 +208,7 @@ public class AppManager : Singleton<AppManager>
         {
             ScoreManager.instance.ResetScore();
         }
+
 
         if (CurrentGameMode == GameMode.Classic)
         {
@@ -465,6 +470,9 @@ public class AppManager : Singleton<AppManager>
             return;
 
         CurrentLevelData = levelData;
+        AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelStart.ToString(), new List<AnalyticsManager.AnalyticsEventData>() { 
+            new AnalyticsManager.AnalyticsEventData("GameType", levelData.GameType.ToString())});
+        
 
         InvokeOnDataLoaded(levelData);
     }

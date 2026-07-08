@@ -26,6 +26,7 @@ public class LoadingScenesManeger : MonoBehaviour
    
     public async UniTask StartLoadingSequence()
     {
+
         if (targetSceneIndex < 0 || targetSceneIndex >= SceneManager.sceneCountInBuildSettings)
         {
             return;
