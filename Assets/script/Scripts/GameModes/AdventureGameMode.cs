@@ -47,7 +47,6 @@ public class AdventureGameMode : IGameMode
     
     public void CheckGameOver()
     {
-        // Check if we have any available moves
         if (!HasAnyMoveAvailable())
         {
             Debug.Log("[AdventureGameMode] No moves available, triggering game over");
@@ -60,17 +59,16 @@ public class AdventureGameMode : IGameMode
         if (shapeTrayManager == null || board == null)
             return false;
 
-        var availableShapes = shapeTrayManager.GetAvailableShapes();
-        
-        foreach (var shape in availableShapes)
+        // Use ShapeTrayManager's own check which correctly accounts for
+        // empty tray + available waves (returns true if next wave can be loaded)
+        if (!shapeTrayManager.HasAnyMoveAvailable())
         {
-            if (shape == null) continue;
-
-            if (CanPlaceShapeAnywhere(shape))
-                return true;
+            // Double-check: if tray is empty but waves remain, moves ARE available
+            // (ShapeTrayManager.HasAnyMove returns true when tray is empty and waves exist)
+            return false;
         }
 
-        return false;
+        return true;
     }
     
     private bool CanPlaceShapeAnywhere(Shape shape)

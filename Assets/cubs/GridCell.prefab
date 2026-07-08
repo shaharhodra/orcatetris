@@ -52,9 +52,10 @@ MonoBehaviour:
   previewClear: 0
   normalAlpha: 1
   hoverAlpha: 0.1
-  previewClearAlpha: 0.1
-  normalColor: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
+  previewClearAlpha: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   previewClearColor: {r: 1, g: 1, b: 1, a: 1}
+  previewClearEmissionIntensity: 6
   _sprite: {fileID: 3347676569184785326}
   _boxCollider: {fileID: 7427878456175831511}
 --- !u!61 &7427878456175831511
@@ -185,7 +186,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4016575244178849761, guid: efd1f08ddccd4e84c8388688cb9f5ef3, type: 3}
-  m_Color: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

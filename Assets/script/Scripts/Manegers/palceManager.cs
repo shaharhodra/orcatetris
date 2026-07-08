@@ -90,6 +90,12 @@ public class PlaceManager : Singleton<PlaceManager>
         if (board == null || placer == null || shapeTrayManager == null)
             return;
 
+        // Adventure mode handles game over via AdventureGameMode.CheckGameOver()
+        // which runs after the tray has been refilled with the next wave.
+        var app = AppManager.instance;
+        if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
+            return;
+
         bool anyMove = HasAnyMove();
 
         if (debugLogs) Debug.Log($"[PlaceManager] EvaluateMoves: anyMove={anyMove}");

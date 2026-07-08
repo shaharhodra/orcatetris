@@ -12,6 +12,7 @@ public class GridCell : MonoBehaviour
     [SerializeField] private float previewClearAlpha = 0.7f;
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color previewClearColor = Color.yellow;
+    [SerializeField] private float previewClearEmissionIntensity = 2f;
 
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private BoxCollider2D _boxCollider;
@@ -124,7 +125,16 @@ public class GridCell : MonoBehaviour
             return;
 
         // בוחרים צבע בסיס לפי מצב התא
-        Color baseColor = previewClear ? previewClearColor : normalColor;
+        Color baseColor;
+        if (previewClear)
+        {
+            // הכפלת הצבע ב-intensity ליצירת אפקט emission/glow (HDR)
+            baseColor = previewClearColor * previewClearEmissionIntensity;
+        }
+        else
+        {
+            baseColor = normalColor;
+        }
         baseColor.a = targetAlpha;
         _sprite.color = baseColor;
     }

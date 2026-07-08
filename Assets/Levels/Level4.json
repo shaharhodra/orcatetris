@@ -22,14 +22,14 @@
       "Shapes": [
         { "Name": "plasLeft", "Symbols": [{ "Type": 1 }] },
         { "Name": "plas", "Symbols": [{ "Type": 1 }] },
-        { "Name": "plas", "Symbols": [{ "Type": 1 }] }
+        { "Name": "plas", "Symbols": [{ "Type": 3 }] }
 
       ]
     },
     {
       "Shapes": [
         { "Name": "plasRight", "Symbols": [{ "Type": 1 }] },
-        { "Name": "plasLeft", "Symbols": [{ "Type": 1 }] }
+        { "Name": "plasLeft", "Symbols": [{ "Type": 3 }] }
       ]
     }
   ]
