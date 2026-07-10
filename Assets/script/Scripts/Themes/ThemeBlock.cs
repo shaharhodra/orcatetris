@@ -8,6 +8,18 @@ public class ThemeBlock : MonoBehaviour
     private SpriteRenderer sr;
     private Sprite originalSprite;
     private Vector3 originalScale;
+    private bool isPlacedOnGrid;
+
+    /// <summary>
+    /// Call this after placing the block on the grid so the theme uses squareColor instead of blockColor.
+    /// </summary>
+    public void MarkAsPlaced()
+    {
+        isPlacedOnGrid = true;
+        // Re-apply current theme with placed color
+        if (ThemeManager.instance != null && ThemeManager.instance.CurrentTheme != null)
+            ApplyTheme(ThemeManager.instance.CurrentTheme, instant: true);
+    }
 
     private void Awake()
     {
@@ -77,10 +89,19 @@ public class ThemeBlock : MonoBehaviour
             }
         }
 
+        // Choose color based on whether this block is placed on grid or still in shape tray
+        Color targetColor = theme.blockColor;
+        if (isPlacedOnGrid)
+        {
+            // Use squareColor if it has non-zero alpha, otherwise fallback to blockColor
+            if (theme.squareColor.a > 0f)
+                targetColor = theme.squareColor;
+        }
+
         float duration = instant ? 0f : theme.transitionDuration;
         if (instant)
-            sr.color = theme.blockColor;
+            sr.color = targetColor;
         else
-            sr.DOColor(theme.blockColor, duration);
+            sr.DOColor(targetColor, duration);
     }
 }

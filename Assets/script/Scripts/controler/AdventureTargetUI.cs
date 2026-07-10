@@ -179,6 +179,10 @@ public class AdventureTargetUI : MonoBehaviour
 
     private void UpdateUI(Dictionary<ColectionTypes, int> targets)
     {
+        // Skip bulk counter update if symbols are animating (counters will decrement one-by-one on arrival)
+        if (isAnimatingSymbols)
+            return;
+
         foreach (var kvp in targets)
         {
             if (!entries.ContainsKey(kvp.Key))
@@ -236,11 +240,23 @@ public class AdventureTargetUI : MonoBehaviour
 
     [Header("Stagger")]
     [SerializeField] private float symbolStaggerDelay = 0.1f;
+    [SerializeField] private float symbolHoldDuration = 0.4f;
+    [SerializeField] private float symbolSequentialDelay = 0.15f;
+
+    private bool isAnimatingSymbols;
 
     private void HandleClearedSymbolVisuals(List<ClearedSymbolVisual> visuals)
     {
-        if (visuals == null)
+        if (visuals == null || visuals.Count == 0)
             return;
+
+        isAnimatingSymbols = true;
+
+        // Phase 1: All symbols grow simultaneously (with small stagger)
+        // Phase 2: After hold, symbols fly to bank one by one sequentially
+        // Phase 3: Counter decrements on each symbol arrival
+
+        var preparedSymbols = new List<PreparedSymbol>();
 
         int staggerIndex = 0;
         foreach (var visual in visuals)
@@ -264,8 +280,6 @@ public class AdventureTargetUI : MonoBehaviour
             flyingTransform.position = visual.WorldPosition;
             flyingTransform.SetParent(null, true);
 
-            Vector3 targetPosition = GetWorldPosition(entry.Icon.transform);
-
             Vector3 baseScale = flyingTransform.localScale;
             if (baseScale == Vector3.zero)
                 baseScale = Vector3.one;
@@ -278,15 +292,36 @@ public class AdventureTargetUI : MonoBehaviour
                 sr.color = c;
             }
 
-            float delay = staggerIndex * symbolStaggerDelay;
+            preparedSymbols.Add(new PreparedSymbol
+            {
+                flyingIcon = flyingIcon,
+                flyingTransform = flyingTransform,
+                baseScale = baseScale,
+                sr = sr,
+                entry = entry,
+                type = visual.Type,
+                staggerIndex = staggerIndex
+            });
+
             staggerIndex++;
+        }
 
-            Sequence seq = DOTween.Sequence();
-            seq.SetTarget(flyingTransform);
-            seq.AppendInterval(delay);
+        if (preparedSymbols.Count == 0)
+        {
+            isAnimatingSymbols = false;
+            return;
+        }
 
-            // צליל גדילה - בתחילת הגדילה
-            seq.AppendCallback(() =>
+        // Phase 1: Grow all symbols with small stagger
+        Sequence masterSeq = DOTween.Sequence();
+
+        foreach (var ps in preparedSymbols)
+        {
+            float growDelay = ps.staggerIndex * symbolStaggerDelay;
+            var growSeq = DOTween.Sequence();
+
+            // Sound
+            growSeq.AppendCallback(() =>
             {
                 if (SoundManager.instance != null && SoundManager.instance.SymbolGrowClipLength > 0f)
                 {
@@ -298,17 +333,33 @@ public class AdventureTargetUI : MonoBehaviour
                     SoundManager.instance.PlaySymbolGrow();
                 }
             });
-            seq.Append(flyingTransform.DOScale(baseScale * symbolPreFlyScaleMultiplier, symbolPreFlyScaleDuration).SetEase(symbolPreFlyScaleEase));
+            growSeq.Append(ps.flyingTransform.DOScale(ps.baseScale * symbolPreFlyScaleMultiplier, symbolPreFlyScaleDuration).SetEase(symbolPreFlyScaleEase));
 
-            Tween moveTween = flyingTransform.DOMove(targetPosition, symbolFlyDuration).SetEase(symbolFlyEase);
-            seq.Append(moveTween);
-            seq.Join(flyingTransform.DOScale(baseScale * symbolIntoTargetScaleMultiplier, symbolFlyDuration).SetEase(symbolIntoTargetScaleEase));
-            if (fadeSymbolIntoTarget && sr != null)
-                seq.Join(sr.DOFade(0f, symbolFlyDuration));
+            masterSeq.Insert(growDelay, growSeq);
+        }
 
-            seq.OnComplete(() =>
+        // Phase 2: Hold all symbols at enlarged size
+        masterSeq.AppendInterval(symbolHoldDuration);
+
+        // Phase 3: Fly to bank one by one sequentially
+        for (int i = 0; i < preparedSymbols.Count; i++)
+        {
+            var ps = preparedSymbols[i];
+            float flyDelay = i * symbolSequentialDelay;
+
+            Vector3 targetPosition = GetWorldPosition(ps.entry.Icon.transform);
+
+            var flySeq = DOTween.Sequence();
+            flySeq.Append(ps.flyingTransform.DOMove(targetPosition, symbolFlyDuration).SetEase(symbolFlyEase));
+            flySeq.Join(ps.flyingTransform.DOScale(ps.baseScale * symbolIntoTargetScaleMultiplier, symbolFlyDuration).SetEase(symbolIntoTargetScaleEase));
+            if (fadeSymbolIntoTarget && ps.sr != null)
+                flySeq.Join(ps.sr.DOFade(0f, symbolFlyDuration));
+
+            // Capture for closure
+            var capturedPs = ps;
+            flySeq.OnComplete(() =>
             {
-                // צליל הגעה למטרה
+                // Sound on arrival
                 if (SoundManager.instance != null && SoundManager.instance.SymbolReachedTargetClipLength > 0f)
                 {
                     float pitch = SoundManager.instance.SymbolReachedTargetClipLength / symbolFlyDuration;
@@ -319,17 +370,51 @@ public class AdventureTargetUI : MonoBehaviour
                     SoundManager.instance.PlaySymbolReachedTarget();
                 }
 
-                if (entry.Root != null)
+                // Punch the target icon
+                if (capturedPs.entry.Root != null)
                 {
-                    entry.Root.transform.DOKill(true);
-                    entry.Root.transform.localScale = Vector3.one;
-                    entry.Root.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
+                    capturedPs.entry.Root.transform.DOKill(true);
+                    capturedPs.entry.Root.transform.localScale = Vector3.one;
+                    capturedPs.entry.Root.transform.DOPunchScale(Vector3.one * punchScale, punchDuration, 1, 0.5f);
                 }
 
-                if (flyingIcon != null)
-                    Destroy(flyingIcon);
+                // Decrement counter by 1
+                if (capturedPs.entry.CountText != null)
+                {
+                    capturedPs.entry.LastCount = Mathf.Max(0, capturedPs.entry.LastCount - 1);
+                    capturedPs.entry.CountText.text = capturedPs.entry.LastCount.ToString();
+
+                    // Dim if completed
+                    if (capturedPs.entry.LastCount <= 0 && capturedPs.entry.Icon != null)
+                    {
+                        var c = capturedPs.entry.Icon.color;
+                        c.a = 0.35f;
+                        capturedPs.entry.Icon.color = c;
+                    }
+                }
+
+                if (capturedPs.flyingIcon != null)
+                    Destroy(capturedPs.flyingIcon);
             });
+
+            masterSeq.Insert(masterSeq.Duration() + flyDelay, flySeq);
         }
+
+        masterSeq.OnComplete(() =>
+        {
+            isAnimatingSymbols = false;
+        });
+    }
+
+    private struct PreparedSymbol
+    {
+        public GameObject flyingIcon;
+        public Transform flyingTransform;
+        public Vector3 baseScale;
+        public SpriteRenderer sr;
+        public TargetUIEntry entry;
+        public ColectionTypes type;
+        public int staggerIndex;
     }
 
     private GameObject CreateFallbackFlyingIcon(ColectionTypes type, Vector3 worldPosition)

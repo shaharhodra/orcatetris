@@ -382,7 +382,22 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             col.enabled = false;
         }
 
+        // להסיר ThemeBlock מה-Ghost כדי שלא ידרוס את האלפה
+        var themeBlocks = currentGhost.GetComponentsInChildren<ThemeBlock>();
+        foreach (var tb in themeBlocks)
+        {
+            Destroy(tb);
+        }
+
         // להפוך את ה-Ghost לשקוף יותר
+        ApplyGhostAlpha();
+
+        currentGhost.gameObject.SetActive(false);
+    }
+
+    private void ApplyGhostAlpha()
+    {
+        if (currentGhost == null) return;
         var renderers = currentGhost.GetComponentsInChildren<SpriteRenderer>();
         foreach (var r in renderers)
         {
@@ -391,8 +406,6 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             c.a = Mathf.Clamp01(ghostAlpha);
             r.color = c;
         }
-
-        currentGhost.gameObject.SetActive(false);
     }
 
     private void UpdateGhostPreview(Vector2Int targetCell, bool canPlace)
@@ -414,6 +427,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             currentGhost.gameObject.SetActive(true);
 
         currentGhost.transform.position = shape.transform.position + delta;
+
+        // Apply alpha every frame to ensure ThemeBlock doesn't override it
+        ApplyGhostAlpha();
     }
 
     private void HideAndDestroyGhost()

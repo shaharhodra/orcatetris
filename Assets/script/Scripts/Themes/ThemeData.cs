@@ -21,6 +21,10 @@ public class ThemeData : ScriptableObject
     public Sprite blockSprite;           // ספרייט לבלוקי הצורות
     public Color blockColor = Color.white;
 
+    [Header("Placed Square")]
+    [Tooltip("צבע הקוביות שנשארות על הגריד אחרי הנחה. אם אלפא=0, ישתמש ב-blockColor")]
+    public Color squareColor = Color.white;
+
     [Header("Grid Cell Sprite")]
     public Sprite gridCellSprite;        // ספרייט לתאי הגריד
 

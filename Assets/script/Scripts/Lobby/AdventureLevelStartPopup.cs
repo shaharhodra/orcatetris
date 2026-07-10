@@ -20,7 +20,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
     [Header("Auto Start")]
     [SerializeField] private bool autoStart = true;
-    [SerializeField, Min(0f)] private float autoStartDelay = 1.0f;
+    [SerializeField, Min(0f)] private float autoStartDelay = 3.0f;
 
     [Header("Target Layout")]
     [SerializeField] private float targetItemPreferredSize = 110f;
@@ -39,6 +39,12 @@ public class AdventureLevelStartPopup : MonoBehaviour
     [SerializeField] private float overlayFadeDuration = 0.3f;
     [SerializeField] private float panelScaleDuration = 0.4f;
     [SerializeField] private Ease panelEase = Ease.OutBack;
+
+    [Header("Dismiss Animation")]
+    [SerializeField] private float symbolFlyOutDuration = 0.35f;
+    [SerializeField] private float symbolFlyOutDelay = 0.12f;
+    [SerializeField] private float symbolFlyOutDistance = 1200f;
+    [SerializeField] private Ease symbolFlyOutEase = Ease.InBack;
 
     private bool isShowing;
     private Tween autoStartTween;
@@ -235,9 +241,31 @@ public class AdventureLevelStartPopup : MonoBehaviour
         if (SoundManager.instance != null)
             SoundManager.instance.PlayButtonClick();
 
-        // Hide popup
+        // Animate symbols flying off screen one by one, then close popup
         Sequence seq = DOTween.Sequence().SetUpdate(true);
 
+        // Fly out each target item
+        if (targetsContainer != null)
+        {
+            int childCount = targetsContainer.childCount;
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = targetsContainer.GetChild(i);
+                if (child == null) continue;
+
+                var rt = child.GetComponent<RectTransform>();
+                if (rt == null) continue;
+
+                float delay = i * symbolFlyOutDelay;
+                // Fly upward off screen
+                seq.Insert(delay, rt.DOAnchorPosY(rt.anchoredPosition.y + symbolFlyOutDistance, symbolFlyOutDuration)
+                    .SetEase(symbolFlyOutEase));
+                // Scale down slightly while flying
+                seq.Insert(delay, rt.DOScale(0.3f, symbolFlyOutDuration).SetEase(symbolFlyOutEase));
+            }
+        }
+
+        // After symbols fly out, scale down the panel
         if (popupPanel != null)
             seq.Append(popupPanel.DOScale(0f, 0.25f).SetEase(Ease.InBack));
 

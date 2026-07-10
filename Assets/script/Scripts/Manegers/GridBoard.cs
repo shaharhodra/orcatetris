@@ -321,6 +321,11 @@ public class GridBoard : MonoBehaviour
 
             placedBlocks[pos.x, pos.y] = blockObj;
 
+            // Mark as placed so ThemeBlock uses squareColor
+            var themeBlock = blockObj.GetComponent<ThemeBlock>();
+            if (themeBlock != null)
+                themeBlock.MarkAsPlaced();
+
             // Apply symbol if defined
             if (blockData.Symbol >= 0)
             {

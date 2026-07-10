@@ -102,6 +102,11 @@ public class GridPlacer : MonoBehaviour
                 
                 board.SetPlacedBlock(cell, block.gameObject);
 
+                // Mark as placed so ThemeBlock uses squareColor
+                var themeBlock = block.GetComponent<ThemeBlock>();
+                if (themeBlock != null)
+                    themeBlock.MarkAsPlaced();
+
                 // If the block has a predefined symbol, register it on the grid
                 var blockSymbol = block.GetComponent<BlockSymbol>();
                 if (blockSymbol != null && blockSymbol.HasSymbol)
