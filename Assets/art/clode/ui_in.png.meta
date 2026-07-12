@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: c28774798e9dc7942961364162be393a
+guid: fbfb28439596cc441b3a53b6a9727476
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8110217799361965792
-    second: Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_0
-  - first:
-      213: -8860971397286928993
-    second: Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_1
+      213: -4075805769370589909
+    second: ui_panel_glass_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 100, y: 100, z: 100, w: 100}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -112,62 +109,27 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_0
+      name: ui_panel_glass_0
       rect:
         serializedVersion: 2
-        x: 170
-        y: 183
-        width: 337
-        height: 97
+        x: 0
+        y: 0
+        width: 512
+        height: 512
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 021daf991e7b27f80800000000000000
-      internalID: -8110217799361965792
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_1
-      rect:
-        serializedVersion: 2
-        x: 185
-        y: 86
-        width: 314
-        height: 96
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f9dd0db2671870580800000000000000
-      internalID: -8860971397286928993
+      spriteID: b25ad2f4f34df67c0800000000000000
+      internalID: -4075805769370589909
       vertices: []
       indices: 
       edges: []
@@ -176,8 +138,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -186,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_0: -8110217799361965792
-      Gemini_Generated_Image_3cz3nt3cz3nt3cz3-removebg-preview_1: -8860971397286928993
+      ui_panel_glass_0: -4075805769370589909
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

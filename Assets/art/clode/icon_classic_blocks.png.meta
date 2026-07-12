@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: ffe31aed90b8f7148a82fc221c72709f
+guid: 77a3e084bd8dbd3429cc05eefbc76d50
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5178482537593082946
-    second: Gemini_Generated_Image_dlo6igdlo6igdlo6-removebg-preview_0
+      213: 6875979717950280483
+    second: icon_classic_blocks_0
+  - first:
+      213: 6146195803053764412
+    second: icon_classic_blocks_1
+  - first:
+      213: -8266555411421323610
+    second: icon_classic_blocks_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,40 +115,71 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: iOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_dlo6igdlo6igdlo6-removebg-preview_0
+      name: icon_classic_blocks_0
       rect:
         serializedVersion: 2
-        x: 45
-        y: 123
-        width: 590
-        height: 111
+        x: 27
+        y: 71
+        width: 157
+        height: 158
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2449cc06e6aadd740800000000000000
-      internalID: 5178482537593082946
+      spriteID: 323973b7f136c6f50800000000000000
+      internalID: 6875979717950280483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_classic_blocks_1
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 154
+        width: 75
+        height: 75
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3f2409d48cab4550800000000000000
+      internalID: 6146195803053764412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon_classic_blocks_2
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 72
+        width: 75
+        height: 75
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ae1622c6ab474d80800000000000000
+      internalID: -8266555411421323610
       vertices: []
       indices: 
       edges: []
@@ -151,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 63df2b21b5d42b7489ca7828b4972681
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gemini_Generated_Image_dlo6igdlo6igdlo6-removebg-preview_0: 5178482537593082946
+      icon_classic_blocks_0: 6875979717950280483
+      icon_classic_blocks_1: 6146195803053764412
+      icon_classic_blocks_2: -8266555411421323610
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

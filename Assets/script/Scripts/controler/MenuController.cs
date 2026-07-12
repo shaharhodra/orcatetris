@@ -8,24 +8,33 @@ public class MenuController : MonoBehaviour
 
     private void Start()
     {
-        if (classicButton != null)
-        {
-            classicButton.onClick.RemoveAllListeners();
-            classicButton.onClick.AddListener(() =>
-            {
-                if (AppManager.instance != null)
-                    AppManager.instance.LoadClassicGame();
-            });
-        }
+        Debug.Log($"[MenuController] Start() called. classicButton={(classicButton != null ? classicButton.name : "NULL")}, adventureButton={(adventureButton != null ? adventureButton.name : "NULL")}");
 
-        if (adventureButton != null)
+        SetupButton(classicButton, () =>
         {
-            adventureButton.onClick.RemoveAllListeners();
-            adventureButton.onClick.AddListener(() =>
-            {
-                if (AppManager.instance != null)
-                    AppManager.instance.StartAdventureGameFromLobby();
-            });
-        }
+            Debug.Log("[MenuController] Classic button clicked!");
+            if (AppManager.instance != null)
+                AppManager.instance.LoadClassicGame();
+        });
+
+        SetupButton(adventureButton, () =>
+        {
+            Debug.Log("[MenuController] Adventure button clicked!");
+            if (AppManager.instance != null)
+                AppManager.instance.StartAdventureGameFromLobby();
+        });
+    }
+
+    private void SetupButton(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button == null) return;
+
+        // Remove all persistent (Inspector) and runtime listeners to avoid stale references
+        button.onClick.RemoveAllListeners();
+        int persistentCount = button.onClick.GetPersistentEventCount();
+        for (int i = 0; i < persistentCount; i++)
+            button.onClick.SetPersistentListenerState(i, UnityEngine.Events.UnityEventCallState.Off);
+
+        button.onClick.AddListener(action);
     }
 }

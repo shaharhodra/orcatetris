@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 18e4b282fa63c9f418c5b50d5e5edd16
+guid: 5239abbafbc224f4fa9556f1cbd76cb6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1854008064661585369
-    second: Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_0
-  - first:
-      213: 8605688456180838755
-    second: Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_1
+      213: -3172839315520791676
+    second: ui_glow_tile_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -54,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 400
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -116,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_0
+      name: ui_glow_tile_0
       rect:
         serializedVersion: 2
-        x: 32
-        y: 104
-        width: 297
-        height: 153
+        x: 0
+        y: 0
+        width: 464
+        height: 464
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,30 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9ddfcd80382cab910800000000000000
-      internalID: 1854008064661585369
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_1
-      rect:
-        serializedVersion: 2
-        x: 348
-        y: 104
-        width: 302
-        height: 154
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 361b6565e0c8d6770800000000000000
-      internalID: 8605688456180838755
+      spriteID: 48b5df4f37fc7f3d0800000000000000
+      internalID: -3172839315520791676
       vertices: []
       indices: 
       edges: []
@@ -173,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_0: 1854008064661585369
-      Gemini_Generated_Image_kb89i2kb89i2kb89-removebg-preview_1: 8605688456180838755
+      ui_glow_tile_0: -3172839315520791676
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

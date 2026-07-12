@@ -174,10 +174,14 @@ public class ThemeManager : MonoBehaviour
             var gridCells = gridBoard.GetComponentsInChildren<GridCell>();
             foreach (var cell in gridCells)
             {
+                // Check if cell is occupied
+                bool isOccupied = gridBoard.IsOccupied(cell.gridPos);
+                Color targetColor = isOccupied ? theme.gridCellOccupiedColor : theme.gridCellEmptyColor;
+                
                 if (theme.gridCellSprite != null)
-                    cell.ApplyTheme(theme.gridCellSprite, theme.gridCellEmptyColor);
+                    cell.ApplyTheme(theme.gridCellSprite, targetColor);
                 else
-                    cell.ApplyThemeColor(theme.gridCellEmptyColor);
+                    cell.ApplyThemeColor(targetColor);
             }
         }
 

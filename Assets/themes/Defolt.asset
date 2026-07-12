@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThemeData
   themeName: Default
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
-  backgroundSprite: {fileID: -6292356986972372547, guid: 894e6fe19662cb34da2f2741be194393, type: 3}
+  backgroundSprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
   backgroundTint: {r: 0.48235294, g: 0.8235294, b: 1, a: 1}
-  gridCellEmptyColor: {r: 0.41598436, g: 0.41598436, b: 0.7169812, a: 1}
-  gridCellOccupiedColor: {r: 0.086274505, g: 1, b: 0.1925742, a: 1}
-  blockSprite: {fileID: -1775993598289667745, guid: a7a8bfb93ed480a42bcd5004bb1d373b, type: 3}
-  blockColor: {r: 0, g: 0.54901963, b: 0.028751936, a: 1}
+  gridCellEmptyColor: {r: 1, g: 1, b: 1, a: 0.16862746}
+  gridCellOccupiedColor: {r: 1, g: 1, b: 1, a: 0}
+  blockSprite: {fileID: -3172839315520791676, guid: 5239abbafbc224f4fa9556f1cbd76cb6, type: 3}
+  blockColor: {r: 0.54901963, g: 0.10502408, b: 0, a: 1}
   squareColor: {r: 0, g: 0.54901963, b: 0.027450982, a: 1}
-  gridCellSprite: {fileID: -62245763954740697, guid: bfef157fcd539f94599f40f672feaf6d, type: 3}
-  uiPrimaryColor: {r: 1, g: 1, b: 1, a: 1}
+  gridCellSprite: {fileID: 21300000, guid: 411c07eebf44ffa4283cf1ba06914797, type: 3}
+  uiPrimaryColor: {r: 1, g: 0, b: 0, a: 0}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   transitionDuration: 1.5

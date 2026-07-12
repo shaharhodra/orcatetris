@@ -165,14 +165,16 @@ public class AppManager : Singleton<AppManager>
 
     public void LoadClassicGame()
     {
+        Debug.Log($"[AppManager] LoadClassicGame called. useAddressables={useAddressablesForLevels}, classicJsonFile={(_classicLevelJsonFile != null ? _classicLevelJsonFile.name : "NULL")}, levelJson empty={string.IsNullOrEmpty(_levelJson)}, targetScene={classicGameSceneBuildIndex}");
         SetGameModeClassic();
 
         if (!useAddressablesForLevels && _classicLevelJsonFile == null && string.IsNullOrEmpty(_levelJson))
         {
-          //  Debug.LogError("AppManager -> LoadClassicGame called but no classic json is assigned. Assign _classicLevelJsonFile on the persistent GameManager (DontDestroyOnLoad).");
+            Debug.LogError("[AppManager] LoadClassicGame BLOCKED: no classic json assigned!");
             return;
         }
 
+        Debug.Log($"[AppManager] LoadClassicGame -> loading scene {classicGameSceneBuildIndex}");
         SceneManager.LoadScene(classicGameSceneBuildIndex);
     }
 

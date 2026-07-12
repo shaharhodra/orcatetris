@@ -57,32 +57,27 @@ public class GridCell : MonoBehaviour
         if (_sprite != null && sprite != null)
         {
             _sprite.sprite = sprite;
-
-            // Compensate scale so cell keeps same visual size
-            if (originalSprite != null)
-            {
-                Vector2 origSize = originalSprite.bounds.size;
-                Vector2 newSize = sprite.bounds.size;
-
-                if (newSize.x > 0f && newSize.y > 0f)
-                {
-                    _sprite.transform.localScale = new Vector3(
-                        originalSpriteScale.x * origSize.x / newSize.x,
-                        originalSpriteScale.y * origSize.y / newSize.y,
-                        originalSpriteScale.z);
-                }
-            }
-
             SyncBoxColliderToSprite();
         }
 
         normalColor = color;
-        UpdateVisual();
+        // Update normalAlpha to match the theme color's alpha
+        normalAlpha = color.a;
+        
+        // Also update the sprite directly to ensure theme alpha is applied immediately
+        if (_sprite != null)
+        {
+            Color finalColor = normalColor;
+            finalColor.a = normalAlpha;
+            _sprite.color = finalColor;
+        }
     }
 
     public void ApplyThemeColor(Color color)
     {
         normalColor = color;
+        // Update normalAlpha to match the theme color's alpha
+        normalAlpha = color.a;
         UpdateVisual();
     }
 

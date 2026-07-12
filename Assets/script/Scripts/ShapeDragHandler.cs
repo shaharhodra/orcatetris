@@ -11,6 +11,10 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [Header("Ghost Preview")]
     [SerializeField] private Shape ghostPrefab; // אופציונלי: אם לא הוגדר, נשתמש בעותק של הצורה עצמה
     [SerializeField] private float ghostAlpha = 0.5f;
+    [SerializeField] private Color[] ghostColors = new Color[]
+    {
+        Color.cyan, Color.magenta, Color.yellow, Color.green, Color.red, new Color(1f, 0.5f, 0f), new Color(0.5f, 0f, 1f)
+    };
     [SerializeField, Min(0)] private int ghostSnapRadius = 0; // כמה תאים סביב התא המרכזי לחפש מיקום חוקי
     [SerializeField] private float minFingerOffsetX = 0f;
     [SerializeField] private float maxFingerOffsetX = 1.5f;
@@ -20,6 +24,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     [SerializeField] private float verticalOffsetRangePixels = 200f; // כמה גרירת מסך דרושה כדי להגיע למקסימום
     [SerializeField] private float validAlpha = 0.8f;
     [SerializeField] private float invalidAlpha = 0.3f;
+    [SerializeField] private int dragSortingOrderBoost = 100;
 
     [Header("Press Scale")]
     [SerializeField] private bool usePressScale = true;
@@ -42,6 +47,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     private Shape currentGhost;
     private Vector2Int? lastValidCell;
     private System.Collections.Generic.List<Vector2Int> previewBuffer;
+    private int[] originalSortingOrders;
 
     private void Awake()
     {
@@ -83,6 +89,9 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         pointerDown = true;
         beganDrag = false;
+
+        // Raise sorting order so dragged shape appears above grid blocks
+        RaiseSortingOrder();
 
         if (usePressScale)
         {
@@ -184,6 +193,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         transform.position = startPos;
         SetAlpha(1f);
+        RestoreSortingOrder();
 
         if (usePressScale)
         {
@@ -227,6 +237,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             }
 
             SetAlpha(1f);
+            RestoreSortingOrder();
 
             HideAndDestroyGhost();
 
@@ -248,6 +259,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         {
             transform.position = startPos;
             SetAlpha(1f);
+            RestoreSortingOrder();
 
             if (usePressScale)
             {
@@ -277,6 +289,28 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         }
     }
 
+    private void RaiseSortingOrder()
+    {
+        var renderers = GetComponentsInChildren<SpriteRenderer>();
+        originalSortingOrders = new int[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            originalSortingOrders[i] = renderers[i].sortingOrder;
+            renderers[i].sortingOrder += dragSortingOrderBoost;
+        }
+    }
+
+    private void RestoreSortingOrder()
+    {
+        if (originalSortingOrders == null) return;
+        var renderers = GetComponentsInChildren<SpriteRenderer>();
+        for (int i = 0; i < renderers.Length && i < originalSortingOrders.Length; i++)
+        {
+            renderers[i].sortingOrder = originalSortingOrders[i];
+        }
+        originalSortingOrders = null;
+    }
+
     private void UpdatePlacementFeedback()
     {
         if (board == null || boardPlacer == null || shape == null)
@@ -293,7 +327,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         else
             lastValidCell = null;
 
-        SetAlpha(canPlace ? validAlpha : invalidAlpha);
+        // Keep dragged shape always at full opacity
+        SetAlpha(1f);
 
         UpdateGhostPreview(chosenCell, canPlace);
 
@@ -382,6 +417,13 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
             col.enabled = false;
         }
 
+        // להוריד את ה-sortingOrder של ה-Ghost כדי שיהיה מתחת לצורה הנגררת
+        var ghostRenderers = currentGhost.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in ghostRenderers)
+        {
+            r.sortingOrder -= 10;
+        }
+
         // להסיר ThemeBlock מה-Ghost כדי שלא ידרוס את האלפה
         var themeBlocks = currentGhost.GetComponentsInChildren<ThemeBlock>();
         foreach (var tb in themeBlocks)
@@ -395,16 +437,36 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         currentGhost.gameObject.SetActive(false);
     }
 
+    private Color currentGhostColor;
+
     private void ApplyGhostAlpha()
+    {
+        if (currentGhost == null) return;
+
+        // Pick a random color for this ghost instance
+        if (ghostColors != null && ghostColors.Length > 0)
+            currentGhostColor = ghostColors[Random.Range(0, ghostColors.Length)];
+        else
+            currentGhostColor = Color.white;
+
+        currentGhostColor.a = Mathf.Clamp(ghostAlpha, 0.1f, 0.9f);
+
+        var renderers = currentGhost.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers)
+        {
+            if (r == null) continue;
+            r.color = currentGhostColor;
+        }
+    }
+
+    private void RefreshGhostColor()
     {
         if (currentGhost == null) return;
         var renderers = currentGhost.GetComponentsInChildren<SpriteRenderer>();
         foreach (var r in renderers)
         {
             if (r == null) continue;
-            var c = r.color;
-            c.a = Mathf.Clamp01(ghostAlpha);
-            r.color = c;
+            r.color = currentGhostColor;
         }
     }
 
@@ -428,8 +490,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
         currentGhost.transform.position = shape.transform.position + delta;
 
-        // Apply alpha every frame to ensure ThemeBlock doesn't override it
-        ApplyGhostAlpha();
+        // Refresh color every frame to prevent overrides
+        RefreshGhostColor();
     }
 
     private void HideAndDestroyGhost()

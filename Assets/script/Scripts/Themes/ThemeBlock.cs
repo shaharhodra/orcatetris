@@ -58,35 +58,13 @@ public class ThemeBlock : MonoBehaviour
 
         if (theme.blockSprite != null)
         {
-            // Only compensate if we have a valid reference and sprites differ in size
-            if (originalSprite != null && originalSprite != theme.blockSprite)
-            {
-                Vector2 origSize = originalSprite.bounds.size;
-                Vector2 newSize  = theme.blockSprite.bounds.size;
-
-                if (origSize.x > 0f && newSize.x > 0f)
-                {
-                    transform.localScale = new Vector3(
-                        originalScale.x * origSize.x / newSize.x,
-                        originalScale.y * origSize.y / newSize.y,
-                        originalScale.z);
-                }
-            }
-            else if (originalSprite == theme.blockSprite)
-            {
-                transform.localScale = originalScale;
-            }
-
             sr.sprite = theme.blockSprite;
         }
         else
         {
             // No sprite in theme — revert to original
             if (originalSprite != null)
-            {
                 sr.sprite = originalSprite;
-                transform.localScale = originalScale;
-            }
         }
 
         // Choose color based on whether this block is placed on grid or still in shape tray
