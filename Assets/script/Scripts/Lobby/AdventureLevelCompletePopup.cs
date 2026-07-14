@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using DG.Tweening;
+using System.Collections.Generic;
 using TMPro;
-using DG.Tweening;
+using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Simple, clean popup for Adventure level completion.
@@ -76,7 +77,10 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         }
 
         isActive = true;
-        Debug.Log($"[CompletePopup] Invoking ShowInternal in {showDelay} seconds...");
+        var levelTime = Time.time;
+		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelComplete.ToString(), new List<AnalyticsManager.AnalyticsEventData>() {
+			new AnalyticsManager.AnalyticsEventData("GameType", "adventure"), new AnalyticsManager.AnalyticsEventData("LevelTime", levelTime.ToString())});
+		Debug.Log($"[CompletePopup] Invoking ShowInternal in {showDelay} seconds...");
         Invoke(nameof(ShowInternal), showDelay);
     }
 

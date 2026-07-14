@@ -20,6 +20,11 @@ public class GridPlacer : MonoBehaviour
     [SerializeField] private int scorePerPlacedCell = 1;
     [SerializeField] private int scorePerClearedCell = 2;
 
+    // Fixed sorting order for any block once it sits on the grid, so tray shapes
+    // (sortingOrder 20, set in ShapeTrayManager) always render above them,
+    // regardless of whatever order the source prefab happened to be authored with.
+    private const int PlacedBlockSortingOrder = 2;
+
     [Header("Block Entry Animation")]
     [SerializeField] private bool animateBlockEntry = false;
     [SerializeField] private float blockEntryDuration = 0.5f;
@@ -89,8 +94,13 @@ public class GridPlacer : MonoBehaviour
             if (childBlocks.TryGetValue(offset, out var block) && block != null)
             {
                 block.SetParent(board.transform, true);
+
+                var blockRenderer = block.GetComponent<SpriteRenderer>();
+                if (blockRenderer != null)
+                    blockRenderer.sortingOrder = PlacedBlockSortingOrder;
+
                 Vector3 targetPosition = board.GridToWorld(cell);
-                
+
                 if (animateBlockEntry)
                 {
                     AnimateBlockEntry(block, targetPosition, blockIndex * blockEntryDelayPerBlock);

@@ -15,8 +15,8 @@ MonoBehaviour:
   themeName: Default
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
   backgroundSprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
-  backgroundTint: {r: 0.48235294, g: 0.8235294, b: 1, a: 1}
-  gridCellEmptyColor: {r: 1, g: 1, b: 1, a: 0.16862746}
+  backgroundTint: {r: 1, g: 1, b: 1, a: 1}
+  gridCellEmptyColor: {r: 1, g: 1, b: 1, a: 0.15686275}
   gridCellOccupiedColor: {r: 1, g: 1, b: 1, a: 0}
   blockSprite: {fileID: -3172839315520791676, guid: 5239abbafbc224f4fa9556f1cbd76cb6, type: 3}
   blockColor: {r: 0.54901963, g: 0.10502408, b: 0, a: 1}

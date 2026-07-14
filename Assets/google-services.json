@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "484506060075",
+    "project_id": "orcatettris",
+    "storage_bucket": "orcatettris.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484506060075:android:ff402e1fd2337ade20316e",
+        "android_client_info": {
+          "package_name": "com.orca.tetrarush"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbsISmKOVc5MHvHcRf3kuiFeiAVOsubhk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -16,12 +16,6 @@ public class ThemeManager : MonoBehaviour
     [SerializeField] private ThemeData defaultTheme;
     [SerializeField] private ThemeData[] themes;
 
-    [Header("Trigger Conditions")]
-    [Tooltip("Switch to theme at index N when score reaches scoreThresholds[N]")]
-    [SerializeField] private int[] scoreThresholds;
-    [Tooltip("Switch to this theme index when the board is fully cleared")]
-    [SerializeField] private int boardClearThemeIndex = -1;
-
     [Header("Scene References")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private SpriteRenderer backgroundRenderer;
@@ -52,16 +46,6 @@ public class ThemeManager : MonoBehaviour
             mainCamera = Camera.main;
 
         ApplyTheme(defaultTheme, instant: true);
-
-        // Listen to score changes
-        if (ScoreManager.instance != null)
-            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdated;
-    }
-
-    private void OnDestroy()
-    {
-        if (ScoreManager.instance != null)
-            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdated;
     }
 
     // ===== Public API =====
@@ -81,10 +65,17 @@ public class ThemeManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Call whenever the player fully clears the grid. Advances to the next theme
+    /// in the list each time (wrapping around), instead of switching by score.
+    /// </summary>
     public void TriggerBoardCleared()
     {
-        if (boardClearThemeIndex >= 0 && themes != null && boardClearThemeIndex < themes.Length)
-            SwitchToTheme(boardClearThemeIndex);
+        if (themes == null || themes.Length == 0)
+            return;
+
+        int nextIndex = (currentThemeIndex + 1) % themes.Length;
+        SwitchToTheme(nextIndex);
     }
 
     public void SwitchToTheme(int index)
@@ -106,21 +97,6 @@ public class ThemeManager : MonoBehaviour
     }
 
     // ===== Internal =====
-
-    private void HandleScoreUpdated(int score)
-    {
-        if (scoreThresholds == null || themes == null)
-            return;
-
-        for (int i = scoreThresholds.Length - 1; i >= 0; i--)
-        {
-            if (score >= scoreThresholds[i] && i < themes.Length)
-            {
-                SwitchToTheme(i);
-                return;
-            }
-        }
-    }
 
     private void ApplyTheme(ThemeData theme, bool instant)
     {

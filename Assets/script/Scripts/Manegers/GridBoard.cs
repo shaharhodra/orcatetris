@@ -41,10 +41,10 @@ public class GridBoard : MonoBehaviour
 
     [Header("Initial Block Entry Animation")]
     [SerializeField] private bool animateInitialBlockEntry = true;
-    [SerializeField] private float initialBlockEntryDuration = 0.6f;
+    [SerializeField] private float initialBlockEntryDuration = 0.25f;
     [SerializeField] private Ease initialBlockEntryEase = Ease.OutBack;
     [SerializeField] private float initialBlockEntryDistance = 8f;
-    [SerializeField] private float initialBlockEntryDelayPerBlock = 0.08f;
+    [SerializeField] private float initialBlockEntryDelayPerBlock = 0f;
 
     // ✅ תיקון: הוסף getters נכונים
     public int Rows => height;
@@ -313,6 +313,12 @@ public class GridBoard : MonoBehaviour
             Vector3 worldPos = GridToWorld(pos);
             var blockObj = Instantiate(initialBlockPrefab, worldPos, Quaternion.identity, transform);
             blockObj.name = $"InitialBlock_{blockData.x}_{blockData.y}";
+
+            // Match the sorting order of normally-placed blocks so tray shapes
+            // (sortingOrder 20) reliably render above every block on the grid.
+            var blockRenderer = blockObj.GetComponent<SpriteRenderer>();
+            if (blockRenderer != null)
+                blockRenderer.sortingOrder = 2;
 
             if (animateInitialBlockEntry)
             {

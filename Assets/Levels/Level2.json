@@ -1,6 +1,6 @@
 {
   "Level": 2,
-  "LevelType": 1,
+  "LevelType": "adventure",
   "TimeInSeconds": 0,
   "GridRows": 8,
   "GridColumns": 8,

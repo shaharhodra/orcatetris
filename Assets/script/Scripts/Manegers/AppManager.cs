@@ -473,7 +473,7 @@ public class AppManager : Singleton<AppManager>
 
         CurrentLevelData = levelData;
         AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelStart.ToString(), new List<AnalyticsManager.AnalyticsEventData>() { 
-            new AnalyticsManager.AnalyticsEventData("GameType", levelData.GameType.ToString())});
+            new AnalyticsManager.AnalyticsEventData("GameType", levelData.LevelType)});
         
 
         InvokeOnDataLoaded(levelData);

@@ -8,6 +8,7 @@ using UnityEngine;
 public class LevelData
 {
 	public GameTypes GameType;
+	public string LevelType;
 	public string LevelName;
 	public int Level;
 	public int GridRows;

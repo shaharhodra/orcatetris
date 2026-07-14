@@ -2,8 +2,8 @@
   "Level": 1,
   "LevelType": "adventure",
   "TimeInSeconds": 180,
-  "GridRows": 6,
-  "GridColumns": 6,
+  "GridRows": 8,
+  "GridColumns": 8,
   "NumberOfShapes": 0,
   "LevelName": "Level 1",
   "Shapes": [],
@@ -24,7 +24,12 @@
     { "x": 4, "y": 0,"Symbol": 0},
     { "x": 5, "y": 0},
     { "x": 4, "y": 1},
-    { "x": 5, "y": 1}
+    { "x": 5, "y": 1},
+    { "x": 6, "y": 0},
+    { "x": 6, "y": 1},
+    { "x": 7, "y": 0},
+    { "x": 7, "y": 1}
+
 
     
   ],

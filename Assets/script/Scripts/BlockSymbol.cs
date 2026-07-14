@@ -88,7 +88,14 @@ public class BlockSymbol : MonoBehaviour
 
         var sr = iconInstance.AddComponent<SpriteRenderer>();
         sr.sprite = symbolSprite;
-        sr.sortingOrder = sortingOrder;
+
+        // Sit just above this block's own renderer (rather than an absolute value),
+        // so the icon stays correctly layered whether the block is idle in the tray,
+        // placed on the grid, or actively being dragged (all of which use different
+        // sortingOrder tiers that shift together).
+        var blockRenderer = GetComponent<SpriteRenderer>();
+        int baseOrder = blockRenderer != null ? blockRenderer.sortingOrder : 0;
+        sr.sortingOrder = baseOrder + sortingOrder;
         
         if (animateEntry)
         {

@@ -1,9 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Automatically adjusts the camera's orthographic size and position
-/// so the entire game screen (grid + shape tray + top UI) is always
-/// fully visible regardless of screen aspect ratio or device.
+/// Fits the camera's orthographic size and position so the grid and the shape
+/// tray stay fully visible regardless of the device's screen aspect ratio.
+/// Bounds come from the grid's own size (origin/width/height/cellSize) plus a
+/// fixed radius around each tray slot's anchor position — NOT from scanning
+/// live renderers, because a shape mid-drag would otherwise drag the camera
+/// along with it. The fit only recomputes when the screen size or the grid's
+/// column/row count actually changes (e.g. on a new level), so placing or
+/// dragging a shape never shifts the camera.
 /// Attach to the Main Camera.
 /// </summary>
 [RequireComponent(typeof(Camera))]
@@ -11,39 +16,23 @@ public class CameraGridFit : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private GridBoard gridBoard;
-    [Tooltip("The shape tray transform (lowest element on screen)")]
-    [SerializeField] private Transform shapeTray;
-
-    [Header("Design Reference")]
-    [Tooltip("The aspect ratio you designed the game for (width/height). 9:16 = 0.5625")]
-    [SerializeField] private float referenceAspect = 0.5625f;
-    [Tooltip("The orthographic size that looks correct in the editor at the reference aspect")]
-    [SerializeField] private float referenceOrthoSize = 8f;
-
-    [Header("World Bounds")]
-    [Tooltip("Topmost Y position that must be visible (top UI edge in world units)")]
-    [SerializeField] private float worldTop = 7f;
-    [Tooltip("Bottommost Y position that must be visible (bottom of shape tray in world units)")]
-    [SerializeField] private float worldBottom = -7f;
-    [Tooltip("Leftmost X position that must be visible")]
-    [SerializeField] private float worldLeft = -4f;
-    [Tooltip("Rightmost X position that must be visible")]
-    [SerializeField] private float worldRight = 4f;
+    [Tooltip("Fixed anchor points that must stay visible, e.g. the shape tray slots. Only their own position is used (not their children), so a dragged/placed shape never moves the camera.")]
+    [SerializeField] private Transform[] anchorPoints;
+    [Tooltip("Radius reserved around each anchor point for its content (e.g. half the biggest shape's footprint)")]
+    [SerializeField] private float anchorRadius = 1.5f;
 
     [Header("Padding")]
-    [SerializeField] private float extraPadding = 0.5f;
+    [SerializeField] private float extraPadding = 0.3f;
 
     [Header("Limits")]
-    [SerializeField] private float minOrthoSize = 5f;
+    [SerializeField] private float minOrthoSize = 3f;
     [SerializeField] private float maxOrthoSize = 14f;
-
-    [Header("Options")]
-    [Tooltip("Also reposition camera Y to center the visible content")]
-    [SerializeField] private bool adjustCameraPosition = true;
 
     private Camera cam;
     private int lastScreenWidth;
     private int lastScreenHeight;
+    private int lastGridColumns = -1;
+    private int lastGridRows = -1;
 
     private void Awake()
     {
@@ -55,48 +44,78 @@ public class CameraGridFit : MonoBehaviour
         if (gridBoard == null)
             gridBoard = FindFirstObjectByType<GridBoard>();
 
-        FitCamera();
+        Fit();
     }
 
     private void LateUpdate()
     {
-        if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
-        {
-            FitCamera();
-        }
+        bool screenChanged = Screen.width != lastScreenWidth || Screen.height != lastScreenHeight;
+        bool gridChanged = gridBoard != null && (gridBoard.Columns != lastGridColumns || gridBoard.Rows != lastGridRows);
+
+        if (screenChanged || gridChanged)
+            Fit();
     }
 
-    public void FitCamera()
+    public void Fit()
     {
         if (cam == null)
             return;
 
-        float aspect = cam.aspect; // width / height
+        bool hasBounds = false;
+        Bounds bounds = new Bounds();
 
-        // Total world area that must be visible
-        float contentHeight = (worldTop - worldBottom) + extraPadding * 2f;
-        float contentWidth = (worldRight - worldLeft) + extraPadding * 2f;
+        if (gridBoard != null)
+        {
+            Vector2 min = gridBoard.origin;
+            Vector2 max = min + new Vector2(gridBoard.width, gridBoard.height) * gridBoard.cellSize;
+            bounds.SetMinMax(new Vector3(min.x, min.y, 0f), new Vector3(max.x, max.y, 0f));
+            hasBounds = true;
+        }
 
-        // Ortho size needed to fit height
+        if (anchorPoints != null)
+        {
+            foreach (var anchor in anchorPoints)
+            {
+                if (anchor == null)
+                    continue;
+
+                Bounds anchorBounds = new Bounds(anchor.position, Vector3.one * (anchorRadius * 2f));
+
+                if (!hasBounds)
+                {
+                    bounds = anchorBounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    bounds.Encapsulate(anchorBounds);
+                }
+            }
+        }
+
+        if (!hasBounds)
+            return;
+
+        float aspect = cam.aspect;
+
+        float contentWidth = bounds.size.x + extraPadding * 2f;
+        float contentHeight = bounds.size.y + extraPadding * 2f;
+
         float orthoForHeight = contentHeight * 0.5f;
-        // Ortho size needed to fit width given current aspect
         float orthoForWidth = (contentWidth * 0.5f) / aspect;
 
-        // Use the larger to guarantee everything fits
-        float targetOrtho = Mathf.Max(orthoForHeight, orthoForWidth);
-        targetOrtho = Mathf.Clamp(targetOrtho, minOrthoSize, maxOrthoSize);
-
+        float targetOrtho = Mathf.Clamp(Mathf.Max(orthoForHeight, orthoForWidth), minOrthoSize, maxOrthoSize);
         cam.orthographicSize = targetOrtho;
 
-        // Center camera vertically on the content
-        if (adjustCameraPosition)
-        {
-            float centerY = (worldTop + worldBottom) * 0.5f;
-            float centerX = (worldLeft + worldRight) * 0.5f;
-            transform.position = new Vector3(centerX, centerY, transform.position.z);
-        }
+        Vector3 center = bounds.center;
+        transform.position = new Vector3(center.x, center.y, transform.position.z);
 
         lastScreenWidth = Screen.width;
         lastScreenHeight = Screen.height;
+        if (gridBoard != null)
+        {
+            lastGridColumns = gridBoard.Columns;
+            lastGridRows = gridBoard.Rows;
+        }
     }
 }

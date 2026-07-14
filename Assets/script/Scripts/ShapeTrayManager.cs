@@ -15,10 +15,14 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private GridPlacer placer;
     [SerializeField] private Transform[] slots;
 
-    // Classic random shapes (used only in Classic mode)
+    // Shape geometry pool, shared by Classic and Adventure mode.
     [SerializeField] private Shape[] classicShapePrefabs;
 
-    // Adventure shapes (used only for matching names from ShapeWaves in Adventure mode)
+    [Header("Adventure")]
+    [Tooltip("Used to weight symbol assignment toward whichever ColectionTypes still need the most.")]
+    [SerializeField] private AdventureManager adventureManager;
+
+    [Tooltip("Fallback shape source for ShapeWaves name-matching when Addressables aren't used/loaded.")]
     [SerializeField] private Shape[] shapePrefabs;
 
     [Header("Addressables")]
@@ -49,11 +53,66 @@ public class ShapeTrayManager : MonoBehaviour
     private AsyncOperationHandle<IList<GameObject>> loadHandle;
     private bool addressablesLoaded;
 
-    // ===== Adventure predefined waves =====
+    private bool waitingForAdventureLevelData;
+
+    // ===== Per-level override: if a level's JSON defines ShapeWaves, use that fixed
+    // sequence instead of the adaptive algorithm (e.g. Level 1's tutorial, which
+    // depends on specific shapes appearing in a specific order). Levels that omit
+    // ShapeWaves fall through to the adaptive picker in RefillIfNeeded(). =====
     private List<ShapeWave> shapeWaves;
     private int currentWaveIndex;
     private bool useAdventureWaves;
-    private bool waitingForAdventureLevelData;
+
+    // Fixed sorting order for any shape sitting idle in a tray slot, so it always
+    // renders above blocks already placed on the grid (sortingOrder 2) regardless
+    // of whatever order the source prefab happened to be authored with.
+    private const int TraySortingOrder = 20;
+
+    private void SetTraySortingOrder(Shape shape)
+    {
+        if (shape == null)
+            return;
+
+        var renderers = shape.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers)
+            r.sortingOrder = TraySortingOrder;
+    }
+
+    /// <summary>
+    /// Builds a pool of ColectionTypes weighted by how many are still needed to
+    /// complete the level (each remaining count adds one entry), so types needed
+    /// more are drawn more often and stop being drawn once satisfied.
+    /// </summary>
+    private List<ColectionTypes> BuildWeightedNeededTypes()
+    {
+        var result = new List<ColectionTypes>();
+
+        if (adventureManager == null)
+            return result;
+
+        foreach (var kvp in adventureManager.RemainingTargets)
+        {
+            for (int i = 0; i < kvp.Value; i++)
+                result.Add(kvp.Key);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Assigns a random symbol type (drawn from the weighted needed-types pool) to
+    /// one random block of the given shape.
+    /// </summary>
+    private void AssignRandomSymbol(Shape shape, List<ColectionTypes> neededTypes)
+    {
+        var blocks = shape.GetComponentsInChildren<BlockSymbol>();
+        if (blocks.Length == 0 || neededTypes.Count == 0)
+            return;
+
+        var block = blocks[Random.Range(0, blocks.Length)];
+        var type = neededTypes[Random.Range(0, neededTypes.Count)];
+        block.SetSymbolType(type);
+    }
 
     private void OnEnable()
     {
@@ -246,20 +305,19 @@ public class ShapeTrayManager : MonoBehaviour
 
     private void Start()
     {
-        
+        if (adventureManager == null)
+            adventureManager = FindFirstObjectByType<AdventureManager>();
+
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
         // Reset revive state whenever the tray is created
         noMovesReviveTriggered = false;
 
-        // Always reset waves state on scene start
-        InitAdventureWaves();
-
         var app = AppManager.instance;
 
         if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
         {
-            if (app.CurrentLevelData != null && app.CurrentLevelData.ShapeWaves != null && app.CurrentLevelData.ShapeWaves.Count > 0)
+            if (app.CurrentLevelData != null)
             {
                 waitingForAdventureLevelData = false;
                 InitAdventureWaves();
@@ -279,10 +337,7 @@ public class ShapeTrayManager : MonoBehaviour
             return;
         }
 
-        // Classic (or no AppManager): ignore waves and use random refill immediately.
-        useAdventureWaves = false;
-        shapeWaves = null;
-        currentWaveIndex = 0;
+        // Classic (or no AppManager): use random refill immediately.
         noMovesReviveTriggered = false;
 
         if (useAddressables)
@@ -302,13 +357,11 @@ public class ShapeTrayManager : MonoBehaviour
         if (!waitingForAdventureLevelData)
             return;
 
-        if (levelData == null || levelData.ShapeWaves == null || levelData.ShapeWaves.Count == 0)
+        if (levelData == null)
             return;
 
         waitingForAdventureLevelData = false;
         app.OnDataLoaded -= HandleLevelDataLoadedForTray;
-
-        // Now that CurrentLevelData is available, initialize waves and refill using them.
         InitAdventureWaves();
 
         if (useAddressables)
@@ -321,6 +374,11 @@ public class ShapeTrayManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether the current level's JSON defines a fixed ShapeWaves sequence
+    /// (used to pin curated/tutorial levels like Level 1 to specific shapes). If not,
+    /// RefillIfNeeded() falls through to the adaptive picker instead.
+    /// </summary>
     private void InitAdventureWaves()
     {
         useAdventureWaves = false;
@@ -330,7 +388,6 @@ public class ShapeTrayManager : MonoBehaviour
         if (AppManager.instance == null)
             return;
 
-        // Only use waves in Adventure mode
         if (AppManager.instance.CurrentGameMode != AppManager.GameMode.Adventure)
             return;
 
@@ -342,7 +399,7 @@ public class ShapeTrayManager : MonoBehaviour
         useAdventureWaves = true;
         currentWaveIndex = 0;
 
-        Debug.Log($"[ShapeTrayManager] Adventure mode: {shapeWaves.Count} predefined waves loaded.");
+        Debug.Log($"[ShapeTrayManager] Level defines {shapeWaves.Count} fixed ShapeWaves — using them instead of the adaptive picker.");
     }
 
     private void UpdateDifficultyBasedOnGridSpace()
@@ -505,7 +562,8 @@ public class ShapeTrayManager : MonoBehaviour
         bool isAdventureMode = AppManager.instance != null &&
                                AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
 
-        // ===== Adventure predefined waves (only in Adventure mode) =====
+        // Per-level override: a level whose JSON defines ShapeWaves (e.g. Level 1's
+        // tutorial) uses that fixed sequence instead of the adaptive picker below.
         if (useAdventureWaves && shapeWaves != null)
         {
             if (shapeWaves.Count > 0)
@@ -517,26 +575,12 @@ public class ShapeTrayManager : MonoBehaviour
                 RefillFromWave(shapeWaves[currentWaveIndex]);
                 currentWaveIndex++;
             }
-            else
-            {
-                Debug.Log("[ShapeTrayManager] No adventure waves defined.");
-            }
 
             CheckNoMovesAndMaybeRevive();
             return;
         }
 
-        if (isAdventureMode)
-        {
-            Debug.LogWarning("[ShapeTrayManager] Adventure mode is active but no ShapeWaves are loaded, so no shapes will be spawned.");
-            return;
-        }
-
-        // ===== Classic / random mode (only classicShapePrefabs, no adventure shapes) =====
-        bool isClassicMode = AppManager.instance != null &&
-                             AppManager.instance.CurrentGameMode == AppManager.GameMode.Classic;
-
-        if ((classicShapePrefabs == null || classicShapePrefabs.Length == 0) && isClassicMode)
+        if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
             return;
 
         if (useSpaceAwareDifficulty)
@@ -544,10 +588,18 @@ public class ShapeTrayManager : MonoBehaviour
             UpdateDifficultyBasedOnGridSpace();
         }
 
-        // Pick a balanced set of 3 shapes using bag system, then guarantee at least one is placeable
-        var selectedPrefabs = useSmartBestShapes
+        // Classic mode always uses the score-free picker: it re-checks the actual
+        // grid on every refill and looks for shapes that structurally complete a
+        // nearly-full row/column (TryPickClearOpportunitySet), falling back to
+        // small/medium shapes sized to the free space (GetMaxComplexityForSpace) —
+        // no scoring heuristic involved. Adventure keeps using PickSmartBestSet
+        // when useSmartBestShapes is on (unchanged).
+        var selectedPrefabs = (useSmartBestShapes && isAdventureMode)
             ? PickSmartBestSet(classicShapePrefabs)
             : PickBalancedClassicSet(classicShapePrefabs);
+
+        // Adventure: weight symbol assignment toward whichever ColectionTypes still need the most.
+        var neededTypes = isAdventureMode ? BuildWeightedNeededTypes() : null;
 
         for (int i = 0; i < 3; i++)
         {
@@ -563,7 +615,11 @@ public class ShapeTrayManager : MonoBehaviour
             if (shape == null)
                 continue;
 
+            SetTraySortingOrder(shape);
             activeShapes.Add(shape);
+
+            if (neededTypes != null && neededTypes.Count > 0)
+                AssignRandomSymbol(shape, neededTypes);
 
             var handler = shape.GetComponent<ShapeDragHandler>();
             if (handler != null)
@@ -578,7 +634,7 @@ public class ShapeTrayManager : MonoBehaviour
 
     /// <summary>
     /// Spawns shapes defined in a ShapeWave by matching names to loaded prefabs.
-    /// Used only in Adventure mode.
+    /// Used only for levels that define a fixed ShapeWaves sequence in their JSON.
     /// </summary>
     private void RefillFromWave(ShapeWave wave)
     {
@@ -587,7 +643,7 @@ public class ShapeTrayManager : MonoBehaviour
 
         // Always spawn 3 shapes in Adventure mode
         int shapesToSpawn = 3;
-        
+
         for (int i = 0; i < shapesToSpawn && i < slots.Length; i++)
         {
             var slot = slots[i];
@@ -597,7 +653,7 @@ public class ShapeTrayManager : MonoBehaviour
             // Cycle through wave shapes if we need more than defined
             int shapeIndex = i % wave.Shapes.Count;
             string shapeName = wave.Shapes[shapeIndex].Name;
-            
+
             if (string.IsNullOrEmpty(shapeName))
                 continue;
 
@@ -628,55 +684,42 @@ public class ShapeTrayManager : MonoBehaviour
                 continue;
             }
 
+            SetTraySortingOrder(shape);
             activeShapes.Add(shape);
 
             // Apply symbols from JSON data to the shape
             var shapeData = wave.Shapes[shapeIndex];
             if (shapeData.Symbols != null && shapeData.Symbols.Count > 0)
             {
-                Debug.Log($"[ShapeTrayManager] Applying {shapeData.Symbols.Count} symbols to shape '{shape.name}'");
                 ApplySymbolsToShape(shape, shapeData.Symbols);
-            }
-            else
-            {
-                Debug.Log($"[ShapeTrayManager] No symbols defined for shape '{shape.name}'");
             }
 
             var handler = shape.GetComponent<ShapeDragHandler>();
             if (handler != null)
                 handler.Init(board, placer, shape);
         }
-
-        Debug.Log($"[ShapeTrayManager] Adventure wave {currentWaveIndex + 1}/{shapeWaves.Count}: spawned {activeShapes.Count} shapes (always 3).");
     }
 
     /// <summary>
-    /// Apply symbols from JSON data to shape blocks
+    /// Apply symbols from JSON data to shape blocks, matching each symbol's JSON
+    /// grid position to the block sitting at that normalized position in the shape.
     /// </summary>
     private void ApplySymbolsToShape(Shape shape, List<SymbolData> symbols)
     {
         if (shape == null || symbols == null)
             return;
 
-        // Step 1: Get all BlockSymbol components (the actual blocks)
         var blocks = shape.GetComponentsInChildren<BlockSymbol>();
         if (blocks.Length == 0)
-        {
-            Debug.LogWarning($"[ShapeTrayManager] No BlockSymbol components found in shape '{shape.name}'");
             return;
-        }
 
-        // Step 2: Build a grid map from normalized positions to blocks
         // Find min x/y and the spacing between blocks
         float minX = float.MaxValue, minY = float.MaxValue;
-        float maxX = float.MinValue, maxY = float.MinValue;
         foreach (var block in blocks)
         {
             Vector3 lp = block.transform.localPosition;
             if (lp.x < minX) minX = lp.x;
             if (lp.y < minY) minY = lp.y;
-            if (lp.x > maxX) maxX = lp.x;
-            if (lp.y > maxY) maxY = lp.y;
         }
 
         // Find the smallest non-zero distance between blocks (the cell spacing)
@@ -693,43 +736,34 @@ public class ShapeTrayManager : MonoBehaviour
         }
         if (spacing == float.MaxValue || spacing < 0.01f) spacing = 1f;
 
-        Debug.Log($"[ShapeTrayManager] Shape '{shape.name}': {blocks.Length} blocks, min=({minX},{minY}), spacing={spacing}");
-
-        // Step 3: Build dictionary of normalized grid position → block
-        var gridMap = new System.Collections.Generic.Dictionary<Vector2Int, BlockSymbol>();
+        // Build dictionary of normalized grid position → block
+        var gridMap = new Dictionary<Vector2Int, BlockSymbol>();
         foreach (var block in blocks)
         {
             Vector3 lp = block.transform.localPosition;
             int gx = Mathf.RoundToInt((lp.x - minX) / spacing);
             int gy = Mathf.RoundToInt((lp.y - minY) / spacing);
-            Vector2Int gridPos = new Vector2Int(gx, gy);
-            
+            var gridPos = new Vector2Int(gx, gy);
+
             if (!gridMap.ContainsKey(gridPos))
-            {
                 gridMap[gridPos] = block;
-            }
-            Debug.Log($"[ShapeTrayManager] Block '{block.name}' localPos=({lp.x:F2},{lp.y:F2}) → grid ({gx},{gy})");
         }
 
-        // Step 4: Log available grid positions
-        Debug.Log($"[ShapeTrayManager] Available grid positions: {string.Join(", ", gridMap.Keys)}");
-
-        // Step 5: Apply each symbol from JSON to the matching grid block
+        // Apply each symbol from JSON to the matching grid block
         foreach (var symbolData in symbols)
         {
-            Vector2Int jsonPos = new Vector2Int(
+            var jsonPos = new Vector2Int(
                 Mathf.RoundToInt(symbolData.Position.x),
                 Mathf.RoundToInt(symbolData.Position.y)
             );
 
             if (gridMap.TryGetValue(jsonPos, out BlockSymbol targetBlock))
             {
-                Debug.Log($"[ShapeTrayManager] ✓ Symbol {symbolData.Type} at JSON ({jsonPos.x},{jsonPos.y}) → block '{targetBlock.name}'");
                 targetBlock.SetSymbolType(symbolData.Type);
             }
             else
             {
-                Debug.LogWarning($"[ShapeTrayManager] ❌ No block at grid ({jsonPos.x},{jsonPos.y}) for symbol {symbolData.Type}. Available: {string.Join(", ", gridMap.Keys)}");
+                Debug.LogWarning($"[ShapeTrayManager] No block at grid ({jsonPos.x},{jsonPos.y}) for symbol {symbolData.Type} on shape '{shape.name}'.");
             }
         }
     }
@@ -782,13 +816,7 @@ public class ShapeTrayManager : MonoBehaviour
             return true;
 
         if (activeShapes.Count == 0)
-        {
-            // Adventure mode: if all waves are exhausted and no shapes left, there are truly no moves.
-            if (useAdventureWaves && shapeWaves != null && currentWaveIndex >= shapeWaves.Count)
-                return false;
-
             return true;
-        }
 
         for (int i = 0; i < activeShapes.Count; i++)
         {
@@ -869,15 +897,11 @@ public class ShapeTrayManager : MonoBehaviour
             activeShapes.Clear();
         }
 
-        currentWaveIndex = 0;
-
         var app = AppManager.instance;
 
-        // If we are in Adventure mode, re-init waves and refill from them once LevelData is ready.
+        // If we are in Adventure mode, re-init the wave override and refill once LevelData is ready.
         if (app != null && app.CurrentGameMode == AppManager.GameMode.Adventure)
         {
-            InitAdventureWaves();
-
             if (app.CurrentLevelData == null)
             {
                 waitingForAdventureLevelData = true;
@@ -886,16 +910,14 @@ public class ShapeTrayManager : MonoBehaviour
                 return;
             }
 
+            InitAdventureWaves();
+
             if (useAddressables)
                 LoadAddressablesAndRefill();
             else
                 RefillIfNeeded();
             return;
         }
-
-        // Classic: ensure we are in pure random mode.
-        useAdventureWaves = false;
-        shapeWaves = null;
 
         if (useAddressables)
             LoadAddressablesAndRefill();
@@ -911,146 +933,152 @@ public class ShapeTrayManager : MonoBehaviour
         if (prefabs == null || prefabs.Length == 0)
             return result;
 
-        float spaceRatio = GetAvailableSpaceRatio();
-        int maxComplexity = GetMaxComplexityForSpace(spaceRatio);
-
-        var pool = prefabs.Where(p => p != null && GetShapeComplexity(p) <= maxComplexity).ToList();
+        var pool = prefabs.Where(p => p != null).ToList();
         if (pool.Count == 0)
-            pool = prefabs.Where(p => p != null).ToList();
+            return result;
 
-        // Try to find shapes that can contribute to clearing a nearly-full line
-        var clearOpportunity = TryPickClearOpportunitySet(pool, spaceRatio);
+        // Still prefer a shape that completes a nearly-full row/column right now,
+        // when one exists, so placing it actually progresses toward an empty board.
+        var clearOpportunity = TryPickClearOpportunitySet(pool);
         if (clearOpportunity != null && clearOpportunity.Count == 3)
             return clearOpportunity;
 
-        // Fallback: bias toward small/medium shapes for easier gameplay
-        var small  = pool.Where(p => GetShapeComplexity(p) <= 1).ToList();
-        var medium = pool.Where(p => GetShapeComplexity(p) <= 2).ToList();
+        // Otherwise: pick 3 shapes weighted toward larger ones (by cell count), so
+        // the board fills up — and lines complete — faster.
+        var weightedPool = new List<Shape>();
+        foreach (var p in pool)
+        {
+            int weight = GetShapeComplexity(p);
+            for (int w = 0; w < weight; w++)
+                weightedPool.Add(p);
+        }
 
-        // Slot 0: always small if available
-        var s0pool = small.Count > 0 ? small : (medium.Count > 0 ? medium : pool);
-        result.Add(s0pool[Random.Range(0, s0pool.Count)]);
-
-        // Slot 1: small or medium
-        var s1pool = medium.Count > 0 ? medium : pool;
-        result.Add(s1pool[Random.Range(0, s1pool.Count)]);
-
-        // Slot 2: medium or smaller (avoid large shapes)
-        var s2pool = medium.Count > 0 ? medium : pool;
-        result.Add(s2pool[Random.Range(0, s2pool.Count)]);
+        for (int i = 0; i < 3; i++)
+            result.Add(weightedPool[Random.Range(0, weightedPool.Count)]);
 
         return result;
     }
 
-    // Returns how many cells are missing in each row and column
-    private void GetLineMissingCounts(out int[] rowMissing, out int[] colMissing)
-    {
-        rowMissing = new int[board.height];
-        colMissing = new int[board.width];
-
-        for (int y = 0; y < board.height; y++)
-        {
-            int missing = 0;
-            for (int x = 0; x < board.width; x++)
-                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
-            rowMissing[y] = missing;
-        }
-
-        for (int x = 0; x < board.width; x++)
-        {
-            int missing = 0;
-            for (int y = 0; y < board.height; y++)
-                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
-            colMissing[x] = missing;
-        }
-    }
-
-    // Check if placing this shape at this position covers any nearly-complete line
-    private bool ShapeHelpsCompleteLine(Shape prefab, int[] rowMissing, int[] colMissing, int nearThreshold)
-    {
-        var cells = prefab.GetCells(1f);
-        if (cells == null) return false;
-
-        var rowCoverage = new Dictionary<int, int>();
-        var colCoverage = new Dictionary<int, int>();
-
-        foreach (var offset in cells)
-        {
-            // We care about the row/col index relative to the shape, not absolute position
-            int row = offset.y;
-            int col = offset.x;
-            if (!rowCoverage.ContainsKey(row)) rowCoverage[row] = 0;
-            if (!colCoverage.ContainsKey(col)) colCoverage[col] = 0;
-            rowCoverage[row]++;
-            colCoverage[col]++;
-        }
-
-        // Check if this shape spans a nearly-full row/col and fills enough of its gaps
-        for (int y = 0; y < board.height; y++)
-        {
-            if (rowMissing[y] > 0 && rowMissing[y] <= nearThreshold)
-            {
-                foreach (var kv in rowCoverage)
-                    if (kv.Value >= Mathf.Min(rowMissing[y], kv.Value))
-                        return true;
-            }
-        }
-        for (int x = 0; x < board.width; x++)
-        {
-            if (colMissing[x] > 0 && colMissing[x] <= nearThreshold)
-            {
-                foreach (var kv in colCoverage)
-                    if (kv.Value >= Mathf.Min(colMissing[x], kv.Value))
-                        return true;
-            }
-        }
-        return false;
-    }
-
-    // Try to build a set where at least 1 shape can contribute to completing a line
-    private List<Shape> TryPickClearOpportunitySet(List<Shape> pool, float spaceRatio)
+    // Try to build a set where at least 1 shape can contribute to completing a line.
+    // "Can contribute" is verified by actually simulating every valid placement of
+    // each shape on the current board (EvaluateBestPlacementScore, the same exact
+    // check used for Adventure's PickSmartBestSet) rather than a size/position
+    // heuristic — this also means it correctly keeps helping when the board is
+    // nearly *empty* (close to a full board-clear), which a "free space < 85%"
+    // early-exit used to skip entirely.
+    private List<Shape> TryPickClearOpportunitySet(List<Shape> pool)
     {
         if (board == null) return null;
 
-        // Analyze earlier so we give helpful shapes sooner
-        if (spaceRatio > 0.85f) return null;
+        // Score every shape's best possible placement once, then reuse it below.
+        var scored = pool.Select(p => (Shape: p, Score: EvaluateBestPlacementScore(p))).ToList();
 
-        GetLineMissingCounts(out int[] rowMissing, out int[] colMissing);
+        var helpers = scored.Where(s => s.Score.BestClearedLines > 0).Select(s => s.Shape).ToList();
+        if (helpers.Count == 0) return null;
 
-        // nearThreshold: generous — consider lines nearly full even with more gaps
-        int nearThreshold = spaceRatio < 0.4f ? 3 : 4;
+        // "Gift" shapes: clear 2+ lines in a single placement — the satisfying,
+        // Block-Blast-style moment. Whenever one is available, guarantee it's
+        // offered instead of a merely-adequate single-line helper.
+        var giftShapes = scored.Where(s => s.Score.BestClearedLines >= 2).Select(s => s.Shape).ToList();
 
-        bool anyNearlyFull = rowMissing.Any(m => m > 0 && m <= nearThreshold)
-                          || colMissing.Any(m => m > 0 && m <= nearThreshold);
+        // Top priority: a shape that would empty the ENTIRE board if placed at the
+        // right spot. A multi-line clear can still leave scattered occupied cells
+        // elsewhere, so this needs its own dedicated check rather than reusing
+        // BestClearedLines.
+        var fullClearShapes = scored.Select(s => s.Shape)
+                                     .Where(p => WouldFullyClearBoard(p))
+                                     .ToList();
 
-        if (!anyNearlyFull) return null;
-
-        // Shapes that can help fill a nearly-complete line
-        var helpers = pool.Where(p => ShapeHelpsCompleteLine(p, rowMissing, colMissing, nearThreshold)).ToList();
         // Shapes that are placeable anywhere (fill in the rest of the tray)
         var placeable = pool.Where(p => HasAnyMoveForShape(p)).ToList();
         if (placeable.Count == 0) placeable = pool;
 
-        if (helpers.Count == 0) return null;
-
         var result = new List<Shape>();
 
-        // Slot 0: a helper shape
-        result.Add(helpers[Random.Range(0, helpers.Count)]);
+        // Slot 0: a full-board-clear shape beats a gift, which beats a plain helper.
+        var slot0Pool = fullClearShapes.Count > 0 ? fullClearShapes
+                       : giftShapes.Count > 0 ? giftShapes
+                       : helpers;
+        result.Add(slot0Pool[Random.Range(0, slot0Pool.Count)]);
 
-        // Slot 1: another helper if possible, otherwise any placeable
+        // Slot 1: when a full-board-clear opportunity exists, keep offering
+        // full-clear-capable shapes (a second chance at it, and less risk that
+        // this slot's shape gets placed somewhere that breaks the setup) before
+        // falling back to a plain helper.
+        var fullClear1 = fullClearShapes.Where(p => p != result[0]).ToList();
         var helpers2 = helpers.Where(p => p != result[0]).ToList();
-        result.Add(helpers2.Count > 0
-            ? helpers2[Random.Range(0, helpers2.Count)]
-            : placeable[Random.Range(0, placeable.Count)]);
+        var slot1Pool = fullClear1.Count > 0 ? fullClear1
+                       : helpers2.Count > 0 ? helpers2
+                       : placeable;
+        result.Add(slot1Pool[Random.Range(0, slot1Pool.Count)]);
 
-        // Slot 2: small/simple filler to not overwhelm the board
-        var fillers = placeable.Where(p => GetShapeComplexity(p) <= 2).ToList();
-        result.Add(fillers.Count > 0
-            ? fillers[Random.Range(0, fillers.Count)]
-            : placeable[Random.Range(0, placeable.Count)]);
+        // Slot 2: same priority — another full-clear shape if one's still
+        // available, otherwise any placeable shape.
+        var fullClear2 = fullClearShapes.Where(p => p != result[0] && p != result[1]).ToList();
+        var slot2Pool = fullClear2.Count > 0 ? fullClear2 : placeable;
+        result.Add(slot2Pool[Random.Range(0, slot2Pool.Count)]);
 
         return result;
+    }
+
+    /// <summary>
+    /// Checks every valid placement of this shape on the CURRENT live board and
+    /// returns true if any of them would leave the board completely empty after
+    /// the resulting rows/columns clear (a full board-clear bonus).
+    /// </summary>
+    private bool WouldFullyClearBoard(Shape prefab)
+    {
+        if (prefab == null || board == null)
+            return false;
+
+        var offsets = prefab.GetCells(board.cellSize);
+        if (offsets == null || offsets.Length == 0)
+            return false;
+
+        var currentlyOccupied = new List<Vector2Int>();
+        for (int x = 0; x < board.width; x++)
+            for (int y = 0; y < board.height; y++)
+                if (board.IsOccupied(new Vector2Int(x, y)))
+                    currentlyOccupied.Add(new Vector2Int(x, y));
+
+        for (int ax = 0; ax < board.width; ax++)
+        {
+            for (int ay = 0; ay < board.height; ay++)
+            {
+                var anchor = new Vector2Int(ax, ay);
+                if (!CanPlaceOffsetsAt(anchor, offsets))
+                    continue;
+
+                var occupied = new HashSet<Vector2Int>(currentlyOccupied);
+                foreach (var off in offsets)
+                    occupied.Add(anchor + off);
+
+                bool[] fullRows = new bool[board.height];
+                bool[] fullCols = new bool[board.width];
+
+                for (int y = 0; y < board.height; y++)
+                {
+                    bool full = true;
+                    for (int x = 0; x < board.width; x++)
+                        if (!occupied.Contains(new Vector2Int(x, y))) { full = false; break; }
+                    fullRows[y] = full;
+                }
+                for (int x = 0; x < board.width; x++)
+                {
+                    bool full = true;
+                    for (int y = 0; y < board.height; y++)
+                        if (!occupied.Contains(new Vector2Int(x, y))) { full = false; break; }
+                    fullCols[x] = full;
+                }
+
+                occupied.RemoveWhere(c => fullRows[c.y] || fullCols[c.x]);
+
+                if (occupied.Count == 0)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     // If no active shape can be placed on the board, replace the most complex one
@@ -1113,6 +1141,7 @@ public class ShapeTrayManager : MonoBehaviour
         var replacement = Instantiate(placeablePrefab, slots[slotIndex].position, slots[slotIndex].rotation, slots[slotIndex]);
         if (replacement != null)
         {
+            SetTraySortingOrder(replacement);
             activeShapes.Add(replacement);
             var handler = replacement.GetComponent<ShapeDragHandler>();
             if (handler != null)

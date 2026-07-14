@@ -16,21 +16,6 @@
   "InitialBlocks": [
     { "x": 2, "y": 2, "Symbol": 1 },
     { "x": 5, "y": 5, "Symbol": 3 }
-  ],
-  "ShapeWaves": [
-    {
-      "Shapes": [
-        { "Name": "plasLeft", "Symbols": [{ "Type": 1 }] },
-        { "Name": "plas", "Symbols": [{ "Type": 1 }] },
-        { "Name": "plas", "Symbols": [{ "Type": 3 }] }
-
-      ]
-    },
-    {
-      "Shapes": [
-        { "Name": "plasRight", "Symbols": [{ "Type": 1 }] },
-        { "Name": "plasLeft", "Symbols": [{ "Type": 3 }] }
-      ]
-    }
   ]
+ 
 }

@@ -1,4 +1,5 @@
 
+using Firebase.Analytics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,14 +30,17 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
             Name = name;
             Value = value;
         }
-    }
+
+		public static implicit operator Parameter(AnalyticsEventData data) => new Parameter(data.Name, data.Value);
+	}
+
 
     public void SendEvent(string eventName, List <AnalyticsEventData> eventData = null)
     {
         var parameters = getBaseParameters(eventData);
         Debug.Log($"[Analytics]--------- : {eventName} {string.Join(",\n", parameters.Select(p => $"{p.Name}: {p.Value}"))}");
-        // FirebaseAnalytics.LogEvent(eventName, parameters.Select(p => (Parameter)p).ToArray());
-    }
+        FirebaseAnalytics.LogEvent(eventName, parameters.Select(p => (Parameter)p).ToArray());
+	}
 
 
     private ICollection<AnalyticsEventData> getBaseParameters(ICollection<AnalyticsEventData> paramsList = null)
@@ -47,7 +51,7 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
         {
             var userData = PlayerManeger.instance.PlayerProgress;
 
-            paramsList.Add(new AnalyticsEventData("Level", userData.HighestUnlockedLevel.ToString()));
+            paramsList.Add(new AnalyticsEventData("Level", (userData.HighestUnlockedLevel + 1).ToString()));
             paramsList.Add(new AnalyticsEventData("Coins", userData.Coins.ToString()));
         }
 

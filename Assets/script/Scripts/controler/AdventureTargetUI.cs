@@ -239,9 +239,9 @@ public class AdventureTargetUI : MonoBehaviour
     }
 
     [Header("Stagger")]
-    [SerializeField] private float symbolStaggerDelay = 0.1f;
-    [SerializeField] private float symbolHoldDuration = 0.4f;
-    [SerializeField] private float symbolSequentialDelay = 0.15f;
+    [SerializeField] private float symbolStaggerDelay = 0f;
+    [SerializeField] private float symbolHoldDuration = 0.15f;
+    [SerializeField] private float symbolSequentialDelay = 0f;
 
     private bool isAnimatingSymbols;
 
