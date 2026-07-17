@@ -27,6 +27,7 @@ public class AdventureLevelFailPopup : MonoBehaviour
     [SerializeField] private ReviveManager reviveManager;
 
     private bool isShowing;
+    private CanvasGroup canvasGroup;
 
     private void Start()
     {
@@ -95,14 +96,20 @@ public class AdventureLevelFailPopup : MonoBehaviour
             popupRoot.SetActive(true);
 
         if (overlay != null)
-        {
             overlay.gameObject.SetActive(true);
-        }
 
+        // Whole popup (dim + card + text + button) fades in as one unit — no scaling.
         if (popupPanel != null)
         {
-            popupPanel.localScale = Vector3.zero;
-            popupPanel.DOScale(1f, panelScaleDuration).SetEase(panelEase).SetUpdate(true);
+            popupPanel.localScale = Vector3.one;
+
+            if (canvasGroup == null)
+                canvasGroup = popupPanel.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+                canvasGroup = popupPanel.gameObject.AddComponent<CanvasGroup>();
+
+            canvasGroup.alpha = 0f;
+            canvasGroup.DOFade(1f, overlayFadeDuration).SetEase(Ease.OutSine).SetUpdate(true);
         }
     }
 
