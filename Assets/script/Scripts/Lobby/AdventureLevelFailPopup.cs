@@ -28,6 +28,7 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
     private bool isShowing;
     private CanvasGroup canvasGroup;
+    private float overlayTargetAlpha = 1f;
 
     private void Start()
     {
@@ -35,6 +36,9 @@ public class AdventureLevelFailPopup : MonoBehaviour
 
         if (popupRoot != null)
             popupRoot.SetActive(false);
+
+        if (overlay != null)
+            overlayTargetAlpha = overlay.color.a;
 
         // Only active in Adventure mode
         if (AppManager.instance == null || AppManager.instance.CurrentGameMode != AppManager.GameMode.Adventure)
@@ -96,7 +100,13 @@ public class AdventureLevelFailPopup : MonoBehaviour
             popupRoot.SetActive(true);
 
         if (overlay != null)
+        {
             overlay.gameObject.SetActive(true);
+            Color oc = overlay.color;
+            oc.a = 0f;
+            overlay.color = oc;
+            overlay.DOFade(overlayTargetAlpha, overlayFadeDuration).SetEase(Ease.OutSine).SetUpdate(true);
+        }
 
         // Whole popup (dim + card + text + button) fades in as one unit — no scaling.
         if (popupPanel != null)

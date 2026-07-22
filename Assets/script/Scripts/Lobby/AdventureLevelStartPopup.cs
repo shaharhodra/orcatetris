@@ -48,6 +48,7 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
     private bool isShowing;
     private Tween autoStartTween;
+    private float overlayTargetAlpha = 1f;
 
     private void Start()
     {
@@ -55,6 +56,9 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
         if (popupRoot != null)
             popupRoot.SetActive(false);
+
+        if (overlay != null)
+            overlayTargetAlpha = overlay.color.a;
 
         if (AppManager.instance == null)
         {
@@ -128,6 +132,10 @@ public class AdventureLevelStartPopup : MonoBehaviour
         if (overlay != null)
         {
             overlay.gameObject.SetActive(true);
+            Color c = overlay.color;
+            c.a = 0f;
+            overlay.color = c;
+            overlay.DOFade(overlayTargetAlpha, overlayFadeDuration).SetEase(Ease.OutSine).SetUpdate(true);
         }
 
         if (popupPanel != null)
@@ -270,10 +278,13 @@ public class AdventureLevelStartPopup : MonoBehaviour
             seq.Append(popupPanel.DOScale(0f, 0.25f).SetEase(Ease.InBack));
 
         if (overlay != null)
-            seq.AppendCallback(() => overlay.gameObject.SetActive(false));
+            seq.Join(overlay.DOFade(0f, overlayFadeDuration).SetEase(Ease.InSine));
 
         seq.OnComplete(() =>
         {
+            if (overlay != null)
+                overlay.gameObject.SetActive(false);
+
             if (popupRoot != null)
                 popupRoot.SetActive(false);
 

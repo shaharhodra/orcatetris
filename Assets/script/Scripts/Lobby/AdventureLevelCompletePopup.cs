@@ -18,7 +18,8 @@ public class AdventureLevelCompletePopup : MonoBehaviour
     [SerializeField] private Button nextLevelButton;
 
     [Header("Effects")]
-    [SerializeField] private ParticleSystem confetti;
+    [Tooltip("Container GameObject holding one or more ParticleSystems (e.g. a composite confetti prefab).")]
+    [SerializeField] private GameObject confetti;
 
     [Header("Settings")]
     [SerializeField] private float animDuration = 0.5f;
@@ -26,15 +27,19 @@ public class AdventureLevelCompletePopup : MonoBehaviour
 
     private AdventureManager adventureManager;
     private bool isActive;
+    private float overlayTargetAlpha = 1f;
 
     private void Awake()
     {
         Debug.Log($"[CompletePopup] ===== AWAKE ===== on GameObject: {gameObject.name}, active={gameObject.activeInHierarchy}, enabled={enabled}");
-        
+
         if (popupRoot != null)
             popupRoot.SetActive(false);
         else
             Debug.LogError("[CompletePopup] popupRoot is NULL in Awake!");
+
+        if (overlay != null)
+            overlayTargetAlpha = overlay.color.a;
 
         if (nextLevelButton != null)
             nextLevelButton.onClick.AddListener(OnNextLevel);
@@ -115,6 +120,10 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         if (overlay != null)
         {
             overlay.gameObject.SetActive(true);
+            Color oc = overlay.color;
+            oc.a = 0f;
+            overlay.color = oc;
+            overlay.DOFade(overlayTargetAlpha, animDuration).SetEase(Ease.OutSine).SetUpdate(true);
         }
 
         if (popupPanel != null)
@@ -127,8 +136,9 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         // Effects
         if (confetti != null)
         {
-            confetti.gameObject.SetActive(true);
-            confetti.Play();
+            confetti.SetActive(true);
+            foreach (var ps in confetti.GetComponentsInChildren<ParticleSystem>(true))
+                ps.Play();
         }
 
         if (SoundManager.instance != null)
@@ -163,7 +173,10 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         ShapeDragHandler.InputBlocked = false;
 
         if (confetti != null)
-            confetti.Stop();
+        {
+            foreach (var ps in confetti.GetComponentsInChildren<ParticleSystem>(true))
+                ps.Stop();
+        }
 
         Sequence seq = DOTween.Sequence();
 
