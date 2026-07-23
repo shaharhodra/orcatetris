@@ -70,3 +70,13 @@ Assets/Firebase/Plugins/x86_64/FirebaseCppApp-13_10_0.so
 Assets/Firebase/
 
 Assets/GeneratedLocalRepo/
+
+# Firebase SDK components - install per-machine via the Firebase Unity SDK
+# importer instead of tracking in git (large binaries, differ per platform)
+Assets/Plugins/iOS/Firebase/
+Assets/Plugins/tvOS/Firebase/
+Assets/art/firebase-crashlytics-unity/
+Assets/art/firebase-crashlytics-unity.meta
+
+# Regenerated automatically by the External Dependency Manager (EDM4U)
+ProjectSettings/AndroidResolverDependencies.xml
