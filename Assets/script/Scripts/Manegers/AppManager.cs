@@ -117,9 +117,11 @@ public class AppManager : Singleton<AppManager>
         HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
         AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.GameStart.ToString());
 
+        RemoteConfigManager.instance.OnRemoteFetchCompleted += () => {};
+        RemoteConfigManager.instance.StartRemoteConfigFetch();
 
 
-    }
+	}
 
     //private string GetProgressFilePath()
     //{

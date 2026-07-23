@@ -1,7 +1,8 @@
+using DG.Tweening;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using DG.Tweening;
 
 /// <summary>
 /// Shows a "Level Failed" popup when the player has no moves left in Adventure mode.
@@ -99,7 +100,11 @@ public class AdventureLevelFailPopup : MonoBehaviour
         if (popupRoot != null)
             popupRoot.SetActive(true);
 
-        if (overlay != null)
+		var levelTime = Time.realtimeSinceStartup - AnalyticsManager.instance.LevelStartTime;
+		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelFail.ToString(), new List<AnalyticsManager.AnalyticsEventData>() {
+			new AnalyticsManager.AnalyticsEventData("GameType", "adventure"), new AnalyticsManager.AnalyticsEventData("LevelTime", levelTime.ToString())});
+
+		if (overlay != null)
         {
             overlay.gameObject.SetActive(true);
             Color oc = overlay.color;

@@ -55,7 +55,7 @@ MonoBehaviour:
   previewClearAlpha: 1
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   previewClearColor: {r: 1, g: 1, b: 1, a: 1}
-  previewClearEmissionIntensity: 6
+  previewClearEmissionIntensity: 12
   _sprite: {fileID: 3347676569184785326}
   _boxCollider: {fileID: 7427878456175831511}
 --- !u!61 &7427878456175831511
@@ -162,7 +162,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -7,7 +7,8 @@ using UnityEngine;
 
 public class AnalyticsManager : Singleton<AnalyticsManager>
 {
-    public enum AnalyticsEvent
+    public float LevelStartTime { get; private set; }
+	public enum AnalyticsEvent
     {
         GameStart,
         GameEnd,
@@ -37,7 +38,11 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
 
     public void SendEvent(string eventName, List <AnalyticsEventData> eventData = null)
     {
-        var parameters = getBaseParameters(eventData);
+        if (!string.IsNullOrEmpty(eventName) && eventName.Equals(AnalyticsEvent.LevelStart.ToString()))
+        {
+            LevelStartTime = Time.realtimeSinceStartup; ;
+		}
+		var parameters = getBaseParameters(eventData);
         Debug.Log($"[Analytics]--------- : {eventName} {string.Join(",\n", parameters.Select(p => $"{p.Name}: {p.Value}"))}");
         FirebaseAnalytics.LogEvent(eventName, parameters.Select(p => (Parameter)p).ToArray());
 	}

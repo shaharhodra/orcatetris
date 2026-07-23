@@ -82,7 +82,7 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         }
 
         isActive = true;
-        var levelTime = Time.time;
+        var levelTime = Time.realtimeSinceStartup - AnalyticsManager.instance.LevelStartTime;
 		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelComplete.ToString(), new List<AnalyticsManager.AnalyticsEventData>() {
 			new AnalyticsManager.AnalyticsEventData("GameType", "adventure"), new AnalyticsManager.AnalyticsEventData("LevelTime", levelTime.ToString())});
 		Debug.Log($"[CompletePopup] Invoking ShowInternal in {showDelay} seconds...");
