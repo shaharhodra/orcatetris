@@ -33,7 +33,7 @@ public class ThemeBlock : MonoBehaviour
 
     private void OnEnable()
     {
-        ThemeManager.OnThemeChanged += ApplyTheme;
+        ThemeManager.OnThemeChanged += HandleThemeChanged;
 
         if (ThemeManager.instance != null && ThemeManager.instance.CurrentTheme != null)
             ApplyTheme(ThemeManager.instance.CurrentTheme, instant: true);
@@ -41,7 +41,20 @@ public class ThemeBlock : MonoBehaviour
 
     private void OnDisable()
     {
-        ThemeManager.OnThemeChanged -= ApplyTheme;
+        ThemeManager.OnThemeChanged -= HandleThemeChanged;
+    }
+
+    // While still sitting in the shape tray (not yet placed), a block keeps
+    // whatever theme it spawned with — a full-board-clear theme switch shouldn't
+    // visibly change a shape the player is currently looking at/deciding whether
+    // to place. MarkAsPlaced() re-applies the current theme once it lands on the
+    // grid, so the swap still happens, just deferred until the block is placed.
+    private void HandleThemeChanged(ThemeData theme, bool instant)
+    {
+        if (!isPlacedOnGrid)
+            return;
+
+        ApplyTheme(theme, instant);
     }
 
     private void ApplyTheme(ThemeData theme, bool instant)

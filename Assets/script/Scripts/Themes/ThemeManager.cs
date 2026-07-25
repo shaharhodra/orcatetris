@@ -62,6 +62,9 @@ public class ThemeManager : MonoBehaviour
                 cell.ApplyTheme(currentTheme.gridCellSprite, currentTheme.gridCellEmptyColor);
             else
                 cell.ApplyThemeColor(currentTheme.gridCellEmptyColor);
+
+            if (currentTheme.previewClearParticlePrefab != null)
+                cell.SetPreviewClearParticlePrefab(currentTheme.previewClearParticlePrefab);
         }
     }
 
@@ -158,6 +161,9 @@ public class ThemeManager : MonoBehaviour
                     cell.ApplyTheme(theme.gridCellSprite, targetColor);
                 else
                     cell.ApplyThemeColor(targetColor);
+
+                if (theme.previewClearParticlePrefab != null)
+                    cell.SetPreviewClearParticlePrefab(theme.previewClearParticlePrefab);
             }
         }
 

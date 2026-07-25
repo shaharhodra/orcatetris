@@ -16,12 +16,13 @@ MonoBehaviour:
   cameraBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
   backgroundSprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
   backgroundTint: {r: 1, g: 1, b: 1, a: 1}
-  gridCellEmptyColor: {r: 0.8207547, g: 0, b: 0, a: 0.15686275}
-  gridCellOccupiedColor: {r: 1, g: 1, b: 1, a: 1}
+  gridCellEmptyColor: {r: 0.8207547, g: 0, b: 0, a: 0.5019608}
+  gridCellOccupiedColor: {r: 0.8396226, g: 0.019802418, b: 0.019802418, a: 1}
   blockSprite: {fileID: -3172839315520791676, guid: 5239abbafbc224f4fa9556f1cbd76cb6, type: 3}
-  blockColor: {r: 0.3679245, g: 0.0017354971, b: 0.0017354971, a: 1}
-  squareColor: {r: 1, g: 1, b: 1, a: 1}
+  blockColor: {r: 0.7075472, g: 0, b: 0.54294354, a: 1}
+  squareColor: {r: 0.8018868, g: 0, b: 0.77685267, a: 1}
   gridCellSprite: {fileID: 21300000, guid: 411c07eebf44ffa4283cf1ba06914797, type: 3}
+  previewClearParticlePrefab: {fileID: 4715996153622213367, guid: c325a92e1f7fdca4ea9699df0a213e14, type: 3}
   uiPrimaryColor: {r: 1, g: 1, b: 1, a: 1}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   transitionDuration: 1.5

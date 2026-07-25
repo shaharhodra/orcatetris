@@ -54,8 +54,9 @@ MonoBehaviour:
   hoverAlpha: 0.1
   previewClearAlpha: 1
   normalColor: {r: 1, g: 1, b: 1, a: 1}
-  previewClearColor: {r: 1, g: 1, b: 1, a: 1}
-  previewClearEmissionIntensity: 12
+  previewClearColor: {r: 1, g: 0.45884857, b: 0.36320752, a: 1}
+  previewClearEmissionIntensity: 2.5
+  previewClearParticlePrefab: {fileID: 0}
   _sprite: {fileID: 3347676569184785326}
   _boxCollider: {fileID: 7427878456175831511}
 --- !u!61 &7427878456175831511

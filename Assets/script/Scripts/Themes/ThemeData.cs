@@ -28,6 +28,10 @@ public class ThemeData : ScriptableObject
     [Header("Grid Cell Sprite")]
     public Sprite gridCellSprite;        // ספרייט לתאי הגריד
 
+    [Header("Preview Clear Particles")]
+    [Tooltip("Optional particle prefab to play on grid cells in preview-clear state. Leave empty to keep each cell's own assigned prefab.")]
+    public GameObject previewClearParticlePrefab;
+
     [Header("UI Colors")]
     public Color uiPrimaryColor = Color.white;
     public Color uiSecondaryColor = new Color(0.8f, 0.8f, 0.8f, 1f);

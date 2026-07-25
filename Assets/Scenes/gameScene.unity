@@ -4876,10 +4876,8 @@ MonoBehaviour:
   shapesLabel: shape
   noMovesReviveDelay: 5
   minPlaceableToConsiderMovable: 1
-  useSpaceAwareDifficulty: 1
-  minSpaceRatioForComplexShapes: 0.4
-  useSmartBestShapes: 1
-  smartBestShapesPoolLimit: 25
+  lowOccupancyThreshold: 10
+  debugLogShapeSelection: 1
   reviveManager: {fileID: 2006691660}
 --- !u!4 &855154865
 Transform:
@@ -10548,8 +10546,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThemeManager
   defaultTheme: {fileID: 11400000, guid: 7bd9309340a76404b931af6e99fdefe0, type: 2}
   themes:
-  - {fileID: 11400000, guid: 51d80da1238248d4eb3003832def9879, type: 2}
   - {fileID: 11400000, guid: a1bfa50ab7444824094a2441ee9d6e72, type: 2}
+  - {fileID: 11400000, guid: 51d80da1238248d4eb3003832def9879, type: 2}
   - {fileID: 11400000, guid: b64793594378c7946af4c87f455f7a96, type: 2}
   mainCamera: {fileID: 1560363972}
   backgroundRenderer: {fileID: 0}
@@ -10713,8 +10711,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4291480266
+  m_fontColor: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

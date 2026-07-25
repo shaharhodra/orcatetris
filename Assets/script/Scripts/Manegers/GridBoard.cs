@@ -126,20 +126,29 @@ public class GridBoard : MonoBehaviour
         if (previewClearCells == null)
             previewClearCells = new System.Collections.Generic.HashSet<Vector2Int>();
 
-        ClearPreviewClear();
-
+        var newCells = new System.Collections.Generic.HashSet<Vector2Int>();
         foreach (var pos in positions)
         {
-            if (!IsInside(pos))
-                continue;
-
-            var cell = cells[pos.x, pos.y];
-            if (cell == null)
-                continue;
-
-            cell.SetPreviewClear(true);
-            previewClearCells.Add(pos);
+            if (IsInside(pos) && cells[pos.x, pos.y] != null)
+                newCells.Add(pos);
         }
+
+        // Only toggle cells whose state actually changed, so cells that stay
+        // highlighted across small drag movements aren't re-triggered every
+        // call (which was restarting the preview-clear particles constantly).
+        foreach (var pos in previewClearCells)
+        {
+            if (!newCells.Contains(pos))
+                cells[pos.x, pos.y].SetPreviewClear(false);
+        }
+
+        foreach (var pos in newCells)
+        {
+            if (!previewClearCells.Contains(pos))
+                cells[pos.x, pos.y].SetPreviewClear(true);
+        }
+
+        previewClearCells = newCells;
     }
 
     public void ApplySize(int newWidth, int newHeight)
