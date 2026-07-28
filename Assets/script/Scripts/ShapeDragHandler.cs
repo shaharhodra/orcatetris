@@ -16,6 +16,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         Color.cyan, Color.magenta, Color.yellow, Color.green, Color.red, new Color(1f, 0.5f, 0f), new Color(0.5f, 0f, 1f)
     };
     [SerializeField, Min(0)] private int ghostSnapRadius = 0; // כמה תאים סביב התא המרכזי לחפש מיקום חוקי
+    [Header("Click Particle")]
+    [SerializeField] private GameObject clickParticlePrefab;
     [SerializeField] private float minFingerOffsetX = 0f;
     [SerializeField] private float maxFingerOffsetX = 1.5f;
     [SerializeField] private float minFingerOffsetY = 0.5f;
@@ -86,6 +88,8 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         {
             SoundManager.instance.PlayClickShape();
         }
+
+        PlayClickParticle();
 
         pointerDown = true;
         beganDrag = false;
@@ -276,6 +280,25 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
                 board.ClearPreviewClear();
             }
         }
+    }
+
+    private void PlayClickParticle()
+    {
+        if (clickParticlePrefab == null)
+            return;
+
+        GameObject instance = Instantiate(clickParticlePrefab, transform.position, Quaternion.identity);
+
+        float maxDuration = 0f;
+        foreach (var ps in instance.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ps.Play();
+            float duration = ps.main.duration + ps.main.startLifetime.constantMax;
+            if (duration > maxDuration)
+                maxDuration = duration;
+        }
+
+        Destroy(instance, maxDuration > 0f ? maxDuration : 2f);
     }
 
     private void SetAlpha(float alpha)

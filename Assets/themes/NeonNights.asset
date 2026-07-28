@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7ff8ef8ce62fbb4898f6e856d1aed5d, type: 3}
+  m_Name: NeonNights
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeData
+  themeName: Neon Nights
+  cameraBackgroundColor: {r: 0.01, g: 0.01, b: 0.06, a: 1}
+  backgroundSprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
+  backgroundTint: {r: 0.5, g: 0.6, b: 1, a: 1}
+  gridCellEmptyColor: {r: 0.3, g: 0.4, b: 1, a: 0.18}
+  gridCellOccupiedColor: {r: 0.6, g: 0.1, b: 1, a: 1}
+  blockSprite: {fileID: -3172839315520791676, guid: 5239abbafbc224f4fa9556f1cbd76cb6, type: 3}
+  blockColor: {r: 0.2, g: 0.85, b: 1, a: 1}
+  squareColor: {r: 0.7, g: 0.15, b: 1, a: 1}
+  gridCellSprite: {fileID: 21300000, guid: 411c07eebf44ffa4283cf1ba06914797, type: 3}
+  previewClearParticlePrefab: {fileID: 4715996153622213367, guid: ae20b07969868bc489a9bf8ee9ce4697, type: 3}
+  uiPrimaryColor: {r: 0.4, g: 0.7, b: 1, a: 1}
+  uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  transitionDuration: 1.5

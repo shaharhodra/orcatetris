@@ -127,15 +127,19 @@ public class ReviveManager : MonoBehaviour
         if (usedRevives >= maxRevives)
         {
             Debug.Log($"[ReviveManager] Reached max revives ({maxRevives}), going straight to OnLose");
+            LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveUnavailable);
             TriggerGameOver();
             return;
         }
 
         if (!CanRevive)
         {
+            LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveUnavailable);
             TriggerGameOver();
             return;
         }
+
+        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveOffered);
 
         // Show revive popup with countdown
         popupOpen = true;
@@ -163,6 +167,8 @@ public class ReviveManager : MonoBehaviour
             reviveCountdownCoroutine = null;
         }
 
+        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAccepted);
+
         ClosePopup();
         WatchAdAndReviveAsync();
     }
@@ -179,6 +185,8 @@ public class ReviveManager : MonoBehaviour
             StopCoroutine(reviveCountdownCoroutine);
             reviveCountdownCoroutine = null;
         }
+
+        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveDeclined);
 
         ClosePopup();
         TriggerGameOver();
@@ -220,6 +228,7 @@ public class ReviveManager : MonoBehaviour
 
         // Countdown expired -> auto game over
         reviveCountdownCoroutine = null;
+        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveTimedOut);
         ClosePopup();
         TriggerGameOver();
     }
@@ -410,5 +419,16 @@ public class ReviveManager : MonoBehaviour
     {
         usedRevives = 0;
         // Debug.Log("[ResetRevives] Revives reset to 0");
+    }
+
+    private void LogReviveEvent(AnalyticsManager.AnalyticsEvent evt)
+    {
+        if (AnalyticsManager.instance == null)
+            return;
+
+        AnalyticsManager.instance.SendEvent(evt.ToString(), new System.Collections.Generic.List<AnalyticsManager.AnalyticsEventData>
+        {
+            new AnalyticsManager.AnalyticsEventData("RevivesUsed", usedRevives.ToString())
+        });
     }
 }

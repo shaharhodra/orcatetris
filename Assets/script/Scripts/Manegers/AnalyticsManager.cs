@@ -17,7 +17,12 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
         LevelFail,
         DailyBonusClaimed,
         CoinsSpent,
-        CoinsEarned
+        CoinsEarned,
+        ReviveOffered,
+        ReviveAccepted,
+        ReviveDeclined,
+        ReviveTimedOut,
+        ReviveUnavailable
     }
 
     [Serializable] 

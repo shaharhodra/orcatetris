@@ -36,8 +36,8 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
     [Header("Endgame Assist")]
-    [Tooltip("When the board has this many or fewer occupied cells (and was previously fuller than that), prefer smaller shapes so they can fit precisely into the last gaps — helps actually reach a full board clear.")]
-    [SerializeField] private int lowOccupancyThreshold = 10;
+    [Tooltip("When the board has this many or fewer occupied cells (and was previously fuller than that), prefer smaller shapes so they can fit precisely into the last gaps — helps actually reach a full board clear. Raised from 10 to cover most of a 6x8 (48-cell) board so the game steers toward full clears for most of the round, not just the final few cells.")]
+    [SerializeField] private int lowOccupancyThreshold = 30;
 
     [Header("Debug")]
     [Tooltip("Logs every candidate shape's best achievable score for each refill, so a confusing tray choice can be diagnosed from the Console instead of guessed at.")]
@@ -158,15 +158,16 @@ public class ShapeTrayManager : MonoBehaviour
 
             if (scored.Count > 0)
             {
-                // Near the end of a board cycle, favor smaller shapes over ones that
-                // simply fill more cells — a small shape is more likely to slot
-                // exactly into the few gaps left, which is what actually gets the
-                // board to a full clear. Require the board to have actually been
-                // fuller than the threshold first, so a fresh/just-cleared empty
-                // board (which also has "few cells occupied") isn't mistaken for
-                // being near a full clear and doesn't get flooded with tiny shapes.
-                bool lowOccupancy = GetOccupiedCellCount() <= lowOccupancyThreshold
-                                     && peakOccupancySinceClear > lowOccupancyThreshold;
+                // Favor smaller shapes over ones that simply fill more cells — a
+                // small shape is more likely to slot exactly into remaining gaps,
+                // which is what actually gets the board to a full clear. This also
+                // applies right after a fresh clear: a freshly emptied board is the
+                // best time to keep things tidy, not to prefer big/awkward shapes
+                // (previously this required the board to have been fuller than the
+                // threshold first, which meant every post-clear cycle briefly fell
+                // back to "prefer bigger shapes" mode until occupancy climbed back
+                // past the threshold — undoing the assist right when it mattered most).
+                bool lowOccupancy = GetOccupiedCellCount() <= lowOccupancyThreshold;
 
                 var ordered = lowOccupancy
                     ? scored.OrderByDescending(s => s.BestClearedLines)
