@@ -22,6 +22,14 @@ public class SoundManager : MonoBehaviour
 
     [Header("Line Clear")]
     [SerializeField] private AudioClip lineClearClip;       // פירוק שורה
+    [SerializeField] private AudioClip lineClearPossibleClip; // יש אפשרות להוריד שורה (לפני שהיא נמחקת בפועל)
+    [SerializeField] private AudioClip boardClearedClip;    // סיום/ניקוי מלא של הגריד
+
+    [Header("Game Flow")]
+    [SerializeField] private AudioClip gameStartClip;       // תחילת משחק
+    [SerializeField] private AudioClip levelCompleteClip;   // סיום שלב בהצלחה
+    [SerializeField] private AudioClip gameOverClip;        // הפסד
+    [SerializeField] private AudioClip nextLevelClip;       // מעבר לשלב הבא
 
     [Header("Target Symbols")]
     [SerializeField] private AudioClip symbolGrowClip;          // סמל גדל (scale up)
@@ -100,6 +108,36 @@ public class SoundManager : MonoBehaviour
     public void PlayLineClear()
     {
         PlayClip(lineClearClip);
+    }
+
+    public void PlayLineClearPossible()
+    {
+        PlayClip(lineClearPossibleClip);
+    }
+
+    public void PlayBoardCleared()
+    {
+        PlayClip(boardClearedClip);
+    }
+
+    public void PlayGameStart()
+    {
+        PlayClip(gameStartClip);
+    }
+
+    public void PlayLevelComplete()
+    {
+        PlayClip(levelCompleteClip);
+    }
+
+    public void PlayGameOver()
+    {
+        PlayClip(gameOverClip);
+    }
+
+    public void PlayNextLevel()
+    {
+        PlayClip(nextLevelClip);
     }
 
     public float SymbolGrowClipLength => symbolGrowClip != null ? symbolGrowClip.length : 0f;

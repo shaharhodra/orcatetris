@@ -35,22 +35,12 @@ public class ShapeTrayManager : MonoBehaviour
     [Header("Move Threshold")]
     [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
-    [Header("Endgame Assist")]
-    [Tooltip("When the board has this many or fewer occupied cells (and was previously fuller than that), prefer smaller shapes so they can fit precisely into the last gaps — helps actually reach a full board clear. Raised from 10 to cover most of a 6x8 (48-cell) board so the game steers toward full clears for most of the round, not just the final few cells.")]
-    [SerializeField] private int lowOccupancyThreshold = 30;
-
     [Header("Debug")]
     [Tooltip("Logs every candidate shape's best achievable score for each refill, so a confusing tray choice can be diagnosed from the Console instead of guessed at.")]
     [SerializeField] private bool debugLogShapeSelection = false;
 
     private readonly List<Shape> activeShapes = new List<Shape>();
     private bool noMovesReviveTriggered;
-
-    // Highest occupied-cell count seen since the board was last empty. Used to tell
-    // "just started / freshly cleared" (peak still low) apart from "was fuller and
-    // is now emptying back down toward a full clear" (peak was above the threshold) —
-    // both look like "few cells occupied right now" if you only check the current count.
-    private int peakOccupancySinceClear;
 
     [Header("Revive")]
     [SerializeField] private ReviveManager reviveManager;
@@ -126,16 +116,44 @@ public class ShapeTrayManager : MonoBehaviour
             placer.OnShapePlaced += HandleShapePlaced;
     }
 
-    private struct ShapeCandidateScore
+    // Simulated tray-refill state used by the beam search below: a private snapshot
+    // of the board (never touches the live board), the sequence of shapes chosen to
+    // reach it, which of those shapes are already used (so a refill of 3 slots never
+    // offers the same shape twice), how many lines that sequence has cleared so far,
+    // and whether it reaches a full board clear at any point. No score/points of any
+    // kind — only actual line-clearing is tracked.
+    private class BeamState
     {
-        public Shape Prefab;
-        public int BestScore;
-        public int BestClearedLines;
-        public int BestFilledCells;
+        public bool[,] Grid;
+        public List<Shape> Sequence;
+        public HashSet<Shape> Used;
+        public int TotalLinesCleared;
+        public bool AchievedFullClear;
     }
 
-    // Always picks the 3 shapes that best help complete rows/columns on the
-    // current board right now (EvaluateBestPlacementScore), for every refill.
+    private const int BeamWidth = 5;
+
+    // Ranks beam states purely by clearing outcome: a sequence that reaches a full
+    // clear always beats one that doesn't, and among sequences that tie on that,
+    // whichever cleared more lines overall wins. No score, no cell counts — nothing
+    // but actual line clears decides this.
+    private static int CompareBeamStates(BeamState a, BeamState b)
+    {
+        int fullClearCompare = (a.AchievedFullClear ? 1 : 0) - (b.AchievedFullClear ? 1 : 0);
+        if (fullClearCompare != 0)
+            return fullClearCompare;
+
+        return a.TotalLinesCleared - b.TotalLinesCleared;
+    }
+
+    // Picks the 3 shapes for a tray refill by looking 3 moves ahead — the depth of
+    // one full refill — instead of judging each shape in isolation against today's
+    // board. Each candidate sequence is simulated on a private grid snapshot
+    // (placement + resulting line clears), so the shape chosen for slot 2 already
+    // accounts for what slot 1 did to the board, and so on. Reaching a full clear
+    // anywhere in the 3-shape sequence always wins over anything else, which is what
+    // lets a big shape get offered when a large open area calls for it, right
+    // alongside small shapes that mop up whatever irregular gaps are left.
     private List<Shape> PickSmartBestSet(Shape[] prefabs)
     {
         var result = new List<Shape>();
@@ -146,65 +164,96 @@ public class ShapeTrayManager : MonoBehaviour
         if (pool.Count == 0)
             return result;
 
+        // Shuffle so that ties (extremely common — most placements clear zero lines)
+        // don't always resolve to whichever shape happens to sit first in the
+        // Inspector array. Without this, a stable sort on an all-zero score would
+        // silently and permanently favor whatever prefab order was authored.
+        for (int i = pool.Count - 1; i > 0; i--)
+        {
+            int swapIndex = Random.Range(0, i + 1);
+            (pool[i], pool[swapIndex]) = (pool[swapIndex], pool[i]);
+        }
+
         if (board != null)
         {
-            var scored = new List<ShapeCandidateScore>(pool.Count);
-            foreach (var prefab in pool)
+            var beam = new List<BeamState>
             {
-                var score = EvaluateBestPlacementScore(prefab);
-                if (score.BestScore > int.MinValue / 2)
-                    scored.Add(score);
+                new BeamState
+                {
+                    Grid = BuildOccupancyGrid(),
+                    Sequence = new List<Shape>(),
+                    Used = new HashSet<Shape>(),
+                    TotalLinesCleared = 0,
+                    AchievedFullClear = false
+                }
+            };
+
+            for (int depth = 0; depth < 3; depth++)
+            {
+                var expanded = new List<BeamState>();
+
+                foreach (var state in beam)
+                {
+                    foreach (var prefab in pool)
+                    {
+                        if (state.Used.Contains(prefab))
+                            continue;
+
+                        var offsets = prefab.GetCells(board.cellSize);
+                        if (offsets == null || offsets.Length == 0)
+                            continue;
+
+                        if (!TryFindBestAnchor(state.Grid, offsets, out var anchor, out int clearedLines))
+                            continue;
+
+                        var newGrid = (bool[,])state.Grid.Clone();
+                        SimulatePlaceAndClear(newGrid, anchor, offsets);
+
+                        bool fullClear = IsGridEmpty(newGrid);
+
+                        expanded.Add(new BeamState
+                        {
+                            Grid = newGrid,
+                            Sequence = new List<Shape>(state.Sequence) { prefab },
+                            Used = new HashSet<Shape>(state.Used) { prefab },
+                            TotalLinesCleared = state.TotalLinesCleared + clearedLines,
+                            AchievedFullClear = state.AchievedFullClear || fullClear
+                        });
+                    }
+                }
+
+                if (expanded.Count == 0)
+                    break;
+
+                expanded.Sort((a, b) => CompareBeamStates(b, a)); // descending: best clearing outcome first
+                beam = expanded.Take(BeamWidth).ToList();
             }
 
-            if (scored.Count > 0)
+            BeamState best = null;
+            foreach (var state in beam)
             {
-                // Favor smaller shapes over ones that simply fill more cells — a
-                // small shape is more likely to slot exactly into remaining gaps,
-                // which is what actually gets the board to a full clear. This also
-                // applies right after a fresh clear: a freshly emptied board is the
-                // best time to keep things tidy, not to prefer big/awkward shapes
-                // (previously this required the board to have been fuller than the
-                // threshold first, which meant every post-clear cycle briefly fell
-                // back to "prefer bigger shapes" mode until occupancy climbed back
-                // past the threshold — undoing the assist right when it mattered most).
-                bool lowOccupancy = GetOccupiedCellCount() <= lowOccupancyThreshold;
+                if (state.Sequence.Count == 0)
+                    continue;
+                if (best == null || CompareBeamStates(state, best) > 0)
+                    best = state;
+            }
 
-                var ordered = lowOccupancy
-                    ? scored.OrderByDescending(s => s.BestClearedLines)
-                            .ThenBy(s => s.BestFilledCells)
-                            .ThenByDescending(s => s.BestScore)
-                    : scored.OrderByDescending(s => s.BestClearedLines)
-                            .ThenByDescending(s => s.BestScore)
-                            .ThenByDescending(s => s.BestFilledCells);
-
-                // Pick top 3 by best achievable outcome
-                var top = ordered
-                    .Take(3)
-                    .Select(s => s.Prefab)
-                    .ToList();
+            if (best != null)
+            {
+                result.AddRange(best.Sequence);
 
                 if (debugLogShapeSelection)
                 {
-                    var summary = string.Join(" | ", ordered.Take(8).Select(s =>
-                        $"{s.Prefab.name}: lines={s.BestClearedLines} score={s.BestScore} cells={s.BestFilledCells}"));
-                    Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}, peak={peakOccupancySinceClear}, lowOccupancy={lowOccupancy}) top candidates: {summary}");
+                    Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}) chose sequence: " +
+                        $"{string.Join(" -> ", best.Sequence.Select(s => s.name))} (linesCleared={best.TotalLinesCleared}, fullClearReached={best.AchievedFullClear})");
                 }
-
-                result.AddRange(top);
 
                 if (result.Count < 3)
                 {
-                    var fillerOrder = lowOccupancy
-                        ? scored.OrderBy(s => s.BestFilledCells).ThenByDescending(s => s.BestScore)
-                        : scored.OrderByDescending(s => s.BestScore);
-
-                    var fillers = fillerOrder
-                        .Select(s => s.Prefab)
-                        .Where(p => !result.Contains(p));
-
-                    foreach (var f in fillers)
+                    var remaining = pool.Where(p => !result.Contains(p)).OrderBy(p => ShapeCellCount(p));
+                    foreach (var p in remaining)
                     {
-                        result.Add(f);
+                        result.Add(p);
                         if (result.Count == 3)
                             break;
                     }
@@ -219,108 +268,153 @@ public class ShapeTrayManager : MonoBehaviour
         return result;
     }
 
-    private ShapeCandidateScore EvaluateBestPlacementScore(Shape prefab)
+    private bool[,] BuildOccupancyGrid()
     {
-        var candidate = new ShapeCandidateScore
-        {
-            Prefab = prefab,
-            BestScore = int.MinValue,
-            BestClearedLines = 0,
-            BestFilledCells = 0
-        };
+        var grid = new bool[board.width, board.height];
+        for (int x = 0; x < board.width; x++)
+            for (int y = 0; y < board.height; y++)
+                grid[x, y] = board.IsOccupied(new Vector2Int(x, y));
+        return grid;
+    }
 
-        if (prefab == null || board == null)
-            return candidate;
+    // Finds the anchor that clears the most lines for a shape on a simulated grid.
+    // Judged on clearedLines alone — no cell-count tiebreak of any kind, since any
+    // such term (more filled cells, fewer remaining missing cells, whatever the
+    // framing) is mathematically just "how many cells did this shape cover", which
+    // always favors bigger shapes regardless of whether that's actually useful. Ties
+    // (the common case: most placements clear zero lines) keep the first anchor
+    // found; the pool itself is shuffled by the caller so ties don't always resolve
+    // to the same shape. Returns false if the shape can't be placed anywhere.
+    private bool TryFindBestAnchor(bool[,] grid, Vector2Int[] offsets, out Vector2Int bestAnchor, out int bestClearedLines)
+    {
+        bestAnchor = default;
+        bestClearedLines = -1;
+        bool found = false;
 
-        var offsets = prefab.GetCells(board.cellSize);
-        if (offsets == null || offsets.Length == 0)
-            return candidate;
+        int width = board.width;
+        int height = board.height;
 
-        // Precompute missing counts in current grid
-        int[] rowMissing = new int[board.height];
-        int[] colMissing = new int[board.width];
-
-        for (int y = 0; y < board.height; y++)
+        int[] rowMissing = new int[height];
+        int[] colMissing = new int[width];
+        for (int y = 0; y < height; y++)
         {
             int missing = 0;
-            for (int x = 0; x < board.width; x++)
-                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            for (int x = 0; x < width; x++)
+                if (!grid[x, y]) missing++;
             rowMissing[y] = missing;
         }
-        for (int x = 0; x < board.width; x++)
+        for (int x = 0; x < width; x++)
         {
             int missing = 0;
-            for (int y = 0; y < board.height; y++)
-                if (!board.IsOccupied(new Vector2Int(x, y))) missing++;
+            for (int y = 0; y < height; y++)
+                if (!grid[x, y]) missing++;
             colMissing[x] = missing;
         }
 
-        // Try every anchor cell as a potential placement
-        for (int ax = 0; ax < board.width; ax++)
+        int[] filledInRow = new int[height];
+        int[] filledInCol = new int[width];
+
+        for (int ax = 0; ax < width; ax++)
         {
-            for (int ay = 0; ay < board.height; ay++)
+            for (int ay = 0; ay < height; ay++)
             {
                 var anchor = new Vector2Int(ax, ay);
-                if (!CanPlaceOffsetsAt(anchor, offsets))
+                if (!CanPlaceOffsetsAtGrid(grid, anchor, offsets))
                     continue;
 
-                // Simulate effect on line completion without mutating the board
-                int filledCells = offsets.Length;
-
-                // Count how many new cells we cover per row/col
-                var filledInRow = new Dictionary<int, int>();
-                var filledInCol = new Dictionary<int, int>();
+                Array.Clear(filledInRow, 0, height);
+                Array.Clear(filledInCol, 0, width);
 
                 foreach (var off in offsets)
                 {
                     var cell = anchor + off;
-                    if (!filledInRow.ContainsKey(cell.y)) filledInRow[cell.y] = 0;
-                    if (!filledInCol.ContainsKey(cell.x)) filledInCol[cell.x] = 0;
                     filledInRow[cell.y]++;
                     filledInCol[cell.x]++;
                 }
 
                 int clearedLines = 0;
-                foreach (var kv in filledInRow)
-                {
-                    int y = kv.Key;
-                    if (y >= 0 && y < rowMissing.Length && rowMissing[y] == kv.Value)
+                for (int y = 0; y < height; y++)
+                    if (filledInRow[y] > 0 && rowMissing[y] == filledInRow[y])
                         clearedLines++;
-                }
-                foreach (var kv in filledInCol)
-                {
-                    int x = kv.Key;
-                    if (x >= 0 && x < colMissing.Length && colMissing[x] == kv.Value)
+                for (int x = 0; x < width; x++)
+                    if (filledInCol[x] > 0 && colMissing[x] == filledInCol[x])
                         clearedLines++;
-                }
 
-                // Score: prioritize clears heavily, then general fill.
-                // This is intentionally generous to make the game easier.
-                int score = (clearedLines * 1000) + (filledCells * 10);
-
-                if (score > candidate.BestScore)
+                if (clearedLines > bestClearedLines)
                 {
-                    candidate.BestScore = score;
-                    candidate.BestClearedLines = clearedLines;
-                    candidate.BestFilledCells = filledCells;
+                    bestClearedLines = clearedLines;
+                    bestAnchor = anchor;
+                    found = true;
                 }
             }
         }
 
-        return candidate;
+        return found;
     }
 
-    private bool CanPlaceOffsetsAt(Vector2Int anchor, Vector2Int[] offsets)
+    private bool CanPlaceOffsetsAtGrid(bool[,] grid, Vector2Int anchor, Vector2Int[] offsets)
     {
-        if (board == null || offsets == null)
-            return false;
+        int width = board.width;
+        int height = board.height;
 
         foreach (var off in offsets)
         {
             var cell = anchor + off;
-            if (!board.IsInside(cell) || board.IsOccupied(cell))
+            if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
+                return false;
+            if (grid[cell.x, cell.y])
                 return false;
         }
+        return true;
+    }
+
+    private void SimulatePlaceAndClear(bool[,] grid, Vector2Int anchor, Vector2Int[] offsets)
+    {
+        int width = board.width;
+        int height = board.height;
+
+        foreach (var off in offsets)
+        {
+            var cell = anchor + off;
+            grid[cell.x, cell.y] = true;
+        }
+
+        var fullRows = new List<int>();
+        for (int y = 0; y < height; y++)
+        {
+            bool full = true;
+            for (int x = 0; x < width; x++)
+                if (!grid[x, y]) { full = false; break; }
+            if (full) fullRows.Add(y);
+        }
+
+        var fullCols = new List<int>();
+        for (int x = 0; x < width; x++)
+        {
+            bool full = true;
+            for (int y = 0; y < height; y++)
+                if (!grid[x, y]) { full = false; break; }
+            if (full) fullCols.Add(x);
+        }
+
+        foreach (var y in fullRows)
+            for (int x = 0; x < width; x++)
+                grid[x, y] = false;
+
+        foreach (var x in fullCols)
+            for (int y = 0; y < height; y++)
+                grid[x, y] = false;
+    }
+
+    private bool IsGridEmpty(bool[,] grid)
+    {
+        int width = board.width;
+        int height = board.height;
+
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (grid[x, y])
+                    return false;
         return true;
     }
 
@@ -452,23 +546,6 @@ public class ShapeTrayManager : MonoBehaviour
         return count;
     }
 
-    // Call after every placement so peakOccupancySinceClear reflects the true high
-    // point of the current fill cycle, not just whatever the count happens to be
-    // when a refill is requested.
-    private void UpdatePeakOccupancy()
-    {
-        int occupied = GetOccupiedCellCount();
-
-        if (occupied == 0)
-        {
-            peakOccupancySinceClear = 0;
-            return;
-        }
-
-        if (occupied > peakOccupancySinceClear)
-            peakOccupancySinceClear = occupied;
-    }
-
     private void OnDestroy()
     {
         GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
@@ -521,8 +598,6 @@ public class ShapeTrayManager : MonoBehaviour
     {
         if (placed != null)
             activeShapes.Remove(placed);
-
-        UpdatePeakOccupancy();
 
         if (activeShapes.Count == 0)
         {
@@ -869,8 +944,6 @@ public class ShapeTrayManager : MonoBehaviour
 
             activeShapes.Clear();
         }
-
-        peakOccupancySinceClear = 0;
 
         var app = AppManager.instance;
 

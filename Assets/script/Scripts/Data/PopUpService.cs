@@ -155,8 +155,14 @@ public class PopUpService : MonoBehaviour
             return;
 
         IsActive = true;
-        if (SoundManager.instance != null)
+
+        // Loss conditions already get their sound from ReviveManager.TriggerGameOver()
+        // (PlayGameOver) right before this popup shows — playing the "amazing" fanfare
+        // on top of that is both the wrong sound for a loss and a stacked duplicate.
+        bool isLossCondition = condition == PopUpCondition.OnLose || condition == PopUpCondition.OnAdventureLose;
+        if (SoundManager.instance != null && !isLossCondition)
             SoundManager.instance.PlayAmazingPopup();
+
         SetOverlayActiveStateForLoss(true);
         UpdateScoreTexts();
         ShowPopUp(true);

@@ -370,6 +370,9 @@ public class ReviveManager : MonoBehaviour
     {
         Debug.Log("[ReviveManager] TriggerGameOver called");
 
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayGameOver();
+
         // In Adventure mode, fire event for AdventureLevelFailPopup
         bool isAdventure = GameManager.instance != null
             && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic;

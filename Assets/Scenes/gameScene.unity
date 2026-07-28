@@ -4883,7 +4883,6 @@ MonoBehaviour:
   shapesLabel: shape
   noMovesReviveDelay: 5
   minPlaceableToConsiderMovable: 1
-  lowOccupancyThreshold: 10
   debugLogShapeSelection: 1
   reviveManager: {fileID: 2006691660}
 --- !u!4 &855154865
@@ -8047,6 +8046,44 @@ MonoBehaviour:
   clearScatterX: 0.45
   board: {fileID: 1414012165}
   initialBlockPrefab: {fileID: 2683690490669831622, guid: 2c43d0de4842fe34f8c66e2b1f6bff47, type: 3}
+  randomFillShapePrefabs:
+  - {fileID: 5924376386551647683, guid: f870f0df91727c746942b569070aecb9, type: 3}
+  - {fileID: 468442592156601434, guid: 50f6cb1b91ee35d4cb5432cc02cc5976, type: 3}
+  - {fileID: 6209137391354102695, guid: 960829f437f434f43b597ceedae1e3cb, type: 3}
+  - {fileID: 2966608712451570766, guid: ca23aea20943d6345924eac5712c2cdb, type: 3}
+  - {fileID: 7671165921191882579, guid: 213a32c4778402f41aff228a4b5db834, type: 3}
+  - {fileID: 5216686327907737246, guid: aa3605e593d747e479487e4fbbc65a64, type: 3}
+  - {fileID: 6849865853973081051, guid: 3a9d6ce6dd36bbf46ba5fa43d30fdd6f, type: 3}
+  - {fileID: 8758272767497094729, guid: 9c3c63c89f9d649186d4b5383f2fce04, type: 3}
+  - {fileID: 6252862105117004881, guid: 1e7cb370ab1af387a628cd840b9f8fca, type: 3}
+  - {fileID: 8796850752747474711, guid: 376756c72ba0291421a3effd2191ac8f, type: 3}
+  - {fileID: 3563352411413407747, guid: 336c555b2095a2e43bd8e40e19a5e8a7, type: 3}
+  - {fileID: 3668488296882935676, guid: 62b4cac75f848894fb8a89576258487c, type: 3}
+  - {fileID: 3563352411413407747, guid: 62035d0a620a44d40b94be90ab131e7a, type: 3}
+  - {fileID: 3668488296882935676, guid: c3b4fc6ed060f064883e8f5168096bab, type: 3}
+  - {fileID: 7246744021484295054, guid: 930a888f3791d7e4eb565a4be8d28cd1, type: 3}
+  - {fileID: 7246744021484295054, guid: 8a25a654b36067443a5ce1e9c05b967e, type: 3}
+  - {fileID: 5924376386551647683, guid: 4f497319d4ae9cc4d96871d63bb2e867, type: 3}
+  - {fileID: 5924376386551647683, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
+  - {fileID: 5924376386551647683, guid: b2c3d4e5f60718293a4b5c6d7e8f9012, type: 3}
+  - {fileID: 5924376386551647683, guid: 0ea0d2b5dd05e47418d9c4765e62a3c0, type: 3}
+  - {fileID: 5454446068728028695, guid: 6559839592a0c9943b6cee75e94c1470, type: 3}
+  - {fileID: 5454446068728028695, guid: 243d6f81dc575b8408d2114cf70d2d53, type: 3}
+  - {fileID: 6394497160110762567, guid: 99ab6e9b691d0de620336b3f60ffb083, type: 3}
+  - {fileID: 5491601910896395813, guid: 4712e9fe1179c7db84d8c97b0508f895, type: 3}
+  - {fileID: 8990599538704178926, guid: da5fa0fd34970a4e3b487a73d780484c, type: 3}
+  - {fileID: 4607580621682292027, guid: 5b25dacaea5d2eb107566fd1f0fad8f4, type: 3}
+  - {fileID: 5013990381444744598, guid: d52b71b10b991884ea02b1d563a3e993, type: 3}
+  - {fileID: 6846608915720579813, guid: 6948d055226540945ae8a2f5205d5804, type: 3}
+  - {fileID: 6580873580862860536, guid: b74bed24c5ca39c46ba26899cb3f7a0f, type: 3}
+  - {fileID: 7701140568180262024, guid: 2ce56daf19b1f3c4db1af3009764681d, type: 3}
+  - {fileID: 5468497852076923241, guid: 0cb0ecd2e3c1ae246b420b22f999c8f9, type: 3}
+  - {fileID: 3668488296882935676, guid: 575218d4f46e9ed4dbbb1e1a93dd6869, type: 3}
+  - {fileID: 3668488296882935676, guid: 63cf25da9e648c343b2c8839db0e4a2e, type: 3}
+  - {fileID: 3668488296882935676, guid: d4e5f60718293a4b5c6d7e8f90123456, type: 3}
+  - {fileID: 3668488296882935676, guid: c3d4e5f60718293a4b5c6d7e8f901234, type: 3}
+  classicRandomInitialShapeCount: 2
+  adventureRandomInitialShapeCount: 0
   animateInitialBlockEntry: 1
   initialBlockEntryDuration: 0.25
   initialBlockEntryEase: 27
@@ -8797,19 +8834,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   audioSource: {fileID: 1513654286}
-  clickShapeClip: {fileID: 8300000, guid: b696c595fc3256a4ea1826d02efed3dc, type: 3}
-  placeShapeClip: {fileID: 8300000, guid: 13de386deddf77d4f87788454e8ab2a6, type: 3}
-  combo1Clip: {fileID: 8300000, guid: 7d8af4f632a9be246b7524a8ebf2db4d, type: 3}
-  combo2Clip: {fileID: 0}
-  combo3Clip: {fileID: 0}
-  combo4Clip: {fileID: 0}
+  clickShapeClip: {fileID: 8300000, guid: f9d2cd7253edd5d4e9a51b1d9759049e, type: 3}
+  placeShapeClip: {fileID: 8300000, guid: 3dcaecc81a031f948940360c979c960d, type: 3}
+  combo1Clip: {fileID: 8300000, guid: 7f3082f2ab6508f499b7f729c9c9f7e6, type: 3}
+  combo2Clip: {fileID: 8300000, guid: c0e6e033f762ece469deec7eaaf632a7, type: 3}
+  combo3Clip: {fileID: 8300000, guid: e87261a6ca38a61418f4e80ebaab6cfa, type: 3}
+  combo4Clip: {fileID: 8300000, guid: ab849f9f42ea3104c9c76e7f09a8bdad, type: 3}
   combo5PlusClip: {fileID: 0}
-  lineClearClip: {fileID: 0}
+  lineClearClip: {fileID: 8300000, guid: d702800f00172cd4086c30c22d6bab41, type: 3}
+  lineClearPossibleClip: {fileID: 8300000, guid: dcd1f1969dc6394408a796d1f6d0fa1b, type: 3}
+  boardClearedClip: {fileID: 8300000, guid: 2ca60e986040f5340aa1fe5659c0ee60, type: 3}
+  gameStartClip: {fileID: 8300000, guid: e4d907eefc39a224ab9675480f900601, type: 3}
+  levelCompleteClip: {fileID: 8300000, guid: 06cb8419c610a8c448cca3492e06d1ba, type: 3}
+  gameOverClip: {fileID: 8300000, guid: 098384fa7b78bc54a8386b7c4b879a33, type: 3}
+  nextLevelClip: {fileID: 8300000, guid: 95b70631570a2d64391ca1f7db0eb723, type: 3}
   symbolGrowClip: {fileID: 8300000, guid: fbe145292a805ed4a8a5146a4ef1e8c6, type: 3}
   symbolReachedTargetClip: {fileID: 8300000, guid: 7c9c8b1c9fb404848820bd592d21f658, type: 3}
   coinsClip: {fileID: 0}
-  amazingPopupClip: {fileID: 0}
-  buttonClickClip: {fileID: 0}
+  amazingPopupClip: {fileID: 8300000, guid: afa74e9bba438ab4b9f1be180c1685f7, type: 3}
+  buttonClickClip: {fileID: 8300000, guid: 579a762d8e0283748ab840760e6beb5d, type: 3}
 --- !u!4 &1513654288
 Transform:
   m_ObjectHideFlags: 0
@@ -10556,7 +10599,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00012207031}
+  m_AnchoredPosition: {x: 0, y: -0.00024414062}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1800130073

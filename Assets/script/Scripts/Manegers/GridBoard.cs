@@ -39,6 +39,16 @@ public class GridBoard : MonoBehaviour
     private List<InitialBlockData> pendingInitialBlocks;
     private List<InitialBlockData> storedInitialBlocks; // kept for restart
 
+    [Header("Random Initial Fill")]
+    [Tooltip("Shape prefabs to draw from when pre-filling the grid at game start (e.g. the same pool used by the tray) — placed as whole connected shapes rather than scattered single cells.")]
+    [SerializeField] private Shape[] randomFillShapePrefabs;
+
+    [Tooltip("How many random shapes to pre-place on the grid at game start in Classic mode. 0 = disabled. A fresh random layout is generated on every build/restart.")]
+    [SerializeField] private int classicRandomInitialShapeCount = 0;
+
+    [Tooltip("Same as above, but for Adventure mode. Only applies to levels whose JSON doesn't already define InitialBlocks — a curated level layout always takes priority over this.")]
+    [SerializeField] private int adventureRandomInitialShapeCount = 0;
+
     [Header("Initial Block Entry Animation")]
     [SerializeField] private bool animateInitialBlockEntry = true;
     [SerializeField] private float initialBlockEntryDuration = 0.25f;
@@ -261,10 +271,17 @@ public class GridBoard : MonoBehaviour
         {
             ApplyInitialBlocks(pendingInitialBlocks);
         }
+        else if (ActiveRandomInitialShapeCount() > 0)
+        {
+            ApplyInitialBlocks(BuildRandomInitialBlocks());
+        }
 
         // Apply current theme to newly created cells
         if (ThemeManager.instance != null)
             ThemeManager.instance.ApplyThemeToGrid(this);
+
+        if (SoundManager.instance != null)
+            SoundManager.instance.PlayGameStart();
     }
 
     /// <summary>
@@ -396,6 +413,77 @@ public class GridBoard : MonoBehaviour
                 if (cells[x, y] != null && cells[x, y].occupied)
                     occupiedCount++;
         Debug.Log($"[GridBoard] After ApplyInitialBlocks: {occupiedCount} cells are occupied");
+    }
+
+    /// <summary>
+    /// Classic or Adventure's random-fill shape count, whichever the current
+    /// AppManager.GameMode selects (defaults to Classic's if AppManager isn't ready yet).
+    /// </summary>
+    private int ActiveRandomInitialShapeCount()
+    {
+        bool isAdventure = AppManager.instance != null &&
+                            AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
+        return isAdventure ? adventureRandomInitialShapeCount : classicRandomInitialShapeCount;
+    }
+
+    private const int RandomFillPlacementAttemptsPerShape = 20;
+
+    /// <summary>
+    /// Places ActiveRandomInitialShapeCount() random shapes (drawn from
+    /// randomFillShapePrefabs) at random non-overlapping spots on the empty grid, so
+    /// the pre-fill reads as whole connected shapes instead of cells scattered
+    /// individually across the board. A shape that can't find a free spot after a
+    /// few tries is simply skipped. Returns null if there's nothing to place.
+    /// </summary>
+    private List<InitialBlockData> BuildRandomInitialBlocks()
+    {
+        int shapeCount = ActiveRandomInitialShapeCount();
+        if (shapeCount <= 0 || randomFillShapePrefabs == null || randomFillShapePrefabs.Length == 0)
+            return null;
+
+        var pool = randomFillShapePrefabs.Where(p => p != null).ToList();
+        if (pool.Count == 0)
+            return null;
+
+        var occupied = new HashSet<Vector2Int>();
+        var blocks = new List<InitialBlockData>();
+
+        for (int i = 0; i < shapeCount; i++)
+        {
+            var prefab = pool[Random.Range(0, pool.Count)];
+            var offsets = prefab.GetCells(cellSize);
+            if (offsets == null || offsets.Length == 0)
+                continue;
+
+            for (int attempt = 0; attempt < RandomFillPlacementAttemptsPerShape; attempt++)
+            {
+                var anchor = new Vector2Int(Random.Range(0, width), Random.Range(0, height));
+
+                bool fits = true;
+                foreach (var off in offsets)
+                {
+                    var cell = anchor + off;
+                    if (!IsInside(cell) || occupied.Contains(cell))
+                    {
+                        fits = false;
+                        break;
+                    }
+                }
+
+                if (!fits)
+                    continue;
+
+                foreach (var off in offsets)
+                {
+                    var cell = anchor + off;
+                    occupied.Add(cell);
+                    blocks.Add(new InitialBlockData { x = cell.x, y = cell.y, Symbol = -1 });
+                }
+                break;
+            }
+        }
+
+        return blocks.Count > 0 ? blocks : null;
     }
 
     private void CenterOrigin()
@@ -1293,6 +1381,10 @@ public class GridBoard : MonoBehaviour
         if (storedInitialBlocks != null && storedInitialBlocks.Count > 0)
         {
             ApplyInitialBlocks(storedInitialBlocks);
+        }
+        else if (ActiveRandomInitialShapeCount() > 0)
+        {
+            ApplyInitialBlocks(BuildRandomInitialBlocks());
         }
     }
 

@@ -50,6 +50,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     private Vector2Int? lastValidCell;
     private System.Collections.Generic.List<Vector2Int> previewBuffer;
     private int[] originalSortingOrders;
+    private bool wasPreviewingClear; // כדי להשמיע את צליל "אפשרות למחיקה" פעם אחת בלבד במעבר, לא בכל פריים
 
     private void Awake()
     {
@@ -151,6 +152,7 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         dragOffset.y = minFingerOffsetY;
         startPointerX = eventData.position.x;
         startPointerY = eventData.position.y;
+        wasPreviewingClear = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -233,9 +235,12 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
         bool canPlace = boardPlacer.CanPlaceShape(shape, cell);
         if (canPlace)
         {
-            boardPlacer.PlaceShape(shape, cell);
+            bool linesCleared = boardPlacer.PlaceShape(shape, cell);
 
-            if (SoundManager.instance != null)
+            // Skip the generic "place" sound when a line/board-clear sound is about to
+            // play for this same placement (played inside PlaceShape) — one sound per
+            // placement, not two stacked together.
+            if (!linesCleared && SoundManager.instance != null)
             {
                 SoundManager.instance.PlayPlaceShape();
             }
@@ -365,10 +370,20 @@ public class ShapeDragHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHa
 
                 var cellsToClear = board.GetPreviewClearCells(shape, lastValidCell.Value, previewBuffer);
                 board.SetPreviewClearCells(cellsToClear);
+
+                bool isPreviewingClear = cellsToClear != null && cellsToClear.Count > 0;
+                // Guard with beganDrag so this doesn't fire on the initial OnPointerDown
+                // call (which also runs UpdatePlacementFeedback at the shape's resting
+                // position) — that would stack this sound directly on top of the
+                // click-pickup sound on every single grab.
+                if (isPreviewingClear && !wasPreviewingClear && beganDrag && SoundManager.instance != null)
+                    SoundManager.instance.PlayLineClearPossible();
+                wasPreviewingClear = isPreviewingClear;
             }
             else
             {
                 board.ClearPreviewClear();
+                wasPreviewingClear = false;
             }
         }
     }

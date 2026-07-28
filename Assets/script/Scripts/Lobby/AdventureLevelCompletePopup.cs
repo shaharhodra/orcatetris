@@ -142,18 +142,20 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         }
 
         if (SoundManager.instance != null)
-            SoundManager.instance.PlayAmazingPopup();
+            SoundManager.instance.PlayLevelComplete();
     }
 
     private void OnNextLevel()
     {
         Debug.Log($"[CompletePopup] OnNextLevel clicked");
-        
+
         if (!isActive)
             return;
 
+        // Dedicated transition sound instead of stacking it on top of the generic
+        // button click — this button always means "go to next level".
         if (SoundManager.instance != null)
-            SoundManager.instance.PlayButtonClick();
+            SoundManager.instance.PlayNextLevel();
 
         // Save progress
         int currentLevel = 0;

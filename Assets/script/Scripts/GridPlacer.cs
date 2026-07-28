@@ -56,10 +56,13 @@ public class GridPlacer : MonoBehaviour
         return true;
     }
 
-    public void PlaceShape(Shape shape, Vector2Int targetCell)
+    // Returns true if this placement cleared at least one line — callers use this to
+    // skip the generic "place" sound in favor of the line-clear/combo/board-cleared
+    // sound, instead of stacking both on the same placement.
+    public bool PlaceShape(Shape shape, Vector2Int targetCell)
     {
         if (shape == null)
-            return;
+            return false;
 
         var offsets = shape.GetCells(board.cellSize);
 
@@ -156,15 +159,28 @@ public class GridPlacer : MonoBehaviour
         if (clearResult.LinesCleared > 0)
         {
             if (debugLogs)
-               // Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
-
-            if (SoundManager.instance != null)
             {
-                SoundManager.instance.PlayLineClear();
-                SoundManager.instance.PlayCombo(clearResult.LinesCleared);
+               // Debug.Log($"[GridPlacer] Lines cleared: lines={clearResult.LinesCleared} (rows={clearResult.RowsCleared}, cols={clearResult.ColumnsCleared}), cells={clearResult.CellsCleared}");
             }
 
-            if (board.IsBoardEmpty() && ThemeManager.instance != null)
+            bool boardCleared = board.IsBoardEmpty();
+
+            // Play only one sound for this placement: the full-board-clear sting takes
+            // over instead of stacking on top of the regular line-clear sound. The
+            // combo-tier stinger is NOT played here — ComboController/ComboManager
+            // already fire it (via ComboUIBridge) off this same OnLinesCleared event
+            // below, with its own streak-based tier count. Calling PlayCombo() here
+            // too meant two combo clips (often different tiers) played on top of each
+            // other on every 2nd+ clear in a streak.
+            if (SoundManager.instance != null)
+            {
+                if (boardCleared)
+                    SoundManager.instance.PlayBoardCleared();
+                else
+                    SoundManager.instance.PlayLineClear();
+            }
+
+            if (boardCleared && ThemeManager.instance != null)
                 ThemeManager.instance.TriggerBoardCleared();
 
             OnLinesCleared?.Invoke(clearResult);
@@ -172,7 +188,9 @@ public class GridPlacer : MonoBehaviour
         else
         {
             if (debugLogs)
+            {
               //  Debug.Log("[GridPlacer] No lines cleared -> breaking combo");
+            }
             OnNoLinesCleared?.Invoke();
         }
 
@@ -181,6 +199,8 @@ public class GridPlacer : MonoBehaviour
 
         // כעת אפשר להשמיד את אובייקט הצורה המקורי
         Destroy(shape.gameObject);
+
+        return clearResult.LinesCleared > 0;
     }
 
     private void AnimateBlockEntry(Transform block, Vector3 targetPosition, float delay)
