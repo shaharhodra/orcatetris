@@ -103,9 +103,8 @@ public class ReviveManager : MonoBehaviour
     public void RequestRevive()
     {
         Debug.Log("[ReviveManager] RequestRevive called");
-        
-        // Disable revive in Adventure mode
-        if (GameManager.instance != null && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic)
+		// Disable revive in Adventure mode
+		if (GameManager.instance != null && GameManager.instance.CurrentGameMode != GameManager.GameMode.Classic)
         {
             Debug.Log("[ReviveManager] Adventure mode detected, calling TriggerGameOver directly");
             TriggerGameOver();
@@ -163,11 +162,13 @@ public class ReviveManager : MonoBehaviour
 
         if (reviveCountdownCoroutine != null)
         {
+
             StopCoroutine(reviveCountdownCoroutine);
             reviveCountdownCoroutine = null;
         }
+		AdsManager.instance.ShowRewardedAd();
 
-        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAccepted);
+		LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAccepted);
 
         ClosePopup();
         WatchAdAndReviveAsync();

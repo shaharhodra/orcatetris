@@ -94,9 +94,10 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         Debug.Log($"[CompletePopup] ===== SHOW INTERNAL ===== displaying popup now!");
         
         ShapeDragHandler.InputBlocked = true;
+        AdsManager.instance?.ShowInterstitialAd();// Show an interstitial ad when the level is completed, if available.
 
-        // Update texts
-        int nextLevel = 1;
+		// Update texts
+		int nextLevel = 1;
         if (PlayerManeger.instance?.PlayerProgress != null)
             nextLevel = PlayerManeger.instance.PlayerProgress.HighestUnlockedLevel + 2;
 

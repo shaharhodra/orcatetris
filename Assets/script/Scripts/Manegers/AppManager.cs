@@ -119,7 +119,7 @@ public class AppManager : Singleton<AppManager>
 
         RemoteConfigManager.instance.OnRemoteFetchCompleted += () => {};
         RemoteConfigManager.instance.StartRemoteConfigFetch();
-
+        AdsManager.instance.Init(); 
 
 	}
 
