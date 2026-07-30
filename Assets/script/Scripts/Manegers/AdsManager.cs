@@ -121,7 +121,7 @@ public class AdsManager : Singleton<AdsManager>
 		var adRequest = new AdRequest();
 
 		// Send the request to load the ad.
-		RewardedAd.Load(TestInterstitialAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+		RewardedAd.Load(TestRewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
 		{
 			if (error != null)
 			{
@@ -183,19 +183,52 @@ public class AdsManager : Singleton<AdsManager>
 	 
 	public void ShowRewardedAd()
 	{
-		if (_rewardedAd != null && _rewardedAd.CanShowAd())
-		{
-			_rewardedAd.Show((Reward reward) =>
-			{
-				// Handle the reward here.
-				Debug.Log("User earned reward: " + reward.Amount);
-			});
-			Debug.Log("Rewarded ad is shown.");
-		}
-		else
+		ShowRewardedAd(null, null);
+	}
+
+	/// <summary>
+	/// Shows the rewarded ad. onRewardEarned fires only if the user watched to
+	/// completion and actually earned the reward. onNotCompleted fires if no ad
+	/// is available, or if the user closes/skips the ad before earning the reward.
+	/// </summary>
+	public void ShowRewardedAd(System.Action onRewardEarned, System.Action onNotCompleted)
+	{
+		if (_rewardedAd == null || !_rewardedAd.CanShowAd())
 		{
 			Debug.Log("Rewarded ad is not ready yet.");
+			onNotCompleted?.Invoke();
+			return;
 		}
+
+		bool rewardEarned = false;
+		var ad = _rewardedAd;
+
+		void HandleClosed()
+		{
+			ad.OnAdFullScreenContentClosed -= HandleClosed;
+			if (!rewardEarned)
+				onNotCompleted?.Invoke();
+		}
+
+		void HandleFailed(AdError error)
+		{
+			ad.OnAdFullScreenContentClosed -= HandleClosed;
+			ad.OnAdFullScreenContentFailed -= HandleFailed;
+			if (!rewardEarned)
+				onNotCompleted?.Invoke();
+		}
+
+		ad.OnAdFullScreenContentClosed += HandleClosed;
+		ad.OnAdFullScreenContentFailed += HandleFailed;
+
+		ad.Show((Reward reward) =>
+		{
+			// Handle the reward here.
+			rewardEarned = true;
+			Debug.Log("User earned reward: " + reward.Amount);
+			onRewardEarned?.Invoke();
+		});
+		Debug.Log("Rewarded ad is shown.");
 	}
 
 

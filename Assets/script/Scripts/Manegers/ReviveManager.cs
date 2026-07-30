@@ -162,16 +162,29 @@ public class ReviveManager : MonoBehaviour
 
         if (reviveCountdownCoroutine != null)
         {
-
             StopCoroutine(reviveCountdownCoroutine);
             reviveCountdownCoroutine = null;
         }
-		AdsManager.instance.ShowRewardedAd();
 
-		LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAccepted);
+        LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAccepted);
 
         ClosePopup();
-        WatchAdAndReviveAsync();
+
+        if (AdsManager.instance != null)
+        {
+            AdsManager.instance.ShowRewardedAd(
+                onRewardEarned: () => WatchAdAndReviveAsync(),
+                onNotCompleted: () =>
+                {
+                    LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAdNotCompleted);
+                    TriggerGameOver();
+                });
+        }
+        else
+        {
+            LogReviveEvent(AnalyticsManager.AnalyticsEvent.ReviveAdNotCompleted);
+            TriggerGameOver();
+        }
     }
 
     public void DeclineRevive()

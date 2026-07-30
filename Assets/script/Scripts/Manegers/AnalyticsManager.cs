@@ -22,7 +22,8 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
         ReviveAccepted,
         ReviveDeclined,
         ReviveTimedOut,
-        ReviveUnavailable
+        ReviveUnavailable,
+        ReviveAdNotCompleted
     }
 
     [Serializable] 
