@@ -35,6 +35,12 @@ public class ShapeTrayManager : MonoBehaviour
     [Header("Move Threshold")]
     [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
+    [Header("Difficulty")]
+    [Tooltip("0 = Easy: always pick whichever clear-tied tray option leaves the board healthiest. 1 = Hard: ignore board health and pick randomly among clear-tied options (chaotic). Line clears themselves always win regardless of this value — it only breaks ties between sequences that are otherwise equally good at clearing.")]
+    [SerializeField, Range(0f, 1f)] private float difficulty = 0.3f;
+
+    private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();
+
     [Header("Debug")]
     [Tooltip("Logs every candidate shape's best achievable score for each refill, so a confusing tray choice can be diagnosed from the Console instead of guessed at.")]
     [SerializeField] private bool debugLogShapeSelection = false;
@@ -116,85 +122,24 @@ public class ShapeTrayManager : MonoBehaviour
             placer.OnShapePlaced += HandleShapePlaced;
     }
 
-    // Picks the 3 shapes for a tray refill by directly ranking every shape in the
-    // pool by how good a clear it can achieve on the board as it stands right now
-    // (single placement, best anchor) — a shape that fully clears the board ranks
-    // above everything else, and among the rest whichever clears more lines wins.
-    // The offered trio is simply the top 3 distinct shapes by that score, so the
-    // player's three shapes are always, individually, the ones most likely to
-    // close a row or column right now.
+    // Picks the 3 tray shapes via ShapeSelectionAlgorithm (see that file for the
+    // beam-search + board-health + difficulty logic). This class only builds the
+    // current occupancy grid to hand off and logs the debug summary.
     private List<Shape> PickSmartBestSet(Shape[] prefabs)
     {
-        var result = new List<Shape>();
-        if (prefabs == null || prefabs.Length == 0)
-            return result;
+        if (prefabs == null || prefabs.Length == 0 || board == null)
+            return new List<Shape>();
 
-        var pool = prefabs.Where(p => p != null).Distinct().ToList();
-        if (pool.Count == 0)
-            return result;
+        // ShapeSelectionAlgorithm takes a "helpfulness" weight (1 = always healthiest),
+        // which is the inverse of this component's Difficulty field (0 = easy).
+        float helpfulness = 1f - difficulty;
+        var result = shapeSelectionAlgorithm.SelectTray(BuildOccupancyGrid(), prefabs, board.cellSize, helpfulness);
 
-        // Shuffle so that ties (extremely common — most placements clear zero lines)
-        // don't always resolve to whichever shape happens to sit first in the
-        // Inspector array. Without this, a stable sort on an all-zero score would
-        // silently and permanently favor whatever prefab order was authored.
-        for (int i = pool.Count - 1; i > 0; i--)
+        if (debugLogShapeSelection)
         {
-            int swapIndex = Random.Range(0, i + 1);
-            (pool[i], pool[swapIndex]) = (pool[swapIndex], pool[i]);
+            Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}, difficulty={difficulty}) chose: " +
+                $"{string.Join(", ", result.Select(s => s.name))}");
         }
-
-        if (board != null)
-        {
-            var currentGrid = BuildOccupancyGrid();
-            var scored = new List<(Shape shape, bool fullClear, int clearedLines)>();
-
-            foreach (var prefab in pool)
-            {
-                var offsets = prefab.GetCells(board.cellSize);
-                if (offsets == null || offsets.Length == 0)
-                    continue;
-
-                if (!TryFindBestAnchor(currentGrid, offsets, out var anchor, out int clearedLines))
-                {
-                    // Not placeable anywhere right now — ranks below every
-                    // placeable shape, clear or not.
-                    scored.Add((prefab, false, -1));
-                    continue;
-                }
-
-                var previewGrid = (bool[,])currentGrid.Clone();
-                SimulatePlaceAndClear(previewGrid, anchor, offsets);
-                bool fullClear = IsGridEmpty(previewGrid);
-
-                scored.Add((prefab, fullClear, clearedLines));
-            }
-
-            scored.Sort((a, b) =>
-            {
-                int fullClearCompare = (b.fullClear ? 1 : 0) - (a.fullClear ? 1 : 0);
-                if (fullClearCompare != 0)
-                    return fullClearCompare;
-
-                return b.clearedLines - a.clearedLines;
-            });
-
-            foreach (var entry in scored)
-            {
-                result.Add(entry.shape);
-                if (result.Count == 3)
-                    break;
-            }
-
-            if (debugLogShapeSelection)
-            {
-                Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}) chose: " +
-                    string.Join(", ", scored.Take(3).Select(e => $"{e.shape.name}(cleared={e.clearedLines},full={e.fullClear})")));
-            }
-        }
-
-        // Last-resort: nothing placeable anywhere (or no board yet) — random fill.
-        while (result.Count < 3)
-            result.Add(pool[Random.Range(0, pool.Count)]);
 
         return result;
     }
@@ -206,147 +151,6 @@ public class ShapeTrayManager : MonoBehaviour
             for (int y = 0; y < board.height; y++)
                 grid[x, y] = board.IsOccupied(new Vector2Int(x, y));
         return grid;
-    }
-
-    // Finds the anchor that clears the most lines for a shape on a simulated grid.
-    // Judged on clearedLines alone — no cell-count tiebreak of any kind, since any
-    // such term (more filled cells, fewer remaining missing cells, whatever the
-    // framing) is mathematically just "how many cells did this shape cover", which
-    // always favors bigger shapes regardless of whether that's actually useful. Ties
-    // (the common case: most placements clear zero lines) keep the first anchor
-    // found; the pool itself is shuffled by the caller so ties don't always resolve
-    // to the same shape. Returns false if the shape can't be placed anywhere.
-    private bool TryFindBestAnchor(bool[,] grid, Vector2Int[] offsets, out Vector2Int bestAnchor, out int bestClearedLines)
-    {
-        bestAnchor = default;
-        bestClearedLines = -1;
-        bool found = false;
-
-        int width = board.width;
-        int height = board.height;
-
-        int[] rowMissing = new int[height];
-        int[] colMissing = new int[width];
-        for (int y = 0; y < height; y++)
-        {
-            int missing = 0;
-            for (int x = 0; x < width; x++)
-                if (!grid[x, y]) missing++;
-            rowMissing[y] = missing;
-        }
-        for (int x = 0; x < width; x++)
-        {
-            int missing = 0;
-            for (int y = 0; y < height; y++)
-                if (!grid[x, y]) missing++;
-            colMissing[x] = missing;
-        }
-
-        int[] filledInRow = new int[height];
-        int[] filledInCol = new int[width];
-
-        for (int ax = 0; ax < width; ax++)
-        {
-            for (int ay = 0; ay < height; ay++)
-            {
-                var anchor = new Vector2Int(ax, ay);
-                if (!CanPlaceOffsetsAtGrid(grid, anchor, offsets))
-                    continue;
-
-                Array.Clear(filledInRow, 0, height);
-                Array.Clear(filledInCol, 0, width);
-
-                foreach (var off in offsets)
-                {
-                    var cell = anchor + off;
-                    filledInRow[cell.y]++;
-                    filledInCol[cell.x]++;
-                }
-
-                int clearedLines = 0;
-                for (int y = 0; y < height; y++)
-                    if (filledInRow[y] > 0 && rowMissing[y] == filledInRow[y])
-                        clearedLines++;
-                for (int x = 0; x < width; x++)
-                    if (filledInCol[x] > 0 && colMissing[x] == filledInCol[x])
-                        clearedLines++;
-
-                if (clearedLines > bestClearedLines)
-                {
-                    bestClearedLines = clearedLines;
-                    bestAnchor = anchor;
-                    found = true;
-                }
-            }
-        }
-
-        return found;
-    }
-
-    private bool CanPlaceOffsetsAtGrid(bool[,] grid, Vector2Int anchor, Vector2Int[] offsets)
-    {
-        int width = board.width;
-        int height = board.height;
-
-        foreach (var off in offsets)
-        {
-            var cell = anchor + off;
-            if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
-                return false;
-            if (grid[cell.x, cell.y])
-                return false;
-        }
-        return true;
-    }
-
-    private void SimulatePlaceAndClear(bool[,] grid, Vector2Int anchor, Vector2Int[] offsets)
-    {
-        int width = board.width;
-        int height = board.height;
-
-        foreach (var off in offsets)
-        {
-            var cell = anchor + off;
-            grid[cell.x, cell.y] = true;
-        }
-
-        var fullRows = new List<int>();
-        for (int y = 0; y < height; y++)
-        {
-            bool full = true;
-            for (int x = 0; x < width; x++)
-                if (!grid[x, y]) { full = false; break; }
-            if (full) fullRows.Add(y);
-        }
-
-        var fullCols = new List<int>();
-        for (int x = 0; x < width; x++)
-        {
-            bool full = true;
-            for (int y = 0; y < height; y++)
-                if (!grid[x, y]) { full = false; break; }
-            if (full) fullCols.Add(x);
-        }
-
-        foreach (var y in fullRows)
-            for (int x = 0; x < width; x++)
-                grid[x, y] = false;
-
-        foreach (var x in fullCols)
-            for (int y = 0; y < height; y++)
-                grid[x, y] = false;
-    }
-
-    private bool IsGridEmpty(bool[,] grid)
-    {
-        int width = board.width;
-        int height = board.height;
-
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (grid[x, y])
-                    return false;
-        return true;
     }
 
     private void OnDisable()
