@@ -3,40 +3,30 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// Picks which 3 shapes to offer next in the tray. Looks a few moves ahead via
-/// beam search: reaching a full clear always wins, then total lines cleared —
-/// nothing else is considered while sequences differ on those. Only once
-/// sequences tie on clearing outcome does "board health" (how many of the
-/// remaining pool shapes can still be placed, how many empty cells are boxed
-/// in on 3+ sides) come in as a tiebreak, blended with a difficulty setting.
+/// Picks which 3 shapes to offer next in the tray. No lookahead, no hypothetical
+/// combos — each candidate shape is judged only on what IT achieves by itself,
+/// placed at its single best spot on the board exactly as it looks right now.
+/// The 3 shapes offered are simply the top 3 by that score: a full clear beats
+/// everything, then whoever clears the most lines, then (as a tiebreak) the
+/// smaller/simpler shape. If fewer than 3 shapes can clear anything, the
+/// remaining slots go to whichever placeable shapes leave the board healthiest.
+/// This keeps every offered shape something the player can actually look at
+/// and see why it was offered — no 2-3-move-deep setup a player has no way to
+/// perceive.
 ///
 /// Plain C# class, no MonoBehaviour/scene dependency — can be driven directly
 /// from a test with a hand-built grid and shape list.
 /// </summary>
 public class ShapeSelectionAlgorithm
 {
-    private const int LookaheadDepth = 3;
-    private const int BeamWidth = 5;
-
-    private class BeamState
-    {
-        public bool[,] Grid;
-        public List<Shape> Sequence;
-        public HashSet<Shape> Used;
-        public int TotalLinesCleared;
-        public int ContributingShapes;
-        public bool AchievedFullClear;
-    }
-
     /// <param name="grid">Current board occupancy, [x, y].</param>
     /// <param name="shapePool">All shapes that may be offered.</param>
     /// <param name="cellSize">Passed through to Shape.GetCells to read each shape's footprint.</param>
     /// <param name="difficulty">
-    /// 0 = ignore board health entirely and pick randomly among clear-tied
-    /// options (most chaotic/hard). 1 = always pick whichever clear-tied
-    /// option leaves the board healthiest (most helpful/easy). Line clears
-    /// themselves are never affected by this — only ties between otherwise
-    /// equally-good sequences are.
+    /// Only used as a fallback when fewer than 3 shapes can clear anything on
+    /// their own: 1 = fill the remaining slots with whichever placeable shapes
+    /// leave the board healthiest (most helpful/easy). 0 = fill them randomly
+    /// among placeable shapes, ignoring board health (most chaotic/hard).
     /// </param>
     public List<Shape> SelectTray(bool[,] grid, IReadOnlyList<Shape> shapePool, float cellSize, float difficulty)
     {
@@ -59,99 +49,62 @@ public class ShapeSelectionAlgorithm
             (pool[i], pool[swapIndex]) = (pool[swapIndex], pool[i]);
         }
 
-        var beam = new List<BeamState>
+        // Score every shape independently on the CURRENT board — what you see
+        // is what you get: each shape's reported clear is exactly what placing
+        // it alone, right now, achieves. No other shape's placement is assumed.
+        var placeable = new List<(Shape shape, bool fullClear, int clearedLines, int cellCount, bool[,] resultGrid)>();
+        foreach (var prefab in pool)
         {
-            new BeamState
-            {
-                Grid = (bool[,])grid.Clone(),
-                Sequence = new List<Shape>(),
-                Used = new HashSet<Shape>(),
-                TotalLinesCleared = 0,
-                ContributingShapes = 0,
-                AchievedFullClear = false
-            }
-        };
+            var offsets = prefab.GetCells(cellSize);
+            if (offsets == null || offsets.Length == 0)
+                continue;
 
-        for (int depth = 0; depth < LookaheadDepth; depth++)
-        {
-            var expanded = new List<BeamState>();
+            if (!TryFindBestAnchor(grid, width, height, offsets, out var anchor, out int clearedLines))
+                continue; // not placeable anywhere right now
 
-            foreach (var state in beam)
-            {
-                foreach (var prefab in pool)
-                {
-                    if (state.Used.Contains(prefab))
-                        continue;
+            var previewGrid = (bool[,])grid.Clone();
+            SimulatePlaceAndClear(previewGrid, width, height, anchor, offsets);
+            bool fullClear = IsGridEmpty(previewGrid, width, height);
 
-                    var offsets = prefab.GetCells(cellSize);
-                    if (offsets == null || offsets.Length == 0)
-                        continue;
-
-                    if (!TryFindBestAnchor(state.Grid, width, height, offsets, out var anchor, out int clearedLines))
-                        continue;
-
-                    var newGrid = (bool[,])state.Grid.Clone();
-                    SimulatePlaceAndClear(newGrid, width, height, anchor, offsets);
-
-                    bool fullClear = IsGridEmpty(newGrid, width, height);
-
-                    expanded.Add(new BeamState
-                    {
-                        Grid = newGrid,
-                        Sequence = new List<Shape>(state.Sequence) { prefab },
-                        Used = new HashSet<Shape>(state.Used) { prefab },
-                        TotalLinesCleared = state.TotalLinesCleared + clearedLines,
-                        ContributingShapes = state.ContributingShapes + (clearedLines > 0 ? 1 : 0),
-                        AchievedFullClear = state.AchievedFullClear || fullClear
-                    });
-                }
-            }
-
-            if (expanded.Count == 0)
-                break;
-
-            expanded.Sort((a, b) => CompareByClearing(b, a));
-            beam = expanded.Take(BeamWidth).ToList();
+            placeable.Add((prefab, fullClear, clearedLines, offsets.Length, previewGrid));
         }
 
-        var finalists = beam.Where(s => s.Sequence.Count > 0).ToList();
-        if (finalists.Count > 0)
+        // Primary picks: shapes that clear something on their own, ranked by
+        // full clear first, then lines cleared, then simplicity (fewer cells —
+        // an obvious small fix over a sprawling one, when both clear equally).
+        var clearing = placeable.Where(p => p.clearedLines > 0)
+            .OrderByDescending(p => p.fullClear)
+            .ThenByDescending(p => p.clearedLines)
+            .ThenBy(p => p.cellCount)
+            .ToList();
+
+        foreach (var entry in clearing)
         {
-            finalists.Sort((a, b) => CompareByClearing(b, a));
-            var bestClearing = finalists[0];
-            var tied = finalists.Where(s => CompareByClearing(s, bestClearing) == 0).ToList();
+            result.Add(entry.shape);
+            if (result.Count == 3)
+                break;
+        }
 
-            BeamState chosen;
-            if (tied.Count == 1)
+        // Fallback: nothing left to clear (or not enough shapes that clear) —
+        // fill remaining slots from whatever's still placeable, preferring
+        // whichever leaves the board healthiest, blended with difficulty.
+        if (result.Count < 3)
+        {
+            var leftover = placeable.Where(p => !result.Contains(p.shape) && p.clearedLines == 0).ToList();
+
+            if (Random.value < difficulty)
             {
-                chosen = tied[0];
-            }
-            else if (Random.value < difficulty)
-            {
-                // Helpful pick: whichever tied option leaves the board healthiest.
-                chosen = tied
-                    .Select(s => (state: s, health: EvaluateBoardHealth(s.Grid, width, height, pool, cellSize)))
-                    .OrderByDescending(t => t.health)
-                    .First().state;
-            }
-            else
-            {
-                // Chaotic pick: board health isn't considered at all.
-                chosen = tied[Random.Range(0, tied.Count)];
+                leftover = leftover
+                    .OrderByDescending(p => EvaluateBoardHealth(p.resultGrid, width, height, pool, cellSize))
+                    .ThenBy(p => p.cellCount)
+                    .ToList();
             }
 
-            result.AddRange(chosen.Sequence);
-
-            if (result.Count < 3)
+            foreach (var entry in leftover)
             {
-                var remaining = pool.Where(p => !result.Contains(p))
-                    .OrderBy(p => p.GetCells(cellSize)?.Length ?? 0);
-                foreach (var p in remaining)
-                {
-                    result.Add(p);
-                    if (result.Count == 3)
-                        break;
-                }
+                result.Add(entry.shape);
+                if (result.Count == 3)
+                    break;
             }
         }
 
@@ -162,25 +115,6 @@ public class ShapeSelectionAlgorithm
         return result;
     }
 
-    // Ranks by: reaching a full clear, then total lines cleared, then how many
-    // of the (up to 3) shapes in the sequence each contributed at least one
-    // clear of their own. That third tier is what stops the algorithm from
-    // being satisfied with "one shape clears 2 lines, the other two do nothing"
-    // when "each of the three clears 1 line" scores the same total — spreading
-    // the help across the whole tray instead of concentrating it in one shape.
-    private static int CompareByClearing(BeamState a, BeamState b)
-    {
-        int fullClearCompare = (a.AchievedFullClear ? 1 : 0) - (b.AchievedFullClear ? 1 : 0);
-        if (fullClearCompare != 0)
-            return fullClearCompare;
-
-        int totalCompare = a.TotalLinesCleared - b.TotalLinesCleared;
-        if (totalCompare != 0)
-            return totalCompare;
-
-        return a.ContributingShapes - b.ContributingShapes;
-    }
-
     /// <summary>
     /// Higher is better. Blends mobility (fraction of the shape pool that can
     /// still be placed somewhere on this grid) with a hole penalty (empty
@@ -189,7 +123,7 @@ public class ShapeSelectionAlgorithm
     /// </summary>
     private static float EvaluateBoardHealth(bool[,] grid, int width, int height, List<Shape> pool, float cellSize)
     {
-        int placeable = 0;
+        int placeableCount = 0;
         foreach (var prefab in pool)
         {
             var offsets = prefab.GetCells(cellSize);
@@ -197,9 +131,9 @@ public class ShapeSelectionAlgorithm
                 continue;
 
             if (HasAnyPlacement(grid, width, height, offsets))
-                placeable++;
+                placeableCount++;
         }
-        float mobility = pool.Count > 0 ? (float)placeable / pool.Count : 0f;
+        float mobility = pool.Count > 0 ? (float)placeableCount / pool.Count : 0f;
 
         int holeCount = 0;
         int emptyCount = 0;
