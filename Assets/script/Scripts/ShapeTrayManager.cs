@@ -116,44 +116,13 @@ public class ShapeTrayManager : MonoBehaviour
             placer.OnShapePlaced += HandleShapePlaced;
     }
 
-    // Simulated tray-refill state used by the beam search below: a private snapshot
-    // of the board (never touches the live board), the sequence of shapes chosen to
-    // reach it, which of those shapes are already used (so a refill of 3 slots never
-    // offers the same shape twice), how many lines that sequence has cleared so far,
-    // and whether it reaches a full board clear at any point. No score/points of any
-    // kind — only actual line-clearing is tracked.
-    private class BeamState
-    {
-        public bool[,] Grid;
-        public List<Shape> Sequence;
-        public HashSet<Shape> Used;
-        public int TotalLinesCleared;
-        public bool AchievedFullClear;
-    }
-
-    private const int BeamWidth = 5;
-
-    // Ranks beam states purely by clearing outcome: a sequence that reaches a full
-    // clear always beats one that doesn't, and among sequences that tie on that,
-    // whichever cleared more lines overall wins. No score, no cell counts — nothing
-    // but actual line clears decides this.
-    private static int CompareBeamStates(BeamState a, BeamState b)
-    {
-        int fullClearCompare = (a.AchievedFullClear ? 1 : 0) - (b.AchievedFullClear ? 1 : 0);
-        if (fullClearCompare != 0)
-            return fullClearCompare;
-
-        return a.TotalLinesCleared - b.TotalLinesCleared;
-    }
-
-    // Picks the 3 shapes for a tray refill by looking 3 moves ahead — the depth of
-    // one full refill — instead of judging each shape in isolation against today's
-    // board. Each candidate sequence is simulated on a private grid snapshot
-    // (placement + resulting line clears), so the shape chosen for slot 2 already
-    // accounts for what slot 1 did to the board, and so on. Reaching a full clear
-    // anywhere in the 3-shape sequence always wins over anything else, which is what
-    // lets a big shape get offered when a large open area calls for it, right
-    // alongside small shapes that mop up whatever irregular gaps are left.
+    // Picks the 3 shapes for a tray refill by directly ranking every shape in the
+    // pool by how good a clear it can achieve on the board as it stands right now
+    // (single placement, best anchor) — a shape that fully clears the board ranks
+    // above everything else, and among the rest whichever clears more lines wins.
+    // The offered trio is simply the top 3 distinct shapes by that score, so the
+    // player's three shapes are always, individually, the ones most likely to
+    // close a row or column right now.
     private List<Shape> PickSmartBestSet(Shape[] prefabs)
     {
         var result = new List<Shape>();
@@ -176,88 +145,50 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (board != null)
         {
-            var beam = new List<BeamState>
+            var currentGrid = BuildOccupancyGrid();
+            var scored = new List<(Shape shape, bool fullClear, int clearedLines)>();
+
+            foreach (var prefab in pool)
             {
-                new BeamState
-                {
-                    Grid = BuildOccupancyGrid(),
-                    Sequence = new List<Shape>(),
-                    Used = new HashSet<Shape>(),
-                    TotalLinesCleared = 0,
-                    AchievedFullClear = false
-                }
-            };
-
-            for (int depth = 0; depth < 3; depth++)
-            {
-                var expanded = new List<BeamState>();
-
-                foreach (var state in beam)
-                {
-                    foreach (var prefab in pool)
-                    {
-                        if (state.Used.Contains(prefab))
-                            continue;
-
-                        var offsets = prefab.GetCells(board.cellSize);
-                        if (offsets == null || offsets.Length == 0)
-                            continue;
-
-                        if (!TryFindBestAnchor(state.Grid, offsets, out var anchor, out int clearedLines))
-                            continue;
-
-                        var newGrid = (bool[,])state.Grid.Clone();
-                        SimulatePlaceAndClear(newGrid, anchor, offsets);
-
-                        bool fullClear = IsGridEmpty(newGrid);
-
-                        expanded.Add(new BeamState
-                        {
-                            Grid = newGrid,
-                            Sequence = new List<Shape>(state.Sequence) { prefab },
-                            Used = new HashSet<Shape>(state.Used) { prefab },
-                            TotalLinesCleared = state.TotalLinesCleared + clearedLines,
-                            AchievedFullClear = state.AchievedFullClear || fullClear
-                        });
-                    }
-                }
-
-                if (expanded.Count == 0)
-                    break;
-
-                expanded.Sort((a, b) => CompareBeamStates(b, a)); // descending: best clearing outcome first
-                beam = expanded.Take(BeamWidth).ToList();
-            }
-
-            BeamState best = null;
-            foreach (var state in beam)
-            {
-                if (state.Sequence.Count == 0)
+                var offsets = prefab.GetCells(board.cellSize);
+                if (offsets == null || offsets.Length == 0)
                     continue;
-                if (best == null || CompareBeamStates(state, best) > 0)
-                    best = state;
+
+                if (!TryFindBestAnchor(currentGrid, offsets, out var anchor, out int clearedLines))
+                {
+                    // Not placeable anywhere right now — ranks below every
+                    // placeable shape, clear or not.
+                    scored.Add((prefab, false, -1));
+                    continue;
+                }
+
+                var previewGrid = (bool[,])currentGrid.Clone();
+                SimulatePlaceAndClear(previewGrid, anchor, offsets);
+                bool fullClear = IsGridEmpty(previewGrid);
+
+                scored.Add((prefab, fullClear, clearedLines));
             }
 
-            if (best != null)
+            scored.Sort((a, b) =>
             {
-                result.AddRange(best.Sequence);
+                int fullClearCompare = (b.fullClear ? 1 : 0) - (a.fullClear ? 1 : 0);
+                if (fullClearCompare != 0)
+                    return fullClearCompare;
 
-                if (debugLogShapeSelection)
-                {
-                    Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}) chose sequence: " +
-                        $"{string.Join(" -> ", best.Sequence.Select(s => s.name))} (linesCleared={best.TotalLinesCleared}, fullClearReached={best.AchievedFullClear})");
-                }
+                return b.clearedLines - a.clearedLines;
+            });
 
-                if (result.Count < 3)
-                {
-                    var remaining = pool.Where(p => !result.Contains(p)).OrderBy(p => ShapeCellCount(p));
-                    foreach (var p in remaining)
-                    {
-                        result.Add(p);
-                        if (result.Count == 3)
-                            break;
-                    }
-                }
+            foreach (var entry in scored)
+            {
+                result.Add(entry.shape);
+                if (result.Count == 3)
+                    break;
+            }
+
+            if (debugLogShapeSelection)
+            {
+                Debug.Log($"[ShapeTrayManager] Refill (occupied={GetOccupiedCellCount()}) chose: " +
+                    string.Join(", ", scored.Take(3).Select(e => $"{e.shape.name}(cleared={e.clearedLines},full={e.fullClear})")));
             }
         }
 

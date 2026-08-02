@@ -206,7 +206,13 @@ public class AdsManager : Singleton<AdsManager>
 		void HandleClosed()
 		{
 			ad.OnAdFullScreenContentClosed -= HandleClosed;
-			if (!rewardEarned)
+			ad.OnAdFullScreenContentFailed -= HandleFailed;
+			// Only invoke the reward callback once the ad's own popup has fully
+			// gone down, so the player can actually see what happens next
+			// (e.g. the board clearing on revive) instead of it playing behind the ad.
+			if (rewardEarned)
+				onRewardEarned?.Invoke();
+			else
 				onNotCompleted?.Invoke();
 		}
 
@@ -223,10 +229,10 @@ public class AdsManager : Singleton<AdsManager>
 
 		ad.Show((Reward reward) =>
 		{
-			// Handle the reward here.
+			// Handle the reward here. Defer onRewardEarned until the ad popup
+			// closes (see HandleClosed) so the revive/clear happens on-screen.
 			rewardEarned = true;
 			Debug.Log("User earned reward: " + reward.Amount);
-			onRewardEarned?.Invoke();
 		});
 		Debug.Log("Rewarded ad is shown.");
 	}

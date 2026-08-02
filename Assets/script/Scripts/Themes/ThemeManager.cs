@@ -46,6 +46,24 @@ public class ThemeManager : MonoBehaviour
             mainCamera = Camera.main;
 
         ApplyTheme(defaultTheme, instant: true);
+
+        if (GameManager.instance != null)
+            GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+    }
+
+    private void OnDestroy()
+    {
+        if (GameManager.instance != null)
+            GameManager.instance.OnLevelRestartedEvent -= HandleOnLevelRestartedEvent;
+    }
+
+    // Whenever the level restarts (e.g. after game over in Classic mode), the theme
+    // should go back to the default one instead of staying on whatever theme was
+    // reached via full-clears during the previous run.
+    private void HandleOnLevelRestartedEvent(LevelData levelData)
+    {
+        currentThemeIndex = -1;
+        ApplyTheme(defaultTheme, instant: true);
     }
 
     // ===== Public API =====

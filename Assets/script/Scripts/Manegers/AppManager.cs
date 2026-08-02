@@ -1,12 +1,13 @@
-using UnityEngine;
+using GoogleMobileAds.Api;
+using NUnit.Framework;
 using System;
-using System.IO;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using NUnit.Framework;
+using UnityEngine.SceneManagement;
 
 // every manager will derive from the Singleton class - this makes sure there is only one single manager of this type in the whole app.
 public class AppManager : Singleton<AppManager>
@@ -119,7 +120,8 @@ public class AppManager : Singleton<AppManager>
 
         RemoteConfigManager.instance.OnRemoteFetchCompleted += () => {};
         RemoteConfigManager.instance.StartRemoteConfigFetch();
-        AdsManager.instance.Init(); 
+        AdsManager.instance.Init();
+		
 
 	}
 
