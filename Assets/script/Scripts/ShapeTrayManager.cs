@@ -41,6 +41,18 @@ public class ShapeTrayManager : MonoBehaviour
 
     private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();
 
+    [Header("Gift Opportunities")]
+    [Tooltip("When enabled, occasionally checks whether 2-3 fully empty rows/columns can be exactly filled by a small combo of shapes from the pool, and if so offers exactly those shapes so the player can pull off a satisfying multi-line clear.")]
+    [SerializeField] private bool enableGiftOpportunities = true;
+    [Tooltip("Chance (per refill, once the cooldown below has passed) to actually offer a found gift combo instead of the normal smart pick.")]
+    [SerializeField, Range(0f, 1f)] private float giftChance = 0.5f;
+    [Tooltip("Minimum number of refills that must pass between gifts, so they can't happen back-to-back even if opportunities keep appearing.")]
+    [SerializeField] private int giftCooldownRefills = 3;
+
+    private readonly GiftOpportunityDetector giftOpportunityDetector = new GiftOpportunityDetector();
+    // Large enough that a gift can still fire on the very first refill of a level.
+    private int refillsSinceLastGift = int.MaxValue / 2;
+
     [Header("Debug")]
     [Tooltip("Logs every candidate shape's best achievable score for each refill, so a confusing tray choice can be diagnosed from the Console instead of guessed at.")]
     [SerializeField] private bool debugLogShapeSelection = false;
@@ -64,6 +76,12 @@ public class ShapeTrayManager : MonoBehaviour
     private List<ShapeWave> shapeWaves;
     private int currentWaveIndex;
     private bool useAdventureWaves;
+
+    public int CurrentWaveIndex => currentWaveIndex;
+
+    // Guards RefillIfNeeded's cache-restore check so it only fires on the very first
+    // fill after this component loads, not on every subsequent tray refill during play.
+    private bool adventureCacheRestoreAttempted;
 
     // Fixed sorting order for any shape sitting idle in a tray slot, so it always
     // renders above blocks already placed on the grid (sortingOrder 2) regardless
@@ -144,6 +162,51 @@ public class ShapeTrayManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// Occasionally (giftChance, gated by giftCooldownRefills so it can't repeat
+    /// back-to-back) checks whether 2-3 completely empty rows/columns can be filled
+    /// exactly by a small combo of shapes from the pool, and if so returns exactly
+    /// those shapes so the player can pull off a satisfying multi-line clear. Returns
+    /// null when no gift is offered this refill — opportunity missing, cooldown still
+    /// active, or the chance roll didn't hit — so the caller falls back to the normal
+    /// smart pick.
+    /// </summary>
+    private List<Shape> TryOfferGiftCombo()
+    {
+        refillsSinceLastGift++;
+
+        if (!enableGiftOpportunities || board == null)
+            return null;
+
+        if (refillsSinceLastGift <= giftCooldownRefills)
+            return null;
+
+        if (Random.value > giftChance)
+            return null;
+
+        var combo = giftOpportunityDetector.TryFindGift(BuildOccupancyGrid(), classicShapePrefabs, board.cellSize);
+        if (combo == null || combo.Count == 0)
+            return null;
+
+        var selected = new List<Shape>(combo);
+        if (selected.Count < 3)
+        {
+            foreach (var extra in PickSmartBestSet(classicShapePrefabs))
+            {
+                if (selected.Count >= 3)
+                    break;
+                selected.Add(extra);
+            }
+        }
+
+        refillsSinceLastGift = 0;
+
+        if (debugLogShapeSelection)
+            Debug.Log($"[ShapeTrayManager] Gift opportunity offered: {string.Join(", ", selected.Select(s => s.name))}");
+
+        return selected;
+    }
+
     private bool[,] BuildOccupancyGrid()
     {
         var grid = new bool[board.width, board.height];
@@ -168,6 +231,7 @@ public class ShapeTrayManager : MonoBehaviour
 
         // Reset revive state whenever the tray is created
         noMovesReviveTriggered = false;
+        adventureCacheRestoreAttempted = false;
 
         var app = AppManager.instance;
 
@@ -355,6 +419,20 @@ public class ShapeTrayManager : MonoBehaviour
         bool isAdventureMode = AppManager.instance != null &&
                                AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
 
+        // Resume a saved mid-level tray instead of drawing a fresh one, but only on the
+        // first fill after load — later refills during play must behave normally.
+        if (isAdventureMode && !adventureCacheRestoreAttempted && AppManager.instance.CurrentLevelData != null)
+        {
+            adventureCacheRestoreAttempted = true;
+
+            var snapshot = AdventureSessionCache.GetSnapshotFor(AppManager.instance.CurrentLevelData.Level);
+            if (snapshot != null)
+            {
+                RestoreTrayState(snapshot.traySlots, snapshot.currentWaveIndex);
+                return;
+            }
+        }
+
         // Per-level override: a level whose JSON defines ShapeWaves (e.g. Level 1's
         // tutorial) uses that fixed sequence instead of the adaptive picker below.
         if (useAdventureWaves && shapeWaves != null)
@@ -376,9 +454,14 @@ public class ShapeTrayManager : MonoBehaviour
         if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
             return;
 
-        // Always pick the 3 shapes that best help complete rows/columns on the
-        // current board right now, in every mode.
-        var selectedPrefabs = PickSmartBestSet(classicShapePrefabs);
+        List<Shape> selectedPrefabs = TryOfferGiftCombo();
+
+        if (selectedPrefabs == null)
+        {
+            // Always pick the 3 shapes that best help complete rows/columns on the
+            // current board right now, in every mode.
+            selectedPrefabs = PickSmartBestSet(classicShapePrefabs);
+        }
 
         // Guarantee at least one is placeable BEFORE anything is shown in the tray,
         // so shapes never change after the player already sees them.
@@ -440,26 +523,7 @@ public class ShapeTrayManager : MonoBehaviour
             if (string.IsNullOrEmpty(shapeName))
                 continue;
 
-            Shape shape = null;
-
-            // Try Addressables first
-            if (useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
-            {
-                var goPrefab = loadedPrefabs.Find(p => p != null && p.name == shapeName);
-                if (goPrefab != null)
-                {
-                    var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
-                    shape = go != null ? go.GetComponent<Shape>() : null;
-                }
-            }
-
-            // Fallback to inspector prefabs
-            if (shape == null && shapePrefabs != null)
-            {
-                var prefab = shapePrefabs.FirstOrDefault(p => p != null && p.name == shapeName);
-                if (prefab != null)
-                    shape = Instantiate(prefab, slot.position, slot.rotation, slot);
-            }
+            Shape shape = InstantiateShapeByName(shapeName, slot);
 
             if (shape == null)
             {
@@ -492,9 +556,44 @@ public class ShapeTrayManager : MonoBehaviour
         if (shape == null || symbols == null)
             return;
 
+        var gridMap = BuildShapeGridMap(shape);
+        if (gridMap.Count == 0)
+            return;
+
+        // Apply each symbol from JSON to the matching grid block
+        foreach (var symbolData in symbols)
+        {
+            var jsonPos = new Vector2Int(
+                Mathf.RoundToInt(symbolData.Position.x),
+                Mathf.RoundToInt(symbolData.Position.y)
+            );
+
+            if (gridMap.TryGetValue(jsonPos, out BlockSymbol targetBlock))
+            {
+                targetBlock.SetSymbolType(symbolData.Type);
+            }
+            else
+            {
+                Debug.LogWarning($"[ShapeTrayManager] No block at grid ({jsonPos.x},{jsonPos.y}) for symbol {symbolData.Type} on shape '{shape.name}'.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Maps each of a shape's blocks to its normalized (spacing-relative) grid
+    /// position, shared by ApplySymbolsToShape (JSON → block) and CaptureTrayState
+    /// (block → JSON) so both directions agree on the same coordinate system.
+    /// </summary>
+    private Dictionary<Vector2Int, BlockSymbol> BuildShapeGridMap(Shape shape)
+    {
+        var gridMap = new Dictionary<Vector2Int, BlockSymbol>();
+
+        if (shape == null)
+            return gridMap;
+
         var blocks = shape.GetComponentsInChildren<BlockSymbol>();
         if (blocks.Length == 0)
-            return;
+            return gridMap;
 
         // Find min x/y and the spacing between blocks
         float minX = float.MaxValue, minY = float.MaxValue;
@@ -519,8 +618,6 @@ public class ShapeTrayManager : MonoBehaviour
         }
         if (spacing == float.MaxValue || spacing < 0.01f) spacing = 1f;
 
-        // Build dictionary of normalized grid position → block
-        var gridMap = new Dictionary<Vector2Int, BlockSymbol>();
         foreach (var block in blocks)
         {
             Vector3 lp = block.transform.localPosition;
@@ -532,23 +629,134 @@ public class ShapeTrayManager : MonoBehaviour
                 gridMap[gridPos] = block;
         }
 
-        // Apply each symbol from JSON to the matching grid block
-        foreach (var symbolData in symbols)
-        {
-            var jsonPos = new Vector2Int(
-                Mathf.RoundToInt(symbolData.Position.x),
-                Mathf.RoundToInt(symbolData.Position.y)
-            );
+        return gridMap;
+    }
 
-            if (gridMap.TryGetValue(jsonPos, out BlockSymbol targetBlock))
+    /// <summary>
+    /// Finds a shape prefab by name (Addressables first, then inspector fallback pools)
+    /// and instantiates it into the given slot. Used by both the fixed-wave refill and
+    /// the session-restore path, which both need to spawn a shape from a saved name.
+    /// </summary>
+    private Shape InstantiateShapeByName(string shapeName, Transform slot)
+    {
+        if (string.IsNullOrEmpty(shapeName) || slot == null)
+            return null;
+
+        if (useAddressables && addressablesLoaded && loadedPrefabs.Count > 0)
+        {
+            var goPrefab = loadedPrefabs.Find(p => p != null && p.name == shapeName);
+            if (goPrefab != null)
             {
-                targetBlock.SetSymbolType(symbolData.Type);
-            }
-            else
-            {
-                Debug.LogWarning($"[ShapeTrayManager] No block at grid ({jsonPos.x},{jsonPos.y}) for symbol {symbolData.Type} on shape '{shape.name}'.");
+                var go = Instantiate(goPrefab, slot.position, slot.rotation, slot);
+                var fromAddressable = go != null ? go.GetComponent<Shape>() : null;
+                if (fromAddressable != null)
+                    return fromAddressable;
             }
         }
+
+        Shape prefab = null;
+        if (shapePrefabs != null)
+            prefab = shapePrefabs.FirstOrDefault(p => p != null && p.name == shapeName);
+        if (prefab == null && classicShapePrefabs != null)
+            prefab = classicShapePrefabs.FirstOrDefault(p => p != null && p.name == shapeName);
+
+        return prefab != null ? Instantiate(prefab, slot.position, slot.rotation, slot) : null;
+    }
+
+    private static string StripCloneSuffix(string instanceName)
+    {
+        const string suffix = "(Clone)";
+        return instanceName != null && instanceName.EndsWith(suffix)
+            ? instanceName.Substring(0, instanceName.Length - suffix.Length).TrimEnd()
+            : instanceName;
+    }
+
+    /// <summary>
+    /// Snapshots the currently visible tray (which prefab sits in each slot, plus its
+    /// symbol assignments) so it can be handed to RestoreTrayState later.
+    /// </summary>
+    public List<TraySlotSnapshot> CaptureTrayState()
+    {
+        var result = new List<TraySlotSnapshot>();
+
+        if (slots == null)
+            return result;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var slot = slots[i];
+            if (slot == null)
+                continue;
+
+            var shape = slot.GetComponentInChildren<Shape>();
+            if (shape == null)
+                continue;
+
+            var symbols = new List<SymbolData>();
+            foreach (var kvp in BuildShapeGridMap(shape))
+            {
+                if (kvp.Value != null && kvp.Value.HasSymbol)
+                    symbols.Add(new SymbolData { Type = kvp.Value.SymbolType, Position = new Vector2(kvp.Key.x, kvp.Key.y) });
+            }
+
+            result.Add(new TraySlotSnapshot
+            {
+                slotIndex = i,
+                shapeName = StripCloneSuffix(shape.name),
+                symbols = symbols
+            });
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Rebuilds the tray from a saved snapshot instead of drawing new shapes, resuming a
+    /// level exactly where the player left it.
+    /// </summary>
+    public void RestoreTrayState(List<TraySlotSnapshot> savedSlots, int waveIndex)
+    {
+        for (int i = 0; i < activeShapes.Count; i++)
+        {
+            if (activeShapes[i] != null)
+                Destroy(activeShapes[i].gameObject);
+        }
+        activeShapes.Clear();
+
+        currentWaveIndex = waveIndex;
+        noMovesReviveTriggered = false;
+
+        if (savedSlots != null)
+        {
+            foreach (var saved in savedSlots)
+            {
+                if (slots == null || saved.slotIndex < 0 || saved.slotIndex >= slots.Length)
+                    continue;
+
+                var slot = slots[saved.slotIndex];
+                if (slot == null)
+                    continue;
+
+                Shape shape = InstantiateShapeByName(saved.shapeName, slot);
+                if (shape == null)
+                {
+                    Debug.LogWarning($"[ShapeTrayManager] Could not restore tray shape '{saved.shapeName}' — prefab not found.");
+                    continue;
+                }
+
+                SetTraySortingOrder(shape);
+                activeShapes.Add(shape);
+
+                if (saved.symbols != null && saved.symbols.Count > 0)
+                    ApplySymbolsToShape(shape, saved.symbols);
+
+                var handler = shape.GetComponent<ShapeDragHandler>();
+                if (handler != null)
+                    handler.Init(board, placer, shape);
+            }
+        }
+
+        CheckNoMovesAndMaybeRevive();
     }
 
     private void CheckNoMovesAndMaybeRevive()
@@ -670,6 +878,8 @@ public class ShapeTrayManager : MonoBehaviour
 
     public void Restart()
     {
+        adventureCacheRestoreAttempted = false;
+
         if (activeShapes != null)
         {
             for (int i = 0; i < activeShapes.Count; i++)

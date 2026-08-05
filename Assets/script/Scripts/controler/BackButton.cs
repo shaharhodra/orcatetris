@@ -7,6 +7,9 @@ public class BackButton : MonoBehaviour
     {
         if (GameManager.instance.CurrentGameMode == GameManager.GameMode.Adventure)
         {
+            // שמירת מצב המשחק הנוכחי כדי לחזור אליו כשהשחקן ייכנס שוב לאותו שלב
+            AdventureSessionCache.CaptureCurrentScene();
+
             // חזרה ללובי של האדוונצ'ר
             SceneManager.LoadScene("adventureMOdeLoby");   // או לפי BuildIndex אם אתה מעדיף
         }

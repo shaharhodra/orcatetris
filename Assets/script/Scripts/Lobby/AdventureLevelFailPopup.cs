@@ -139,7 +139,16 @@ public class AdventureLevelFailPopup : MonoBehaviour
         isShowing = false;
         ShapeDragHandler.InputBlocked = false;
 
-        // Reload same scene (same level)
-        GameManager.instance.ReloadCurrentScene();
+        // The board that led to this failure is dead — retry must start from the level's
+        // authored layout, not resume that state.
+        AdventureSessionCache.Clear();
+
+        // Show the interstitial on the player's own action, then reload only once it's closed.
+        System.Action reloadLevel = () => GameManager.instance.ReloadCurrentScene();
+
+        if (AdsManager.instance != null)
+            AdsManager.instance.ShowInterstitialAd(reloadLevel);
+        else
+            reloadLevel();
     }
 }

@@ -39,7 +39,7 @@ public class AdventureManager : MonoBehaviour
 
         // If data is already loaded, init immediately
         if (IsAdventureMode && AppManager.instance.CurrentLevelData != null)
-            InitTargets(AppManager.instance.CurrentLevelData);
+            LoadTargetsForLevel(AppManager.instance.CurrentLevelData);
     }
 
     private void OnDestroy()
@@ -71,7 +71,38 @@ public class AdventureManager : MonoBehaviour
         if (!IsAdventureMode)
             return;
 
-        InitTargets(levelData);
+        LoadTargetsForLevel(levelData);
+    }
+
+    /// <summary>
+    /// Resumes saved targets from AdventureSessionCache if the player is re-entering the
+    /// same level they exited mid-play, otherwise inits fresh targets from the level JSON.
+    /// </summary>
+    private void LoadTargetsForLevel(LevelData levelData)
+    {
+        var snapshot = AdventureSessionCache.GetSnapshotFor(levelData.Level);
+        if (snapshot != null && snapshot.remainingTargets != null)
+            RestoreTargets(snapshot.remainingTargets);
+        else
+            InitTargets(levelData);
+    }
+
+    /// <summary>
+    /// Restores remaining targets exactly as they were saved, bypassing the normal
+    /// recompute from LevelTargets.
+    /// </summary>
+    public void RestoreTargets(Dictionary<ColectionTypes, int> savedTargets)
+    {
+        remainingTargets.Clear();
+        levelCompleted = false;
+
+        if (savedTargets != null)
+        {
+            foreach (var kvp in savedTargets)
+                remainingTargets[kvp.Key] = kvp.Value;
+        }
+
+        OnTargetsUpdated?.Invoke(remainingTargets);
     }
 
     public void InitTargets(LevelData levelData)

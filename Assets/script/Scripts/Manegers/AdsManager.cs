@@ -94,15 +94,45 @@ public class AdsManager : Singleton<AdsManager>
 
 	public void ShowInterstitialAd()
 	{
-		if (_interstitialAd != null && _interstitialAd.CanShowAd())
-		{
-			_interstitialAd.Show();
-			Debug.Log("Interstitial ad is shown.");
-		}
-		else
+		ShowInterstitialAd(null);
+	}
+
+	/// <summary>
+	/// Shows the interstitial ad if one is ready. onClosed fires once the ad's own
+	/// full-screen content has fully gone down (or immediately if no ad is
+	/// available/ready), so callers can safely gate a transition on it without
+	/// ever getting stuck waiting for an ad that never shows.
+	/// </summary>
+	public void ShowInterstitialAd(System.Action onClosed)
+	{
+		if (_interstitialAd == null || !_interstitialAd.CanShowAd())
 		{
 			Debug.Log("Interstitial ad is not ready yet.");
+			onClosed?.Invoke();
+			return;
 		}
+
+		var ad = _interstitialAd;
+		bool callbackFired = false;
+
+		void FireOnce()
+		{
+			if (callbackFired)
+				return;
+			callbackFired = true;
+			ad.OnAdFullScreenContentClosed -= HandleClosed;
+			ad.OnAdFullScreenContentFailed -= HandleFailed;
+			onClosed?.Invoke();
+		}
+
+		void HandleClosed() => FireOnce();
+		void HandleFailed(AdError error) => FireOnce();
+
+		ad.OnAdFullScreenContentClosed += HandleClosed;
+		ad.OnAdFullScreenContentFailed += HandleFailed;
+
+		ad.Show();
+		Debug.Log("Interstitial ad is shown.");
 	}
 
 	public void DestroyInterstitialAd()

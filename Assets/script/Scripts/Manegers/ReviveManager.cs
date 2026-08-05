@@ -418,7 +418,14 @@ public class ReviveManager : MonoBehaviour
         if (popUpService != null)
             popUpService.OnPopupDismissed -= OnGameOverPopupDismissed;
 
-        GameManager.instance.InvokeOnLevelRestartedEvent();
+        // Show the interstitial on the player's own action (dismissing the loss
+        // popup), and only restart the level once it's closed.
+        System.Action restart = () => GameManager.instance.InvokeOnLevelRestartedEvent();
+
+        if (AdsManager.instance != null)
+            AdsManager.instance.ShowInterstitialAd(restart);
+        else
+            restart();
     }
 
     public void HandleOnLevelRestartedEvent (LevelData levelData)

@@ -94,7 +94,6 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         Debug.Log($"[CompletePopup] ===== SHOW INTERNAL ===== displaying popup now!");
         
         ShapeDragHandler.InputBlocked = true;
-        AdsManager.instance?.ShowInterstitialAd();// Show an interstitial ad when the level is completed, if available.
 
 		// Update texts
 		int nextLevel = 1;
@@ -165,8 +164,18 @@ public class AdventureLevelCompletePopup : MonoBehaviour
 
         GameManager.instance.SetLevelCompleted(currentLevel);
 
-        // Hide and reload
-        Hide(() => GameManager.instance.ReloadCurrentScene());
+        // The level is done — drop any saved mid-level state so it can't leak into the next one.
+        AdventureSessionCache.Clear();
+
+        // Show the interstitial now (on the player's own action) instead of the moment
+        // the level finished, and only advance to the next level once it's closed —
+        // that's what triggers the next level's own start popup.
+        System.Action advanceToNextLevel = () => Hide(() => GameManager.instance.ReloadCurrentScene());
+
+        if (AdsManager.instance != null)
+            AdsManager.instance.ShowInterstitialAd(advanceToNextLevel);
+        else
+            advanceToNextLevel();
     }
 
     private void Hide(System.Action onComplete)

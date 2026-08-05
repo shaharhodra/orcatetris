@@ -38,6 +38,7 @@ public class GridBoard : MonoBehaviour
     [SerializeField] private GameObject initialBlockPrefab; // prefab for pre-filled blocks
     private List<InitialBlockData> pendingInitialBlocks;
     private List<InitialBlockData> storedInitialBlocks; // kept for restart
+    private bool suppressRandomInitialFill;
 
     [Header("Random Initial Fill")]
     [Tooltip("Shape prefabs to draw from when pre-filling the grid at game start (e.g. the same pool used by the tray) — placed as whole connected shapes rather than scattered single cells.")]
@@ -271,7 +272,7 @@ public class GridBoard : MonoBehaviour
         {
             ApplyInitialBlocks(pendingInitialBlocks);
         }
-        else if (ActiveRandomInitialShapeCount() > 0)
+        else if (!suppressRandomInitialFill && ActiveRandomInitialShapeCount() > 0)
         {
             ApplyInitialBlocks(BuildRandomInitialBlocks());
         }
@@ -288,10 +289,42 @@ public class GridBoard : MonoBehaviour
     /// Store initial blocks to be placed after the grid is built.
     /// Call this before ApplySize/RebuildGrid.
     /// </summary>
-    public void SetInitialBlocks(List<InitialBlockData> blocks)
+    public void SetInitialBlocks(List<InitialBlockData> blocks, bool suppressRandomFallback = false)
     {
         pendingInitialBlocks = blocks;
         storedInitialBlocks = blocks; // keep for restart
+        suppressRandomInitialFill = suppressRandomFallback;
+    }
+
+    /// <summary>
+    /// Snapshots every currently-occupied cell (initial blocks still standing plus
+    /// anything the player has placed) as InitialBlockData, so it can be fed back into
+    /// SetInitialBlocks/ApplyInitialBlocks later to restore the board exactly as it was.
+    /// </summary>
+    public List<InitialBlockData> CaptureCurrentBlocks()
+    {
+        var blocks = new List<InitialBlockData>();
+
+        if (cells == null)
+            return blocks;
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (cells[x, y] == null || !cells[x, y].occupied)
+                    continue;
+
+                blocks.Add(new InitialBlockData
+                {
+                    x = x,
+                    y = y,
+                    Symbol = GetSymbolType(new Vector2Int(x, y))
+                });
+            }
+        }
+
+        return blocks;
     }
 
     /// <summary>
