@@ -76,7 +76,7 @@ public class AdsManager : Singleton<AdsManager>
 
 				// Reload the ad so that we can show another as soon as possible.
 				var adRequest = new AdRequest();
-				InterstitialAd.Load("AD_UNIT_ID", adRequest, (InterstitialAd ad, LoadAdError error) =>
+				InterstitialAd.Load(TestInterstitialAdUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
 				{
 					// Handle ad loading here.
 					_interstitialAd = ad;

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThemeData
   themeName: Candy Pop
   cameraBackgroundColor: {r: 0.06, g: 0.02, b: 0.08, a: 1}
-  backgroundSprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
-  backgroundTint: {r: 1, g: 0.8, b: 0.9, a: 1}
+  backgroundSprite: {fileID: 3440755442007375352, guid: b9e171e302ca04540b228440e0ce8b42, type: 3}
+  backgroundTint: {r: 0.9685534, g: 0.9685534, b: 0.9685534, a: 1}
   gridCellEmptyColor: {r: 1, g: 0.4, b: 0.7, a: 0.16}
   gridCellOccupiedColor: {r: 0.95, g: 0.35, b: 0.65, a: 1}
   blockSprite: {fileID: 4900889284799673793, guid: a86319a7141b27d42aebdcb0edf0a491, type: 3}

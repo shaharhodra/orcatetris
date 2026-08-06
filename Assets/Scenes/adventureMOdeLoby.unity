@@ -11911,7 +11911,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
+  m_Sprite: {fileID: 3440755442007375352, guid: b9e171e302ca04540b228440e0ce8b42, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -15602,6 +15602,7 @@ MonoBehaviour:
   IsDestroyOnLoad: 1
   _levelData:
     GameType: 0
+    LevelType: 
     LevelName: 
     Level: 0
     GridRows: 0

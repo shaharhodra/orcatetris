@@ -14,6 +14,13 @@ using UnityEngine;
 /// and see why it was offered — no 2-3-move-deep setup a player has no way to
 /// perceive.
 ///
+/// Difficulty also controls how many of the 3 slots are guaranteed placeable
+/// at all: at max helpfulness all 3 are real options, at max difficulty only
+/// 1 is — the other 2 are genuine decoys (shapes that don't fit anywhere on
+/// the board right now), scaling linearly in between. On a mostly empty board
+/// almost everything fits somewhere, so this only bites once the board has
+/// enough clutter for decoys to actually exist.
+///
 /// Plain C# class, no MonoBehaviour/scene dependency — can be driven directly
 /// from a test with a hand-built grid and shape list.
 /// </summary>
@@ -23,10 +30,13 @@ public class ShapeSelectionAlgorithm
     /// <param name="shapePool">All shapes that may be offered.</param>
     /// <param name="cellSize">Passed through to Shape.GetCells to read each shape's footprint.</param>
     /// <param name="difficulty">
-    /// Only used as a fallback when fewer than 3 shapes can clear anything on
-    /// their own: 1 = fill the remaining slots with whichever placeable shapes
-    /// leave the board healthiest (most helpful/easy). 0 = fill them randomly
-    /// among placeable shapes, ignoring board health (most chaotic/hard).
+    /// 1 = most helpful/easy, 0 = most chaotic/hard. Controls two things:
+    /// how many of the 3 slots are guaranteed placeable at all (3 at
+    /// difficulty 1 down to 1 at difficulty 0, the rest filled with decoys
+    /// that don't fit anywhere right now), and — as a fallback when fewer
+    /// than the real-slot count can clear anything on their own — whether
+    /// remaining real slots prefer whichever placeable shape leaves the
+    /// board healthiest (1) or are picked without regard to board health (0).
     /// </param>
     public List<Shape> SelectTray(bool[,] grid, IReadOnlyList<Shape> shapePool, float cellSize, float difficulty)
     {
@@ -69,6 +79,10 @@ public class ShapeSelectionAlgorithm
             placeable.Add((prefab, fullClear, clearedLines, offsets.Length, previewGrid));
         }
 
+        // How many of the 3 slots must actually be placeable right now. 1 at max
+        // difficulty (helpfulness 0) up to all 3 at max helpfulness (1).
+        int realSlotCount = Mathf.Clamp(Mathf.RoundToInt(1 + difficulty * 2), 1, 3);
+
         // Primary picks: shapes that clear something on their own, ranked by
         // full clear first, then lines cleared, then simplicity (fewer cells —
         // an obvious small fix over a sprawling one, when both clear equally).
@@ -81,14 +95,14 @@ public class ShapeSelectionAlgorithm
         foreach (var entry in clearing)
         {
             result.Add(entry.shape);
-            if (result.Count == 3)
+            if (result.Count == realSlotCount)
                 break;
         }
 
         // Fallback: nothing left to clear (or not enough shapes that clear) —
-        // fill remaining slots from whatever's still placeable, preferring
+        // fill remaining real slots from whatever's still placeable, preferring
         // whichever leaves the board healthiest, blended with difficulty.
-        if (result.Count < 3)
+        if (result.Count < realSlotCount)
         {
             var leftover = placeable.Where(p => !result.Contains(p.shape) && p.clearedLines == 0).ToList();
 
@@ -103,6 +117,34 @@ public class ShapeSelectionAlgorithm
             foreach (var entry in leftover)
             {
                 result.Add(entry.shape);
+                if (result.Count == realSlotCount)
+                    break;
+            }
+        }
+
+        // Remaining slots (above realSlotCount) become decoys: shapes from the
+        // pool that cannot be placed anywhere on the board right now, so higher
+        // difficulty means fewer genuinely usable options in the tray.
+        if (result.Count < 3)
+        {
+            var unplaceable = pool.Where(p => !result.Contains(p) && !placeable.Any(pl => pl.shape == p)).ToList();
+
+            foreach (var decoy in unplaceable)
+            {
+                result.Add(decoy);
+                if (result.Count == 3)
+                    break;
+            }
+        }
+
+        // Not enough decoys existed (board too empty) — fall back to filling
+        // with whatever's still placeable rather than leaving slots empty.
+        if (result.Count < 3)
+        {
+            var stillPlaceable = placeable.Where(p => !result.Contains(p.shape)).Select(p => p.shape).ToList();
+            foreach (var shape in stillPlaceable)
+            {
+                result.Add(shape);
                 if (result.Count == 3)
                     break;
             }

@@ -4291,7 +4291,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1962713837083533114, guid: 39e01ce983496ec42a704f21f8a42268, type: 3}
+  m_Sprite: {fileID: -5908506062746681475, guid: 7915446f2dd584b4f8682035b91c3b0c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5195,7 +5195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 733598eb293c0584b89a26f93bb179e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AdsManager
-  IsDestroyOnLoad: 1
+  IsDestroyOnLoad: 0
 --- !u!1 &1887066881
 GameObject:
   m_ObjectHideFlags: 0

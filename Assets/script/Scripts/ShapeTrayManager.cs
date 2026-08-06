@@ -36,7 +36,7 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
     [Header("Difficulty")]
-    [Tooltip("0 = Easy: always pick whichever clear-tied tray option leaves the board healthiest. 1 = Hard: ignore board health and pick randomly among clear-tied options (chaotic). Line clears themselves always win regardless of this value — it only breaks ties between sequences that are otherwise equally good at clearing.")]
+    [Tooltip("0 = Easy: all 3 tray slots stay genuinely placeable, and fallback ties prefer whichever option leaves the board healthiest. 1 = Hard: only 1 of the 3 slots is guaranteed placeable — the other 2 are decoys that don't fit anywhere on the board right now (once the board has enough clutter for decoys to exist), and fallback ties ignore board health. Line clears themselves always win regardless of this value.")]
     [SerializeField, Range(0f, 1f)] private float difficulty = 0.3f;
 
     private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();

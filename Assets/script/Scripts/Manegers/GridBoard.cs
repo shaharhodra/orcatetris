@@ -923,25 +923,14 @@ public class GridBoard : MonoBehaviour
         // בניית סט של תאים שהצורה תתפוס אם נמקם אותה ב-targetCell
         var shapeCells = new System.Collections.Generic.HashSet<Vector2Int>();
 
-        var blocks = shape.GetComponentsInChildren<Transform>()
-            .Where(t => t != shape.transform)
-            .ToList();
+        var shapeOffsets = shape.GetCells(cellSize);
 
-        if (blocks.Count == 0)
+        if (shapeOffsets == null || shapeOffsets.Length == 0)
             return result;
 
-        foreach (var block in blocks)
+        foreach (var offset in shapeOffsets)
         {
-            if (block == null)
-                continue;
-
-            Vector2 localPos = block.localPosition;
-            Vector2Int blockOffset = new Vector2Int(
-                Mathf.RoundToInt(localPos.x / cellSize),
-                Mathf.RoundToInt(localPos.y / cellSize)
-            );
-
-            Vector2Int cellPos = targetCell + blockOffset;
+            Vector2Int cellPos = targetCell + offset;
 
             if (IsInside(cellPos))
                 shapeCells.Add(cellPos);
@@ -1194,12 +1183,10 @@ public class GridBoard : MonoBehaviour
         if (shape == null || cells == null)
             return false;
 
-        // קבל את הבלוקים של הצורה
-        var blocks = shape.GetComponentsInChildren<Transform>()
-            .Where(t => t != shape.transform)
-            .ToList();
+        // קבל את התאים של הצורה
+        var offsets = shape.GetCells(cellSize);
 
-        if (blocks == null || blocks.Count == 0)
+        if (offsets == null || offsets.Length == 0)
             return false;
 
         // נסה כל מיקום אפשרי בגריד
@@ -1209,7 +1196,7 @@ public class GridBoard : MonoBehaviour
             {
                 Vector2Int targetPos = new Vector2Int(x, y);
 
-                if (CanPlaceShapeAtInternal(shape, blocks, targetPos))
+                if (CanPlaceShapeAtInternal(offsets, targetPos))
                 {
                     return true;
                 }
@@ -1222,24 +1209,14 @@ public class GridBoard : MonoBehaviour
     /// <summary>
     /// בודק אם אפשר למקם צורה במיקום ספציפי (internal helper)
     /// </summary>
-    private bool CanPlaceShapeAtInternal(Shape shape, System.Collections.Generic.List<Transform> blocks, Vector2Int position)
+    private bool CanPlaceShapeAtInternal(Vector2Int[] offsets, Vector2Int position)
     {
-        if (shape == null || blocks == null || cells == null)
+        if (offsets == null || cells == null)
             return false;
 
-        foreach (var block in blocks)
+        foreach (var offset in offsets)
         {
-            if (block == null)
-                continue;
-
-            // חשב את המיקום של הבלוק ביחס לצורה
-            Vector2 localPos = block.localPosition;
-            Vector2Int blockOffset = new Vector2Int(
-                Mathf.RoundToInt(localPos.x / cellSize),
-                Mathf.RoundToInt(localPos.y / cellSize)
-            );
-
-            Vector2Int cellPos = position + blockOffset;
+            Vector2Int cellPos = position + offset;
 
             // בדוק אם התא בתוך הגריד ופנוי
             if (!IsInside(cellPos) || IsOccupied(cellPos))
@@ -1314,24 +1291,16 @@ public class GridBoard : MonoBehaviour
             return false;
         }
 
-        // קבל את כל הבלוקים של הצורה
-        var blocks = shape.GetComponentsInChildren<Transform>()
-            .Where(t => t != shape.transform)
-            .ToList();
+        // קבל את כל התאים של הצורה
+        var offsets = shape.GetCells(cellSize);
 
-        if (blocks.Count == 0)
+        if (offsets == null || offsets.Length == 0)
             return false;
 
-        // בדוק כל בלוק
-        foreach (var block in blocks)
+        // בדוק כל תא
+        foreach (var offset in offsets)
         {
-            Vector2 localPos = block.localPosition;
-            Vector2Int blockOffset = new Vector2Int(
-                Mathf.RoundToInt(localPos.x / cellSize),
-                Mathf.RoundToInt(localPos.y / cellSize)
-            );
-
-            Vector2Int cellPos = targetCell + blockOffset;
+            Vector2Int cellPos = targetCell + offset;
 
             if (!IsInside(cellPos) || IsOccupied(cellPos))
             {
@@ -1351,23 +1320,15 @@ public class GridBoard : MonoBehaviour
             return;
         }
 
-        // קבל את כל הבלוקים של הצורה
-        var blocks = shape.GetComponentsInChildren<Transform>()
-            .Where(t => t != shape.transform)
-            .ToList();
+        // קבל את כל התאים של הצורה
+        var offsets = shape.GetCells(cellSize);
 
-        Debug.Log($"[ClearCellsForShape] Clearing {blocks.Count} cells for shape '{shape.name}' at {targetCell}");
+        Debug.Log($"[ClearCellsForShape] Clearing {offsets.Length} cells for shape '{shape.name}' at {targetCell}");
 
         // נקה כל תא שהצורה תופסת
-        foreach (var block in blocks)
+        foreach (var offset in offsets)
         {
-            Vector2 localPos = block.localPosition;
-            Vector2Int blockOffset = new Vector2Int(
-                Mathf.RoundToInt(localPos.x / cellSize),
-                Mathf.RoundToInt(localPos.y / cellSize)
-            );
-
-            Vector2Int cellPos = targetCell + blockOffset;
+            Vector2Int cellPos = targetCell + offset;
 
             if (IsInside(cellPos) && IsOccupied(cellPos))
             {
