@@ -39,12 +39,20 @@ public class ShapeTrayManager : MonoBehaviour
     [Tooltip("0 = Easy: all 3 tray slots stay genuinely placeable, and fallback ties prefer whichever option leaves the board healthiest. 1 = Hard: only 1 of the 3 slots is guaranteed placeable — the other 2 are decoys that don't fit anywhere on the board right now (once the board has enough clutter for decoys to exist), and fallback ties ignore board health. Line clears themselves always win regardless of this value.")]
     [SerializeField, Range(0f, 1f)] private float difficulty = 0.3f;
 
+    [Header("Score-based Difficulty Ramp")]
+    [Tooltip("0 = gift chance at its highest and difficulty at its lowest (start of game). Automatically overwrites Difficulty and Gift Chance above as the score climbs — editing them directly will just get overwritten on the next score update. Read-only display of the current ramp value; edit the two fields below to change its behavior.")]
+    [SerializeField, Range(0f, 1f)] private float scoreProgress = 0f;
+    [Tooltip("How many points must be scored for one Score Progress Step.")]
+    [SerializeField] private int scoreProgressStepPoints = 10000;
+    [Tooltip("How much Score Progress rises per Score Progress Step Points scored.")]
+    [SerializeField] private float scoreProgressStep = 0.1f;
+
     private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();
 
     [Header("Gift Opportunities")]
     [Tooltip("When enabled, occasionally checks whether 2-3 fully empty rows/columns can be exactly filled by a small combo of shapes from the pool, and if so offers exactly those shapes so the player can pull off a satisfying multi-line clear.")]
     [SerializeField] private bool enableGiftOpportunities = true;
-    [Tooltip("Chance (per refill, once the cooldown below has passed) to actually offer a found gift combo instead of the normal smart pick.")]
+    [Tooltip("Chance (per refill, once the cooldown below has passed) to actually offer a found gift combo instead of the normal smart pick. Overwritten by the score-based ramp above once the game is running.")]
     [SerializeField, Range(0f, 1f)] private float giftChance = 0.5f;
     [Tooltip("Minimum number of refills that must pass between gifts, so they can't happen back-to-back even if opportunities keep appearing.")]
     [SerializeField] private int giftCooldownRefills = 3;
@@ -138,6 +146,23 @@ public class ShapeTrayManager : MonoBehaviour
     {
         if (placer != null)
             placer.OnShapePlaced += HandleShapePlaced;
+
+        if (ScoreManager.instance != null)
+            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdatedForDifficultyRamp;
+    }
+
+    // Drives difficulty/giftChance from the current score: 0 at score 0 (easiest,
+    // most gifts), rising by scoreProgressStep every scoreProgressStepPoints,
+    // capped at 1 (hardest, no gifts).
+    private void HandleScoreUpdatedForDifficultyRamp(int score)
+    {
+        if (scoreProgressStepPoints <= 0)
+            return;
+
+        int steps = score / scoreProgressStepPoints;
+        scoreProgress = Mathf.Clamp01(steps * scoreProgressStep);
+        difficulty = scoreProgress;
+        giftChance = 1f - scoreProgress;
     }
 
     // Picks the 3 tray shapes via ShapeSelectionAlgorithm (see that file for the
@@ -220,6 +245,9 @@ public class ShapeTrayManager : MonoBehaviour
     {
         if (placer != null)
             placer.OnShapePlaced -= HandleShapePlaced;
+
+        if (ScoreManager.instance != null)
+            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdatedForDifficultyRamp;
     }
 
     private void Start()
@@ -228,6 +256,15 @@ public class ShapeTrayManager : MonoBehaviour
             adventureManager = FindFirstObjectByType<AdventureManager>();
 
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
+
+        // ScoreManager may not have run its own Awake yet when this component's
+        // OnEnable fired, so make sure the subscription is actually attached here too.
+        if (ScoreManager.instance != null)
+        {
+            ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdatedForDifficultyRamp;
+            ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdatedForDifficultyRamp;
+            HandleScoreUpdatedForDifficultyRamp(ScoreManager.instance.Score);
+        }
 
         // Reset revive state whenever the tray is created
         noMovesReviveTriggered = false;

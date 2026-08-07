@@ -2,8 +2,8 @@
     "GameType": 0,
     "LevelName": "Level 7",
     "Level": 7,
-    "GridRows": 10,
-    "GridColumns": 10,
+    "GridRows": 8,
+    "GridColumns": 8,
     "NumberOfShapes": 0,
     "DifficultyLevel": 2,
     "DifficultyThreshold": 0,
@@ -732,11 +732,6 @@
             "Symbol": 3
         },
         {
-            "x": 8,
-            "y": 2,
-            "Symbol": 0
-        },
-        {
             "x": 4,
             "y": 3,
             "Symbol": 1
@@ -757,11 +752,6 @@
             "Symbol": 0
         },
         {
-            "x": 8,
-            "y": 3,
-            "Symbol": 1
-        },
-        {
             "x": 4,
             "y": 4,
             "Symbol": 2
@@ -780,11 +770,6 @@
             "x": 7,
             "y": 4,
             "Symbol": 1
-        },
-        {
-            "x": 8,
-            "y": 4,
-            "Symbol": 2
         },
         {
             "x": 5,
@@ -827,11 +812,6 @@
             "Symbol": 3
         },
         {
-            "x": 8,
-            "y": 3,
-            "Symbol": 0
-        },
-        {
             "x": 4,
             "y": 4,
             "Symbol": 1
@@ -852,11 +832,6 @@
             "Symbol": 0
         },
         {
-            "x": 8,
-            "y": 4,
-            "Symbol": 1
-        },
-        {
             "x": 4,
             "y": 5,
             "Symbol": 2
@@ -875,11 +850,6 @@
             "x": 7,
             "y": 5,
             "Symbol": 1
-        },
-        {
-            "x": 8,
-            "y": 5,
-            "Symbol": 2
         },
         {
             "x": 5,

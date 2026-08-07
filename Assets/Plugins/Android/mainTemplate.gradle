@@ -38,7 +38,7 @@ android {
     namespace "com.unity3d.player"
     ndkPath "**NDKPATH**"
     ndkVersion "**NDKVERSION**"
-    compileSdk **APIVERSION**
+    compileSdk 34
     buildToolsVersion "**BUILDTOOLS**"
 
     compileOptions {

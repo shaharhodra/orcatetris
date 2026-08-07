@@ -2,8 +2,8 @@
     "GameType": 0,
     "LevelName": "Level 14",
     "Level": 14,
-    "GridRows": 10,
-    "GridColumns": 10,
+    "GridRows": 8,
+    "GridColumns": 8,
     "NumberOfShapes": 0,
     "DifficultyLevel": 2,
     "DifficultyThreshold": 0,
@@ -1171,11 +1171,6 @@
             "Symbol": 2
         },
         {
-            "x": 4,
-            "y": 8,
-            "Symbol": 3
-        },
-        {
             "x": 3,
             "y": 3,
             "Symbol": 0
@@ -1359,11 +1354,6 @@
             "x": 6,
             "y": 7,
             "Symbol": 2
-        },
-        {
-            "x": 5,
-            "y": 8,
-            "Symbol": 3
         }
     ]
 }
