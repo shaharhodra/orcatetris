@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f1e4534023a1f754ba79ebde921cb184
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355942
+  packageName: Game VFX - Card Effects Collection
+  packageVersion: 1.01
+  assetPath: Assets/Eric VFX Studio/Resource/Shader/Builtin_AdditiveFlow.shader
+  uploadId: 901398

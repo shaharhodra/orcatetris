@@ -58,7 +58,9 @@
       "Shapes": [
         { "Name": "Jsmall3", "Symbols": [
           { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] },
-      { "Name": "plasDowne"}
+      { "Name": "plasDowne"},
+      { "Name": "singel", "Symbols": [
+          { "Type": 0, "Position": { "x": 0.0, "y": 0.0 } } ] }
       ]
     },
 

@@ -471,21 +471,22 @@ public class ShapeTrayManager : MonoBehaviour
         }
 
         // Per-level override: a level whose JSON defines ShapeWaves (e.g. Level 1's
-        // tutorial) uses that fixed sequence instead of the adaptive picker below.
+        // tutorial) uses that fixed, curated sequence first. Once every wave has been
+        // played through once, fall through to the adaptive picker below (the same
+        // "automation" Classic mode and wave-less levels use) for the rest of the
+        // level, instead of looping the same handful of curated waves forever.
         if (useAdventureWaves && shapeWaves != null)
         {
-            if (shapeWaves.Count > 0)
+            if (shapeWaves.Count > 0 && currentWaveIndex < shapeWaves.Count)
             {
-                // Loop waves instead of stopping when the last wave is reached.
-                if (currentWaveIndex >= shapeWaves.Count)
-                    currentWaveIndex = 0;
-
                 RefillFromWave(shapeWaves[currentWaveIndex]);
                 currentWaveIndex++;
+
+                CheckNoMovesAndMaybeRevive();
+                return;
             }
 
-            CheckNoMovesAndMaybeRevive();
-            return;
+            useAdventureWaves = false;
         }
 
         if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
@@ -582,6 +583,72 @@ public class ShapeTrayManager : MonoBehaviour
             if (handler != null)
                 handler.Init(board, placer, shape);
         }
+
+        EnsureWaveTrayHasPlaceable();
+    }
+
+    /// <summary>
+    /// Wave-based refills (RefillFromWave) don't build a prefab list up front like the
+    /// adaptive picker does, so unlike PickSmartBestSet's callers they never ran through
+    /// EnsureSelectionHasPlaceable. Adventure mode has no revive, so an unlucky wave draw
+    /// where none of the 3 shapes fit anywhere on the board is an instant, unrecoverable
+    /// game over. This mirrors EnsureSelectionHasPlaceable's fallback for that path too:
+    /// if nothing in the tray is placeable, swap the most complex active shape for the
+    /// simplest prefab (from the shared classicShapePrefabs pool) that actually fits.
+    /// </summary>
+    private void EnsureWaveTrayHasPlaceable()
+    {
+        if (board == null || placer == null || activeShapes.Count == 0)
+            return;
+
+        if (activeShapes.Any(s => s != null && HasAnyMoveForShape(s)))
+            return;
+
+        if (classicShapePrefabs == null || classicShapePrefabs.Length == 0)
+            return;
+
+        var placeablePrefab = classicShapePrefabs
+            .Where(p => p != null)
+            .OrderBy(p => ShapeCellCount(p))
+            .FirstOrDefault(p => IsPrefabPlaceableNow(p));
+
+        if (placeablePrefab == null)
+            return; // truly no move possible anywhere — game over is correct here
+
+        int replaceIndex = -1;
+        int maxCells = -1;
+        for (int i = 0; i < activeShapes.Count; i++)
+        {
+            var s = activeShapes[i];
+            if (s == null)
+                continue;
+
+            int cells = ShapeCellCount(s);
+            if (cells > maxCells)
+            {
+                maxCells = cells;
+                replaceIndex = i;
+            }
+        }
+
+        if (replaceIndex < 0)
+            return;
+
+        var oldShape = activeShapes[replaceIndex];
+        var slot = oldShape.transform.parent;
+        Destroy(oldShape.gameObject);
+
+        var newShape = Instantiate(placeablePrefab, slot.position, slot.rotation, slot);
+        SetTraySortingOrder(newShape);
+
+        var newHandler = newShape.GetComponent<ShapeDragHandler>();
+        if (newHandler != null)
+            newHandler.Init(board, placer, newShape);
+
+        activeShapes[replaceIndex] = newShape;
+
+        if (debugLogShapeSelection)
+            Debug.Log($"[ShapeTrayManager] Wave tray had no placeable shape — swapped in '{placeablePrefab.name}'.");
     }
 
     /// <summary>

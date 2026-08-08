@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a2b9ed3a9e8c24e4a8d43f39132e75f5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355942
+  packageName: Game VFX - Card Effects Collection
+  packageVersion: 1.01
+  assetPath: Assets/Eric VFX Studio/Resource/Materials/UVFlow_Shader05.mat
+  uploadId: 901398

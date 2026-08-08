@@ -5,6 +5,13 @@ using UnityEngine;
 /// <summary>
 /// Generator for Adventure JSON levels based on an existing template level.
 /// It clones Level2.json into Level3..Level35 and gradually increases targets.
+///
+/// WARNING: Levels 6-9, 11-20 and 22-35 were hand-tuned afterward (2026-08-08) with a
+/// much gentler, varied difficulty curve and lighter InitialBlocks layouts than this
+/// tool produces — running "Generate Levels 3-35" again will silently overwrite that
+/// tuning with this tool's old linear-growth formula. Levels 1-5, 10 and 21 were always
+/// hand-curated and are also untouched by this tool (it only ever writes 3-35, and 10/21
+/// happen to have been re-edited by hand after generation).
 /// </summary>
 public static class AdventureLevelGenerator
 {
@@ -165,7 +172,17 @@ public static class AdventureLevelGenerator
             }
         }
 
-        levelData.InitialBlocks = blocks;
+        // The bands added above can land on the same (x,y) as an earlier band after the
+        // shift-pattern step (e.g. a block shifted down by the level>=4 band overlapping
+        // one shifted right by the level>=7 band). Keep only the last entry per
+        // coordinate — GridBoard.ApplyInitialBlocks instantiates a block per list entry
+        // and only tracks the last one written per cell, so earlier duplicates would
+        // otherwise become orphaned GameObjects that are never cleaned up.
+        var deduped = new System.Collections.Generic.Dictionary<(int, int), InitialBlockData>();
+        foreach (var b in blocks)
+            deduped[(b.x, b.y)] = b;
+
+        levelData.InitialBlocks = new System.Collections.Generic.List<InitialBlockData>(deduped.Values);
     }
 
     /// <summary>

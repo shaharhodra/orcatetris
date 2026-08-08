@@ -23,13 +23,22 @@
     {
       "Shapes": [
         { "Name": "3x2", "Symbols": [{ "Type": 0,"Position": { "x": 0.0, "y": 1.0 }}] },
-        { "Name": "3x3", "Symbols": [{ "Type": 1 }] }
+        { "Name": "3x3", "Symbols": [{ "Type": 1 }] },
+        { "Name": "Jsmall", "Symbols": [{ "Type": 2 }] }
       ]
     },
     {
       "Shapes": [
-        { "Name": "Jsmall", "Symbols": [{ "Type": 2 }] },
+        { "Name": "lineof2", "Symbols": [{ "Type": 1 }] },
+        { "Name": "singel", "Symbols": [{ "Type": 2 }] },
         { "Name": "3x2", "Symbols": [{ "Type": 0 }] }
+      ]
+    },
+    {
+      "Shapes": [
+        { "Name": "Jsmall", "Symbols": [{ "Type": 0 }] },
+        { "Name": "3x2", "Symbols": [{ "Type": 1,"Position": { "x": 0.0, "y": 1.0 }}] },
+        { "Name": "3x3", "Symbols": [{ "Type": 2 }] }
       ]
     }
   ]
