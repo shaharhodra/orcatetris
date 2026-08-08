@@ -47,6 +47,25 @@ public class ShapeTrayManager : MonoBehaviour
     [Tooltip("How much Score Progress rises per Score Progress Step Points scored.")]
     [SerializeField] private float scoreProgressStep = 0.1f;
 
+    // Adventure: each level's LevelData.DifficultyLevel (0-100, unused by Adventure until now —
+    // Classic mode reads it separately via palceManager) seeds the automation's starting
+    // toughness, so a late-campaign level starts harder than an early one instead of every level
+    // starting equally easy and only escalating from in-level score. The score-based ramp above
+    // still climbs from this base up to fully-hard, so even late levels keep some in-level room
+    // to escalate further. Stays 0 for Classic mode / levels without a set DifficultyLevel.
+    private float baseDifficulty;
+
+    private void SeedDifficultyForLevel()
+    {
+        baseDifficulty = 0f;
+
+        var app = AppManager.instance;
+        if (app == null || app.CurrentGameMode != AppManager.GameMode.Adventure || app.CurrentLevelData == null)
+            return;
+
+        baseDifficulty = Mathf.Clamp01(app.CurrentLevelData.DifficultyLevel / 100f);
+    }
+
     private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();
 
     [Header("Gift Opportunities")]
@@ -151,9 +170,11 @@ public class ShapeTrayManager : MonoBehaviour
             ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdatedForDifficultyRamp;
     }
 
-    // Drives difficulty/giftChance from the current score: 0 at score 0 (easiest,
-    // most gifts), rising by scoreProgressStep every scoreProgressStepPoints,
-    // capped at 1 (hardest, no gifts).
+    // Drives difficulty/giftChance from the current score, ramping from the level's
+    // baseDifficulty (0 for Classic/levels without a DifficultyLevel) up to fully-hard as
+    // score climbs — so a late-campaign Adventure level starts tougher than an early one
+    // instead of every level starting equally easy, while still leaving room for in-level
+    // score progression to escalate further even from a high base.
     private void HandleScoreUpdatedForDifficultyRamp(int score)
     {
         if (scoreProgressStepPoints <= 0)
@@ -161,8 +182,8 @@ public class ShapeTrayManager : MonoBehaviour
 
         int steps = score / scoreProgressStepPoints;
         scoreProgress = Mathf.Clamp01(steps * scoreProgressStep);
-        difficulty = scoreProgress;
-        giftChance = 1f - scoreProgress;
+        difficulty = Mathf.Clamp01(baseDifficulty + scoreProgress * (1f - baseDifficulty));
+        giftChance = 1f - difficulty;
     }
 
     // Picks the 3 tray shapes via ShapeSelectionAlgorithm (see that file for the
@@ -257,6 +278,11 @@ public class ShapeTrayManager : MonoBehaviour
 
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
+        // Seed before the initial ramp calculation below so it starts from the right base
+        // (a no-op — stays 0 — if CurrentLevelData isn't loaded yet; HandleLevelDataLoadedForTray
+        // re-seeds and recomputes once it is).
+        SeedDifficultyForLevel();
+
         // ScoreManager may not have run its own Awake yet when this component's
         // OnEnable fired, so make sure the subscription is actually attached here too.
         if (ScoreManager.instance != null)
@@ -320,6 +346,12 @@ public class ShapeTrayManager : MonoBehaviour
         waitingForAdventureLevelData = false;
         app.OnDataLoaded -= HandleLevelDataLoadedForTray;
         InitAdventureWaves();
+
+        // Level data wasn't ready when Start() ran its initial seed, so redo it now that
+        // CurrentLevelData is actually available, and recompute the ramp against it.
+        SeedDifficultyForLevel();
+        if (ScoreManager.instance != null)
+            HandleScoreUpdatedForDifficultyRamp(ScoreManager.instance.Score);
 
         if (useAddressables)
         {
@@ -1008,6 +1040,10 @@ public class ShapeTrayManager : MonoBehaviour
             }
 
             InitAdventureWaves();
+
+            SeedDifficultyForLevel();
+            if (ScoreManager.instance != null)
+                HandleScoreUpdatedForDifficultyRamp(ScoreManager.instance.Score);
 
             if (useAddressables)
                 LoadAddressablesAndRefill();

@@ -5068,38 +5068,6 @@ MonoBehaviour:
   - {fileID: 4900000, guid: e00b801a91213b349b219e85de0d5567, type: 3}
   - {fileID: 4900000, guid: 87273cfe2a99b974da4702015ce3e434, type: 3}
   - {fileID: 4900000, guid: 6d8d91600d7a7b941981b62b45770170, type: 3}
-  - {fileID: 4900000, guid: e658f04e03e73854e9259b1ec6c7e2bc, type: 3}
-  - {fileID: 4900000, guid: 80f5a98442320c444af96187d5a90e1e, type: 3}
-  - {fileID: 4900000, guid: 51e7472ccec592447a404969106a7288, type: 3}
-  - {fileID: 4900000, guid: 20e450064889c5a4d8deff2d2d200bb7, type: 3}
-  - {fileID: 4900000, guid: f803478c6d7e99e4ca45823b94c3db9b, type: 3}
-  - {fileID: 4900000, guid: a5ecc1e4f839cf24a9e2d07cb1096440, type: 3}
-  - {fileID: 4900000, guid: 174c78d39ed8fee43afcb9b0f1037265, type: 3}
-  - {fileID: 4900000, guid: 3b390289a725cea4b967e98c1ba4679f, type: 3}
-  - {fileID: 4900000, guid: b9cbb5cf9c2648a4f90261d6ac977cce, type: 3}
-  - {fileID: 4900000, guid: 072d4f58f9bd0ad49831ede20667a600, type: 3}
-  - {fileID: 4900000, guid: 8b744b41ba94abe4c9618d0c4a641e8b, type: 3}
-  - {fileID: 4900000, guid: 238909517f17a7647b5956013a2d0f62, type: 3}
-  - {fileID: 4900000, guid: 2522715547af7f446a2789d7ae6c3809, type: 3}
-  - {fileID: 4900000, guid: 3f974029e5cd5e74a8500902d54b5ea8, type: 3}
-  - {fileID: 4900000, guid: 1c98ddaee4899fb41beea10d7d7748c6, type: 3}
-  - {fileID: 4900000, guid: 4db11aa5f4b7c694cadf08fabed21d56, type: 3}
-  - {fileID: 4900000, guid: da7f166eb5c71784b891bd8f37b64fee, type: 3}
-  - {fileID: 4900000, guid: c9a4cea304d84dd49917a4e1a84bee6c, type: 3}
-  - {fileID: 4900000, guid: a28fbe1ce1660504fa63e75ec5290e6f, type: 3}
-  - {fileID: 4900000, guid: c526bb133b0acb948aefe628b79db973, type: 3}
-  - {fileID: 4900000, guid: fdae207a49095e24ca30e96a96327b5c, type: 3}
-  - {fileID: 4900000, guid: 047c0c4e7c6ef824fafc8f03d719f20d, type: 3}
-  - {fileID: 4900000, guid: f85a217f0cf2a6e4fa9f6fd39cd2a74c, type: 3}
-  - {fileID: 4900000, guid: f376a38f80678b64e9328881397d6a72, type: 3}
-  - {fileID: 4900000, guid: c96eb189d50afce46b5cc71cb0e3f12c, type: 3}
-  - {fileID: 4900000, guid: af584a1c050734549b7484cd819efc87, type: 3}
-  - {fileID: 4900000, guid: 4cce9217db49cb54898d428d51055a9d, type: 3}
-  - {fileID: 4900000, guid: 9ebdc856ca8d1574eb1a802dc3df1036, type: 3}
-  - {fileID: 4900000, guid: 21baba00eec14dc41a4742b446a9bfda, type: 3}
-  - {fileID: 4900000, guid: c5b874f13d3d9f4479f56dda05fa9022, type: 3}
-  - {fileID: 4900000, guid: c3b48e600b373564cac3db6f624e0891, type: 3}
-  - {fileID: 4900000, guid: ee9ba277716850542883d337e067cc09, type: 3}
   _classicLevelJsonFile: {fileID: 4900000, guid: eb82d921b6aae854fa2354d4436e5135, type: 3}
   startLevelIndex: 1
   useAddressablesForLevels: 1
