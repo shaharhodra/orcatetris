@@ -1,0 +1,390 @@
+fileFormatVersion: 2
+guid: 90492612bcc0c6a4aac883c3ca223833
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2293677984728331630
+    second: combo_digits_sheet_0-9_0
+  - first:
+      213: 5030040784029078296
+    second: combo_digits_sheet_0-9_1
+  - first:
+      213: 7420739402046651353
+    second: combo_digits_sheet_0-9_2
+  - first:
+      213: -388428486371427047
+    second: combo_digits_sheet_0-9_3
+  - first:
+      213: 2676523772619777615
+    second: combo_digits_sheet_0-9_4
+  - first:
+      213: -968608641007089544
+    second: combo_digits_sheet_0-9_5
+  - first:
+      213: 859387146527784865
+    second: combo_digits_sheet_0-9_6
+  - first:
+      213: -7316916323192567543
+    second: combo_digits_sheet_0-9_7
+  - first:
+      213: -6200614064530747495
+    second: combo_digits_sheet_0-9_8
+  - first:
+      213: 5856624006910007000
+    second: combo_digits_sheet_0-9_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_0
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 334
+        width: 198
+        height: 233
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29a422b76083b20e0800000000000000
+      internalID: -2293677984728331630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_1
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 334
+        width: 141
+        height: 232
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 813d7c9517b4ec540800000000000000
+      internalID: 5030040784029078296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_2
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 335
+        width: 186
+        height: 232
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9db3cbd5b23cbf660800000000000000
+      internalID: 7420739402046651353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_3
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 332
+        width: 187
+        height: 236
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91d303189560c9af0800000000000000
+      internalID: -388428486371427047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_4
+      rect:
+        serializedVersion: 2
+        x: 979
+        y: 336
+        width: 203
+        height: 229
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f46e3ebb03ce42520800000000000000
+      internalID: 2676523772619777615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_5
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 35
+        width: 189
+        height: 231
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 878066aa29fce82f0800000000000000
+      internalID: -968608641007089544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_6
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 33
+        width: 190
+        height: 234
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1af33597e082deb00800000000000000
+      internalID: 859387146527784865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_7
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 35
+        width: 182
+        height: 231
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90989d8ee57157a90800000000000000
+      internalID: -7316916323192567543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_8
+      rect:
+        serializedVersion: 2
+        x: 743
+        y: 32
+        width: 194
+        height: 236
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99f8a5e4c5ef2f9a0800000000000000
+      internalID: -6200614064530747495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: combo_digits_sheet_0-9_9
+      rect:
+        serializedVersion: 2
+        x: 986
+        y: 33
+        width: 189
+        height: 234
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d655ea2188e64150800000000000000
+      internalID: 5856624006910007000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      combo_digits_sheet_0-9_0: -2293677984728331630
+      combo_digits_sheet_0-9_1: 5030040784029078296
+      combo_digits_sheet_0-9_2: 7420739402046651353
+      combo_digits_sheet_0-9_3: -388428486371427047
+      combo_digits_sheet_0-9_4: 2676523772619777615
+      combo_digits_sheet_0-9_5: -968608641007089544
+      combo_digits_sheet_0-9_6: 859387146527784865
+      combo_digits_sheet_0-9_7: -7316916323192567543
+      combo_digits_sheet_0-9_8: -6200614064530747495
+      combo_digits_sheet_0-9_9: 5856624006910007000
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

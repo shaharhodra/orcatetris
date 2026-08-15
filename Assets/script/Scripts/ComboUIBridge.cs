@@ -11,9 +11,8 @@ public class ComboUIBridge : MonoBehaviour
 
     [Header("Popup")]
     [SerializeField] private RectTransform popupRoot;
-    [Tooltip("Combo images for combo 1 through 20. Index 0 = combo 1, Index 19 = combo 20.")]
-    [SerializeField] private Sprite[] comboImages = new Sprite[20];
-    [SerializeField] private Image comboImage;
+    [Tooltip("Renders the combo count as composed digit sprites, so it isn't capped at a fixed set of whole-number images.")]
+    [SerializeField] private ComboDigitDisplay comboNumberDisplay;
     [SerializeField] private float popupDuration = 0.6f;
     [SerializeField] private float popupTweenDuration = 0.15f;
 
@@ -111,20 +110,10 @@ public class ComboUIBridge : MonoBehaviour
 
     private void ShowPopup(ComboEventArgs args)
     {
-        if (popupRoot == null || comboImage == null)
+        if (popupRoot == null)
             return;
 
-        // ComboCount is 1-based, array is 0-based. Clamp to valid range (1..20).
-        int index = Mathf.Clamp(args.ComboCount, 1, comboImages.Length) - 1;
-
-        if (comboImages[index] == null)
-        {
-            if (debugLogs)
-                Debug.LogWarning($"[ComboUIBridge] No sprite assigned for combo {args.ComboCount} (index {index})");
-            return;
-        }
-
-        comboImage.sprite = comboImages[index];
+        comboNumberDisplay?.SetNumber(args.ComboCount);
 
         popupTween?.Kill();
         popupRoot.gameObject.SetActive(true);

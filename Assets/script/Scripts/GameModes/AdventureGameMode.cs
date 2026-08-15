@@ -54,21 +54,18 @@ public class AdventureGameMode : IGameMode
         }
     }
     
+    /// <summary>
+    /// Whether the shapes currently sitting in the tray can still go anywhere on the board. A
+    /// level is meant to be beatable by placing shapes in the right spot, but Adventure has no
+    /// revive and no other fail condition — if the player's own placements leave the tray with
+    /// nowhere to go, that's a loss, not something the game quietly papers over.
+    /// </summary>
     private bool HasAnyMoveAvailable()
     {
         if (shapeTrayManager == null || board == null)
             return false;
 
-        // Use ShapeTrayManager's own check which correctly accounts for
-        // empty tray + available waves (returns true if next wave can be loaded)
-        if (!shapeTrayManager.HasAnyMoveAvailable())
-        {
-            // Double-check: if tray is empty but waves remain, moves ARE available
-            // (ShapeTrayManager.HasAnyMove returns true when tray is empty and waves exist)
-            return false;
-        }
-
-        return true;
+        return shapeTrayManager.HasAnyMoveAvailable();
     }
     
     private bool CanPlaceShapeAnywhere(Shape shape)

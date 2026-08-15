@@ -5,7 +5,25 @@ using System;
 
 public class PlayerManeger : Singleton<PlayerManeger>
 {
-    public PlayerProgressData PlayerProgress { get; private set; }
+    // Lazy: PlayerManeger.instance becomes non-null in Awake() (via Singleton<T>), but the actual
+    // progress data used to only load in Start() — and Unity doesn't guarantee Start() ordering
+    // between different singletons on the same frame. Any code that reached
+    // PlayerManeger.instance.PlayerProgress before this component's own Start() had run (very
+    // possible on a cold app launch, when several singletons Awake/Start in the same frame) hit a
+    // null PlayerProgress and threw, aborting whatever caller was mid-initialization. Making this
+    // a lazy property closes that race entirely: PlayerProgress is now guaranteed non-null the
+    // instant PlayerManeger.instance itself is non-null, regardless of Start() order.
+    private PlayerProgressData _playerProgress;
+    public PlayerProgressData PlayerProgress
+    {
+        get
+        {
+            if (_playerProgress == null)
+                LoadPlayerProgress();
+            return _playerProgress;
+        }
+        private set => _playerProgress = value;
+    }
 
     [SerializeField] private bool enableDailyBonus = true;
     
@@ -55,42 +73,44 @@ public class PlayerManeger : Singleton<PlayerManeger>
         return Path.Combine(Application.persistentDataPath, "player_progress.json");
     }
 
+    // Reads/writes the backing field directly throughout (never the PlayerProgress property) —
+    // going through the property here would re-enter this same method via its lazy getter.
     public void LoadPlayerProgress()
     {
         var path = GetProgressFilePath();
         if (!File.Exists(path))
         {
-            PlayerProgress = new PlayerProgressData
+            _playerProgress = new PlayerProgressData
             {
                 HighestUnlockedLevel = 0,
                 DisplayLevel = 0
             };
             return;
         }
-        
+
         var json = File.ReadAllText(path);
 
         if (!string.IsNullOrEmpty(json))
         {
             var data = JsonUtility.FromJson<PlayerProgressData>(json);
             if (data != null)
-                PlayerProgress = data;
+                _playerProgress = data;
         }
 
-        if (PlayerProgress == null)
+        if (_playerProgress == null)
         {
-            PlayerProgress = new PlayerProgressData
+            _playerProgress = new PlayerProgressData
             {
                 HighestUnlockedLevel = 0,
                 DisplayLevel = 0
             };
         }
 
-        if (PlayerProgress.HighestUnlockedLevel < 0)
-            PlayerProgress.HighestUnlockedLevel = 0;
+        if (_playerProgress.HighestUnlockedLevel < 0)
+            _playerProgress.HighestUnlockedLevel = 0;
 
-        if (PlayerProgress.DisplayLevel < 0)
-            PlayerProgress.DisplayLevel = PlayerProgress.HighestUnlockedLevel;
+        if (_playerProgress.DisplayLevel < 0)
+            _playerProgress.DisplayLevel = _playerProgress.HighestUnlockedLevel;
     }
 
     public int GetCoins()

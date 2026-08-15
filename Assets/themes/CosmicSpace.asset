@@ -23,6 +23,8 @@ MonoBehaviour:
   squareColor: {r: 0.75, g: 0.75, b: 0.85, a: 1}
   gridCellSprite: {fileID: 21300000, guid: 411c07eebf44ffa4283cf1ba06914797, type: 3}
   previewClearParticlePrefab: {fileID: 4715996153622213367, guid: ae20b07969868bc489a9bf8ee9ce4697, type: 3}
+  boardClearedParticlePrefab: {fileID: 2602148595556023593, guid: 69aa07138c2339f478fe967c385e636b, type: 3}
+  gridGlowParticlePrefab: {fileID: 2455477053302891842, guid: 10e4756b30b4d404bb8933337713fccc, type: 3}
   uiPrimaryColor: {r: 0.6, g: 0.55, b: 1, a: 1}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   transitionDuration: 1.5

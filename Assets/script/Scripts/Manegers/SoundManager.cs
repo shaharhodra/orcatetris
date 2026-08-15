@@ -107,6 +107,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlayLineClear()
     {
+        VibrationManager.instance?.Vibrate();
         PlayClip(lineClearClip);
     }
 
@@ -117,6 +118,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlayBoardCleared()
     {
+        VibrationManager.instance?.Vibrate();
         PlayClip(boardClearedClip);
     }
 
@@ -145,6 +147,8 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySymbolGrow(float pitch = 1f)
     {
+        VibrationManager.instance?.Vibrate();
+
         if (symbolGrowClip == null || audioSource == null)
             return;
 
@@ -156,6 +160,8 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySymbolReachedTarget(float pitch = 1f)
     {
+        VibrationManager.instance?.Vibrate();
+
         if (symbolReachedTargetClip == null || audioSource == null)
             return;
 
@@ -177,6 +183,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlayButtonClick()
     {
+        VibrationManager.instance?.Vibrate();
         PlayClip(buttonClickClip);
     }
 

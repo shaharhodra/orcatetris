@@ -28,6 +28,7 @@ public class ThemeManager : MonoBehaviour
     private ThemeData currentTheme;
     private int currentThemeIndex = -1;
     private Sequence transitionSequence;
+    private GameObject gridGlowInstance;
 
     private void Awake()
     {
@@ -92,11 +93,34 @@ public class ThemeManager : MonoBehaviour
     /// </summary>
     public void TriggerBoardCleared()
     {
+        PlayBoardClearedParticle();
+
         if (themes == null || themes.Length == 0)
             return;
 
         int nextIndex = (currentThemeIndex + 1) % themes.Length;
         SwitchToTheme(nextIndex);
+    }
+
+    // Plays the outgoing theme's board-cleared particle (if assigned) at the grid's position.
+    private void PlayBoardClearedParticle()
+    {
+        if (currentTheme == null || currentTheme.boardClearedParticlePrefab == null)
+            return;
+
+        Vector3 spawnPos = gridBoard != null ? gridBoard.transform.position : Vector3.zero;
+        GameObject instance = Instantiate(currentTheme.boardClearedParticlePrefab, spawnPos, Quaternion.identity);
+
+        float maxDuration = 0f;
+        foreach (var ps in instance.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ps.Play();
+            float duration = ps.main.duration + ps.main.startLifetime.constantMax;
+            if (duration > maxDuration)
+                maxDuration = duration;
+        }
+
+        Destroy(instance, maxDuration > 0f ? maxDuration : 2f);
     }
 
     public void SwitchToTheme(int index)
@@ -197,5 +221,40 @@ public class ThemeManager : MonoBehaviour
 
         // Notify all ThemeBlock components (shapes + placed blocks)
         OnThemeChanged?.Invoke(theme, instant);
+
+        ApplyGridGlowParticle(theme);
+    }
+
+    // Swaps the looping grid-glow particle instance to match the active theme.
+    // The prefab's own ParticleSystems are expected to be configured to loop; we just
+    // instantiate, play once, and let it run until the theme changes again.
+    private void ApplyGridGlowParticle(ThemeData theme)
+    {
+        if (gridGlowInstance != null)
+        {
+            Destroy(gridGlowInstance);
+            gridGlowInstance = null;
+        }
+
+        if (theme.gridGlowParticlePrefab == null)
+            return;
+
+        // Parented to ThemeManager's own transform rather than gridBoard's — GridBoard.BuildGrid()
+        // destroys all of its transform's children whenever the grid is (re)built (e.g. every
+        // adventure level), which was destroying this particle moments after it spawned.
+        Vector3 spawnPos = gridBoard != null ? gridBoard.transform.position : transform.position;
+        gridGlowInstance = Instantiate(theme.gridGlowParticlePrefab, transform);
+        gridGlowInstance.transform.position = spawnPos;
+
+        // Force continuous looping regardless of how the source prefab's Particle System
+        // was authored (many VFX-pack prefabs default to a one-shot burst with
+        // Stop Action: Destroy) — this glow must keep running until the theme changes.
+        foreach (var ps in gridGlowInstance.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var main = ps.main;
+            main.loop = true;
+            main.stopAction = ParticleSystemStopAction.None;
+            ps.Play();
+        }
     }
 }

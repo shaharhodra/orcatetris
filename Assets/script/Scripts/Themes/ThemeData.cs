@@ -32,6 +32,14 @@ public class ThemeData : ScriptableObject
     [Tooltip("Optional particle prefab to play on grid cells in preview-clear state. Leave empty to keep each cell's own assigned prefab.")]
     public GameObject previewClearParticlePrefab;
 
+    [Header("Board Cleared Particle")]
+    [Tooltip("Optional particle prefab played once when the whole board is fully cleared while this theme is active. Leave empty to disable.")]
+    public GameObject boardClearedParticlePrefab;
+
+    [Header("Grid Glow Particle")]
+    [Tooltip("Optional particle prefab that plays continuously around the grid border while this theme is active. Leave empty to disable.")]
+    public GameObject gridGlowParticlePrefab;
+
     [Header("UI Colors")]
     public Color uiPrimaryColor = Color.white;
     public Color uiSecondaryColor = new Color(0.8f, 0.8f, 0.8f, 1f);
