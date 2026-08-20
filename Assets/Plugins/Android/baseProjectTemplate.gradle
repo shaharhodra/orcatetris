@@ -1,0 +1,20 @@
+plugins {
+    // If you are changing the Android Gradle Plugin version, make sure it is compatible with the Gradle version preinstalled with Unity
+    // See which Gradle version is preinstalled with Unity here https://docs.unity3d.com/Manual/android-gradle-overview.html
+    // See official Gradle and Android Gradle Plugin compatibility table here https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+    // To specify a custom Gradle version in Unity, go do "Preferences > External Tools", uncheck "Gradle Installed with Unity (recommended)" and specify a path to a custom Gradle version
+    id 'com.android.application' version '9.0.0' apply false
+    id 'com.android.library' version '9.0.0' apply false
+    // Declared here (root project, apply false) and applied per-module in launcherTemplate.gradle.
+    // Crashlytics needs this to upload native (NDK) debug symbols and, if minification is ever
+    // turned on, ProGuard/R8 mapping files at build time — without it, every crash still reaches
+    // the Firebase console, but as raw memory addresses instead of a readable stack trace. That
+    // matters here specifically because Android in this Unity version only ships IL2CPP, so even
+    // an ordinary C# exception surfaces as a native crash.
+    id 'com.google.firebase.crashlytics' version '3.0.6' apply false
+    **BUILD_SCRIPT_DEPS**
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}
