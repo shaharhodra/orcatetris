@@ -29,6 +29,8 @@ public class ThemeManager : MonoBehaviour
     private int currentThemeIndex = -1;
     private Sequence transitionSequence;
     private GameObject gridGlowInstance;
+    private ParticleSystem[] gridGlowParticleSystems;
+    private Tween gridGlowStopTween;
 
     private void Awake()
     {
@@ -94,6 +96,12 @@ public class ThemeManager : MonoBehaviour
     public void TriggerBoardCleared()
     {
         PlayBoardClearedParticle();
+
+        // Emptying the whole board is the game's high point and its only theme-unlock trigger, so
+        // how often it actually happens is worth knowing — it is the difference between a reward
+        // players chase and one most of them never see.
+        AnalyticsManager.instance?.SendEvent(
+            AnalyticsManager.AnalyticsEvent.BoardCleared.ToString());
 
         if (themes == null || themes.Length == 0)
             return;
@@ -225,15 +233,17 @@ public class ThemeManager : MonoBehaviour
         ApplyGridGlowParticle(theme);
     }
 
-    // Swaps the looping grid-glow particle instance to match the active theme.
-    // The prefab's own ParticleSystems are expected to be configured to loop; we just
-    // instantiate, play once, and let it run until the theme changes again.
+    // Swaps the grid-glow particle instance to match the active theme, ready to be
+    // burst-played by PlayGridGlowBurst() — it no longer plays continuously.
     private void ApplyGridGlowParticle(ThemeData theme)
     {
+        gridGlowStopTween?.Kill();
+
         if (gridGlowInstance != null)
         {
             Destroy(gridGlowInstance);
             gridGlowInstance = null;
+            gridGlowParticleSystems = null;
         }
 
         if (theme.gridGlowParticlePrefab == null)
@@ -246,15 +256,50 @@ public class ThemeManager : MonoBehaviour
         gridGlowInstance = Instantiate(theme.gridGlowParticlePrefab, transform);
         gridGlowInstance.transform.position = spawnPos;
 
-        // Force continuous looping regardless of how the source prefab's Particle System
-        // was authored (many VFX-pack prefabs default to a one-shot burst with
-        // Stop Action: Destroy) — this glow must keep running until the theme changes.
-        foreach (var ps in gridGlowInstance.GetComponentsInChildren<ParticleSystem>(true))
+        gridGlowParticleSystems = gridGlowInstance.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var ps in gridGlowParticleSystems)
         {
             var main = ps.main;
             main.loop = true;
             main.stopAction = ParticleSystemStopAction.None;
-            ps.Play();
         }
+
+        gridGlowInstance.SetActive(false);
+    }
+
+    /// <summary>
+    /// Plays the current theme's grid-glow particle for exactly <paramref name="duration"/>
+    /// seconds, then stops it. Meant to be called alongside the "Amazing" (multi-line clear)
+    /// popup so the glow is only visible while that popup is on screen.
+    /// </summary>
+    public void PlayGridGlowBurst(float duration)
+    {
+        if (gridGlowInstance == null || gridGlowParticleSystems == null)
+            return;
+
+        gridGlowStopTween?.Kill();
+
+        gridGlowInstance.SetActive(true);
+        foreach (var ps in gridGlowParticleSystems)
+            ps.Play();
+
+        gridGlowStopTween = DOVirtual.DelayedCall(duration, StopGridGlowBurst);
+    }
+
+    /// <summary>
+    /// Stops the grid-glow particle immediately, e.g. if the "Amazing" popup is
+    /// dismissed early (a new combo starts before the previous one finished).
+    /// </summary>
+    public void StopGridGlowBurst()
+    {
+        gridGlowStopTween?.Kill();
+
+        if (gridGlowParticleSystems == null)
+            return;
+
+        foreach (var ps in gridGlowParticleSystems)
+            ps.Stop();
+        if (gridGlowInstance != null)
+            gridGlowInstance.SetActive(false);
     }
 }

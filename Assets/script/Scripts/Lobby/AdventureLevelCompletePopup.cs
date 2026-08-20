@@ -82,9 +82,9 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         }
 
         isActive = true;
-        var levelTime = Time.realtimeSinceStartup - AnalyticsManager.instance.LevelStartTime;
-		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelComplete.ToString(), new List<AnalyticsManager.AnalyticsEventData>() {
-			new AnalyticsManager.AnalyticsEventData("GameType", "adventure"), new AnalyticsManager.AnalyticsEventData("LevelTime", levelTime.ToString())});
+		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelComplete.ToString(), new List<AnalyticsManager.AnalyticsParam>() {
+			AnalyticsManager.AnalyticsParam.Of("GameType", "adventure"),
+			AnalyticsManager.AnalyticsParam.Of("LevelTime", AnalyticsManager.instance.GetElapsedLevelTime())});
 		Debug.Log($"[CompletePopup] Invoking ShowInternal in {showDelay} seconds...");
         Invoke(nameof(ShowInternal), showDelay);
     }
@@ -173,7 +173,12 @@ public class AdventureLevelCompletePopup : MonoBehaviour
         System.Action advanceToNextLevel = () => Hide(() => GameManager.instance.ReloadCurrentScene());
 
         if (AdsManager.instance != null)
+        {
+            // Counted whether or not an ad ends up playing, so the "every N level ends" rule
+            // measures level ends rather than ad opportunities.
+            AdsManager.instance.NoteLevelEnded();
             AdsManager.instance.ShowInterstitialAd(advanceToNextLevel);
+        }
         else
             advanceToNextLevel();
     }

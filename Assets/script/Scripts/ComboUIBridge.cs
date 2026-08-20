@@ -97,6 +97,17 @@ public class ComboUIBridge : MonoBehaviour
     private void HandleComboStep(ComboEventArgs args)
     {
         if (debugLogs) { }
+
+        // Classic only — AdventureGameMode disables the combo controller outright.
+        AnalyticsManager.instance?.SendEvent(
+            AnalyticsManager.AnalyticsEvent.ComboStep.ToString(),
+            new System.Collections.Generic.List<AnalyticsManager.AnalyticsParam>
+            {
+                AnalyticsManager.AnalyticsParam.Of("ComboCount", args.ComboCount),
+                AnalyticsManager.AnalyticsParam.Of("TotalLinesCleared", args.TotalLinesClearedInCombo),
+                AnalyticsManager.AnalyticsParam.Of("Tier", args.Tier.ToString()),
+            });
+
         ShowPopup(args);
         PlayComboSound(args.Tier);
         DoShake(args.Tier);
@@ -140,6 +151,10 @@ public class ComboUIBridge : MonoBehaviour
             amazingImage.gameObject.SetActive(true);
             amazingImage.rectTransform.localScale = Vector3.zero;
 
+            // Grid glow particle runs for exactly as long as this popup stays on screen
+            // (scale-in + hold + scale-out), so it's tied to the "Amazing" moment only.
+            ThemeManager.instance?.PlayGridGlowBurst(amazingTweenDuration * 2f + amazingDuration);
+
             amazingTween = amazingImage.rectTransform
                 .DOScale(1f, amazingTweenDuration)
                 .SetEase(Ease.OutBack)
@@ -166,6 +181,8 @@ public class ComboUIBridge : MonoBehaviour
             amazingImage.gameObject.SetActive(false);
             amazingImage.rectTransform.localScale = Vector3.zero;
         }
+
+        ThemeManager.instance?.StopGridGlowBurst();
     }
 
     private void DoShake(ComboTier tier)

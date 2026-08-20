@@ -122,9 +122,11 @@ public class AppManager : Singleton<AppManager>
     {
 
         HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+
+        // Fires before Firebase can possibly be initialized — AnalyticsManager buffers it and
+        // sends it once the SDK is up, so the session's opening event is not lost.
         AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.GameStart.ToString());
 
-        RemoteConfigManager.instance.OnRemoteFetchCompleted += () => {};
         RemoteConfigManager.instance.StartRemoteConfigFetch();
         AdsManager.instance.Init();
 		
@@ -501,9 +503,21 @@ public class AppManager : Singleton<AppManager>
             return;
 
         CurrentLevelData = levelData;
-        AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelStart.ToString(), new List<AnalyticsManager.AnalyticsEventData>() { 
-            new AnalyticsManager.AnalyticsEventData("GameType", levelData.LevelType)});
-        
+
+        // Config staged by a fetch mid-session takes effect here, at a level boundary, so a
+        // level's difficulty can never change under the player's hands partway through it.
+        GameSettings.ApplyPending();
+
+        // Baseline stamp so Classic — which has no intro popup — measures from level load.
+        // Adventure re-stamps in AdventureLevelStartPopup once the player actually starts.
+        AnalyticsManager.instance.MarkLevelStarted();
+
+        bool isResumed = AdventureSessionCache.GetSnapshotFor(levelData.Level) != null;
+
+        AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelStart.ToString(), new List<AnalyticsManager.AnalyticsParam>() {
+            AnalyticsManager.AnalyticsParam.Of("GameType", levelData.LevelType ?? string.Empty),
+            AnalyticsManager.AnalyticsParam.Of("IsGenerated", levelData.Level > StaticAdventureLevelCount),
+            AnalyticsManager.AnalyticsParam.Of("IsResumed", isResumed)});
 
         InvokeOnDataLoaded(levelData);
     }

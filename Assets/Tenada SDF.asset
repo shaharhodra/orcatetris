@@ -4329,7 +4329,11 @@ MonoBehaviour:
           m_YPlacement: 0
           m_XAdvance: 0
           m_YAdvance: 0
+<<<<<<< Updated upstream
       m_FeatureLookupFlags: -1719465153
+=======
+      m_FeatureLookupFlags: 200674111
+>>>>>>> Stashed changes
     - m_FirstAdjustmentRecord:
         m_GlyphIndex: 64
         m_GlyphValueRecord:
@@ -4344,7 +4348,11 @@ MonoBehaviour:
           m_YPlacement: 0
           m_XAdvance: 0
           m_YAdvance: 0
+<<<<<<< Updated upstream
       m_FeatureLookupFlags: -1719465153
+=======
+      m_FeatureLookupFlags: 200674111
+>>>>>>> Stashed changes
     - m_FirstAdjustmentRecord:
         m_GlyphIndex: 64
         m_GlyphValueRecord:
@@ -4359,7 +4367,11 @@ MonoBehaviour:
           m_YPlacement: 0
           m_XAdvance: 0
           m_YAdvance: 0
+<<<<<<< Updated upstream
       m_FeatureLookupFlags: -1719465153
+=======
+      m_FeatureLookupFlags: 200674111
+>>>>>>> Stashed changes
     m_MarkToBaseAdjustmentRecords: []
     m_MarkToMarkAdjustmentRecords: []
   m_ShouldReimportFontFeatures: 0

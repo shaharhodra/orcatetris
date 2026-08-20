@@ -18,40 +18,94 @@ namespace OrcaTetris.Adventure
     /// old linear target curve did, reaching 277 symbols by level 300) eventually produces a level
     /// no player can finish. Saturation means level 300 and level 3000 are equally playable.
     ///
-    /// Difficulty is expressed through *more symbol types to juggle*, *a bigger target* and *a
-    /// fuller starting board* — never by offering shapes that don't fit or by capping how many
-    /// moves the player gets. A level simply runs until its targets are met.
+    /// Difficulty is expressed through *more symbol types to juggle*, *a bigger target*, *a
+    /// fuller starting board* and *fewer ready-made multi-line clears in the tray* — never by
+    /// offering shapes that don't fit, by withholding the clears the board needs to stay alive, or
+    /// by capping how many moves the player gets. A level simply runs until its targets are met.
     /// </summary>
     public static class AdventureLevelCurves
     {
+        // === Remotely tunable ===
+        //
+        // These are mutable statics rather than consts so Remote Config can override them. A const
+        // is inlined into every call site at compile time, which makes it literally unreachable
+        // from configuration — the whole difficulty model was unadjustable without shipping a
+        // build.
+        //
+        // They are plain fields written from outside rather than values read from a settings
+        // service, because this assembly (OrcaTetris.Adventure.Core) deliberately does not
+        // reference Assembly-CSharp — that separation is what lets the EditMode solvability tests
+        // drive the real curves. So the dependency points inward: GameSettings lives in the outer
+        // assembly and pushes values in via AdventureConfigApplier, and this file stays free of
+        // Unity plumbing.
+        //
+        // Note what that costs: the solvability suite only ever exercises the defaults below. A
+        // value published to the Remote Config console is not validated by anything.
+
         /// <summary>
         /// Level 4 is the first generated level (1-3 are hand-authored tutorials), so every curve
         /// measures its progress from there.
         /// </summary>
-        public const int FirstGeneratedLevel = 4;
+        public static int FirstGeneratedLevel = 4;
 
         /// <summary>
-        /// The level by which each curve has covered ~95% of its range. Past this point levels
-        /// keep varying in shape and layout, but stop meaningfully getting harder.
+        /// The level by which each size curve has covered ~95% of its range. Past this point levels
+        /// keep varying in shape and layout, but stop meaningfully getting bigger.
         /// </summary>
-        public const int SaturationLevel = 150;
+        public static int SaturationLevel = 150;
 
-        // exp(-Rate * (SaturationLevel - FirstGeneratedLevel)) = 0.05  =>  Rate = 3 / 146
-        private const float SaturationRate = 3f / (SaturationLevel - FirstGeneratedLevel);
+        public static int TargetFloor = 12;
+        public static int TargetCeiling = 45;
 
-        public const int TargetFloor = 12;
-        public const int TargetCeiling = 45;
+        public static int FillFloor = 8;
+        public static int FillCeiling = 18;
 
-        private const int FillFloor = 8;
-        private const int FillCeiling = 18;
+        public static int DifficultyCeiling = 75;
 
-        public const int DifficultyCeiling = 55;
+        /// <summary>
+        /// How hard a level is allowed to get by the time its targets are nearly complete. Only
+        /// late-campaign levels actually reach this — see <see cref="GetDifficultyAtProgress"/>.
+        /// </summary>
+        public static int InLevelDifficultyPeak = 90;
+
+        /// <summary>
+        /// Difficulty saturates far earlier than everything else, and deliberately so. Size knobs
+        /// — how many symbols a level asks for, how full it starts — decide how *long* a level
+        /// takes, and stretching those over 150 levels is right: levels shouldn't keep growing.
+        /// But how much a level makes the player *think* is a separate axis, and pinning it to the
+        /// same slow curve meant level 45 still sat at barely half difficulty while playing like
+        /// a tutorial. This lets demand arrive early and hold, without levels getting any longer.
+        /// </summary>
+        public static int DifficultySaturationLevel = 65;
 
         /// <summary>
         /// Smallest number of any one symbol type a level will ask for, so a type never shows up
         /// as a token "collect 1 of these" entry in the target UI.
         /// </summary>
-        public const int MinPerType = 3;
+        public static int MinPerType = 3;
+
+        // exp(-Rate * (SaturationLevel - FirstGeneratedLevel)) = 0.05  =>  Rate = 3 / 146.
+        //
+        // Computed properties, not fields: these are derived from two values that are now both
+        // overridable, and a precomputed field would silently keep the old rate after an override —
+        // the curve would then saturate at a level nobody asked for. The denominator is floored at
+        // 1 so a config that sets the saturation level at or below the first generated level
+        // produces a steep curve instead of a division by zero, which would poison every downstream
+        // number with NaN and take the whole difficulty model with it.
+        private static float SaturationRate => 3f / Mathf.Max(1, SaturationLevel - FirstGeneratedLevel);
+
+        private static float DifficultySaturationRate => 3f / Mathf.Max(1, DifficultySaturationLevel - FirstGeneratedLevel);
+
+        /// <summary>
+        /// <see cref="GetProgress"/>'s curve on its own, faster schedule — ~95% by
+        /// <see cref="DifficultySaturationLevel"/>. Only the difficulty knobs read this; every
+        /// size knob stays on <see cref="GetProgress"/>.
+        /// </summary>
+        public static float GetDifficultyProgress(int level)
+        {
+            int steps = Mathf.Max(0, level - FirstGeneratedLevel);
+            return 1f - Mathf.Exp(-DifficultySaturationRate * steps);
+        }
 
         /// <summary>
         /// How far along its difficulty range a level sits: 0 at the first generated level, ~0.95
@@ -143,14 +197,45 @@ namespace OrcaTetris.Adventure
         }
 
         /// <summary>
-        /// Seeds the tray automation's toughness (0-100). With decoys gone this no longer gates
-        /// how many tray slots are usable — all 3 always are — it only steers how hard the picker
-        /// tries to hand the player a board-healthy shape, so a high value makes a level grindier
-        /// rather than unwinnable.
+        /// The tray automation's toughness (0-100) at the *start* of a level. With decoys gone
+        /// this no longer gates how many tray slots are usable — all 3 always are — it gates how
+        /// many of them may arrive with a multi-line clear already set up, how awkward a shape the
+        /// picker reaches for, and how hard it tries to hand the player a board-healthy one. A high
+        /// value makes a level demand more planning rather than making it unwinnable.
+        ///
+        /// Rides <see cref="GetDifficultyProgress"/>, not <see cref="GetProgress"/>, so demand
+        /// arrives well before level size does.
         /// </summary>
         public static int GetBaseDifficultyPct(int level)
         {
-            return Mathf.Clamp(Mathf.RoundToInt(DifficultyCeiling * GetProgress(level)), 0, DifficultyCeiling);
+            return Mathf.Clamp(Mathf.RoundToInt(DifficultyCeiling * GetDifficultyProgress(level)), 0, DifficultyCeiling);
+        }
+
+        /// <summary>
+        /// The toughness in force at a given moment *inside* a level, climbing from the level's
+        /// starting difficulty as its targets get collected. Adventure has no score, so this
+        /// replaces the score-driven ramp Classic uses — without it a level's difficulty is frozen
+        /// from first move to last and the tray keeps handing out ready-made multi-line clears
+        /// right up to the win.
+        ///
+        /// How far the ramp climbs depends on how deep into the campaign the level is, derived
+        /// from the starting difficulty itself rather than the level number so this also works for
+        /// the hand-authored levels that set DifficultyLevel in their JSON. An early level
+        /// (base 0) doesn't ramp at all; a saturated one climbs from ~0.52 toward
+        /// <see cref="InLevelDifficultyPeak"/> as the player closes in on the targets — so every
+        /// level opens fair and tightens at the end instead of tightening on the player before
+        /// they've had a chance to build anything.
+        /// </summary>
+        /// <param name="baseDifficulty01">The level's starting difficulty, 0-1.</param>
+        /// <param name="targetProgress01">Fraction of the level's symbol targets already collected.</param>
+        public static float GetDifficultyAtProgress(float baseDifficulty01, float targetProgress01)
+        {
+            baseDifficulty01 = Mathf.Clamp01(baseDifficulty01);
+
+            float campaignProgress = Mathf.Clamp01(baseDifficulty01 / (DifficultyCeiling / 100f));
+            float peak = Mathf.Lerp(baseDifficulty01, InLevelDifficultyPeak / 100f, campaignProgress);
+
+            return Mathf.Lerp(baseDifficulty01, Mathf.Max(baseDifficulty01, peak), Mathf.Clamp01(targetProgress01));
         }
 
         /// <summary>

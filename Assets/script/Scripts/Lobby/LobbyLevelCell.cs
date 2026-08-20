@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using DG.Tweening;
 
 // Attach to each cell prefab inside the GridLayoutGroup.
@@ -9,6 +10,26 @@ public class LobbyLevelCell : MonoBehaviour
     [Header("Cell Identity")]
     [SerializeField] private int levelIndex = 0;
     public int LevelIndex => levelIndex;
+
+    [Tooltip("Displays LevelIndex + 1. Set by LobbyLevelManager when it slides this cell's window over the (unbounded) level range instead of leaving every cell permanently tied to whatever level it was baked to show.")]
+    [SerializeField] private TextMeshProUGUI levelNumberText;
+
+    // Re-labels this cell to represent a different level without needing a distinct
+    // GameObject per level — lets a fixed number of physical cells show a sliding
+    // window over an arbitrarily large level range. Clears any completed-cover
+    // instance from whatever level this cell previously showed, since that cover
+    // no longer applies once the cell is re-windowed onto a different level.
+    public void SetLevelIndex(int newLevelIndex)
+    {
+        if (newLevelIndex == levelIndex)
+            return;
+
+        levelIndex = newLevelIndex;
+        if (levelNumberText != null)
+            levelNumberText.text = (levelIndex + 1).ToString();
+
+        ResetCover();
+    }
 
     [Header("Visuals")]
     [SerializeField] private Image lockedOverlay;      // shown when level is locked (dark/greyed)
@@ -22,6 +43,7 @@ public class LobbyLevelCell : MonoBehaviour
     [SerializeField] private Ease flyEase = Ease.OutBack;
 
     private bool coverPlaced = false;
+    private GameObject coverInstance;
 
     private void Awake()
     {
@@ -51,6 +73,7 @@ public class LobbyLevelCell : MonoBehaviour
         coverPlaced = true;
 
         var go = Instantiate(coverPrefab, transform);
+        coverInstance = go;
         var rect = go.GetComponent<RectTransform>();
         if (rect == null) return;
 
@@ -79,6 +102,7 @@ public class LobbyLevelCell : MonoBehaviour
         coverPlaced = true;
 
         var go = Instantiate(coverPrefab, transform);
+        coverInstance = go;
         var rect = go.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -90,5 +114,11 @@ public class LobbyLevelCell : MonoBehaviour
     public void ResetCover()
     {
         coverPlaced = false;
+
+        if (coverInstance != null)
+        {
+            Destroy(coverInstance);
+            coverInstance = null;
+        }
     }
 }

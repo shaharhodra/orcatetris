@@ -585,6 +585,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 12
+  levelNumberText: {fileID: 275783342}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -1591,6 +1592,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 34
+  levelNumberText: {fileID: 197508771}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -2113,6 +2115,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 28
+  levelNumberText: {fileID: 1215509461}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -2287,6 +2290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 31
+  levelNumberText: {fileID: 802397099}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -2537,6 +2541,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 27
+  levelNumberText: {fileID: 364456629}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -3341,6 +3346,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 19
+  levelNumberText: {fileID: 1917886065}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -3668,6 +3674,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 24
+  levelNumberText: {fileID: 1470502978}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -4429,6 +4436,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 29
+  levelNumberText: {fileID: 1916719579}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -4664,6 +4672,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 16
+  levelNumberText: {fileID: 2069649495}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -4862,6 +4871,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 6
+  levelNumberText: {fileID: 1469766314}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -4960,6 +4970,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 8
+  levelNumberText: {fileID: 850022369}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -5332,6 +5343,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 17
+  levelNumberText: {fileID: 805786248}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -5841,6 +5853,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 25
+  levelNumberText: {fileID: 1678665002}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -6392,6 +6405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 7
+  levelNumberText: {fileID: 356608520}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -6627,6 +6641,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 23
+  levelNumberText: {fileID: 159387679}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -6724,6 +6739,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 26
+  levelNumberText: {fileID: 1162093255}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -7184,6 +7200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 4
+  levelNumberText: {fileID: 1938349133}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -7357,6 +7374,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 0
+  levelNumberText: {fileID: 1763116309}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -7592,6 +7610,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 21
+  levelNumberText: {fileID: 1220282228}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -7735,6 +7754,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 30
+  levelNumberText: {fileID: 1036766658}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -7833,6 +7853,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 22
+  levelNumberText: {fileID: 1603630006}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -8218,6 +8239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 1
+  levelNumberText: {fileID: 1074639594}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -8590,6 +8612,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 18
+  levelNumberText: {fileID: 1621458859}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -9311,6 +9334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 10
+  levelNumberText: {fileID: 2020875264}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -9618,6 +9642,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 3
+  levelNumberText: {fileID: 395823225}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -10270,6 +10295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 20
+  levelNumberText: {fileID: 874112154}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -11710,6 +11736,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 13
+  levelNumberText: {fileID: 843998006}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -12173,6 +12200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 11
+  levelNumberText: {fileID: 1198570963}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -12271,6 +12299,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 14
+  levelNumberText: {fileID: 2008067965}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -12506,6 +12535,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 2
+  levelNumberText: {fileID: 1618337475}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -12741,6 +12771,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 9
+  levelNumberText: {fileID: 221701868}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -13188,6 +13219,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 15
+  levelNumberText: {fileID: 666871966}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -13423,6 +13455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 33
+  levelNumberText: {fileID: 756408835}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -13908,6 +13941,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 5
+  levelNumberText: {fileID: 819151131}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}
@@ -14550,6 +14584,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 246377422}
   pointer: {fileID: 266964935}
+  levelsBehindCurrent: 2
   punchScale: 0.25
   punchDuration: 0.4
   coverAnimDelay: 0.12
@@ -15563,6 +15598,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyLevelCell
   levelIndex: 32
+  levelNumberText: {fileID: 182759727}
   lockedOverlay: {fileID: 0}
   completedIcon: {fileID: 0}
   staticCover: {fileID: 0}

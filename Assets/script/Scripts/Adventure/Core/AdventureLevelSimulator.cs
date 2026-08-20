@@ -12,10 +12,12 @@ namespace OrcaTetris.Adventure
     /// The simulation mirrors the real loop exactly where it matters: an 8x8 board, a 3-slot tray
     /// refilled only once every shape is placed, one symbol per offered shape drawn from the same
     /// weighted needed-types pool ShapeTrayManager uses, symbols collected only when a line clear
-    /// removes the cell carrying them, and tray picks coming from the shared
-    /// <see cref="TraySelectionCore"/> so the solver can't be validating a different tray policy
-    /// than the one the player faces. There is no mulligan for a stuck tray, matching the real
-    /// game: Adventure has no revive, so the player's own placements can end a level early.
+    /// removes the cell carrying them, difficulty ramping with collected targets exactly as
+    /// ShapeTrayManager.RecomputeAdventureDifficulty ramps it, and tray picks coming from the
+    /// shared <see cref="TraySelectionCore.SelectTrayChained"/> so the solver can't be validating a
+    /// different tray policy than the one the player faces. There is no mulligan for a stuck tray,
+    /// matching the real game: Adventure has no revive, so the player's own placements can end a
+    /// level early.
     ///
     /// The built-in player is deliberately *greedy, not optimal* — it looks one placement ahead
     /// and never plans a combo. A <see cref="Outcome.Stuck"/> result here means this simple
@@ -72,7 +74,10 @@ namespace OrcaTetris.Adventure
             for (int i = 0; i < activeTypes.Count; i++)
                 remaining[activeTypes[i]] = amounts[i];
 
-            float helpfulness = 1f - AdventureLevelCurves.GetBaseDifficultyPct(level) / 100f;
+            // The level's starting toughness. The tray gets harder than this as targets come in —
+            // RefillTray re-derives the live value on every refill, the same way the game does.
+            float baseDifficulty = AdventureLevelCurves.GetBaseDifficultyPct(level) / 100f;
+            int totalTarget = amounts.Sum();
 
             var occupied = new bool[BoardSize, BoardSize];
             var symbols = new int[BoardSize, BoardSize];
@@ -94,7 +99,7 @@ namespace OrcaTetris.Adventure
             while (movesUsed < MaxMovesSafetyCap)
             {
                 if (tray.Count == 0)
-                    RefillTray(tray, occupied, shapePool, remaining, helpfulness, rng);
+                    RefillTray(tray, occupied, shapePool, remaining, baseDifficulty, totalTarget, rng);
 
                 if (!TryPickBestPlacement(occupied, symbols, tray, shapePool, remaining, out int trayIndex, out var anchor))
                 {
@@ -128,17 +133,28 @@ namespace OrcaTetris.Adventure
 
         /// <summary>
         /// Draws a fresh tray and gives each shape one symbol of a still-needed type, matching
-        /// ShapeTrayManager's refill (SelectTray, then AssignRandomSymbol per shape).
+        /// ShapeTrayManager's refill (SelectTrayChained, then AssignRandomSymbol per shape).
+        ///
+        /// Difficulty is re-derived here rather than passed in fixed, because the live game does
+        /// the same: a level tightens as its targets get collected. Reading it once per level
+        /// would let the suite green-light a policy softer than the one the player actually meets
+        /// late in a level.
         /// </summary>
         private static void RefillTray(
             List<(int shapeIndex, int symbolCell, int symbolType)> tray,
             bool[,] occupied,
             IReadOnlyList<Vector2Int[]> shapePool,
             Dictionary<int, int> remaining,
-            float helpfulness,
+            float baseDifficulty,
+            int totalTarget,
             System.Random rng)
         {
-            var picks = TraySelectionCore.SelectTray(occupied, shapePool, helpfulness, allowDecoys: false, rng);
+            float targetProgress = totalTarget > 0
+                ? 1f - remaining.Values.Sum() / (float)totalTarget
+                : 0f;
+            float helpfulness = 1f - AdventureLevelCurves.GetDifficultyAtProgress(baseDifficulty, targetProgress);
+
+            var picks = TraySelectionCore.SelectTrayChained(occupied, shapePool, helpfulness, rng);
             var neededPool = BuildWeightedNeededTypes(remaining);
 
             foreach (int shapeIndex in picks)
@@ -223,7 +239,31 @@ namespace OrcaTetris.Adventure
                         // shouldn't be modelled as evaluating the full pool either.
                         float clutter = CountHoles(previewOccupied) * 2f + CountOccupied(previewOccupied) * 0.1f;
 
-                        float score = collected * 100f + linesCleared * 10f - clutter;
+                        // How many of the OTHER shapes still sitting in the tray this placement
+                        // would leave with nowhere to go. Diagnosing stuck runs kept finding this
+                        // exact shape: a perfectly reasonable tray member that only became stuck
+                        // because the other two landed wherever scored best in isolation, with
+                        // nothing accounting for what that did to it. A player who can already see
+                        // all 3 tray shapes wouldn't casually box one out — Adventure has no
+                        // revive, so a visibly bad trade like that is exactly what "reasonable,
+                        // not perfect" play avoids. This is still one placement of lookahead, not a
+                        // search: it only checks the immediate, visible consequence of the move
+                        // being scored right now, same as everything else in this function.
+                        int strandedSiblings = 0;
+                        for (int other = 0; other < tray.Count; other++)
+                        {
+                            if (other == t)
+                                continue;
+
+                            var otherOffsets = shapePool[tray[other].shapeIndex];
+                            if (otherOffsets == null || otherOffsets.Length == 0)
+                                continue;
+
+                            if (!TraySelectionCore.HasAnyPlacement(previewOccupied, BoardSize, BoardSize, otherOffsets))
+                                strandedSiblings++;
+                        }
+
+                        float score = collected * 100f + linesCleared * 10f - clutter - strandedSiblings * 1000f;
 
                         if (score > bestScore)
                         {

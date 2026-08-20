@@ -116,12 +116,12 @@ TextureImporter:
       name: grid_frame_preview_1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 500
-        height: 500
+        x: 98
+        y: 79
+        width: 324
+        height: 322
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 87fc1555e0de66d4b8a49d7f629dcd18
     internalID: 0
     vertices: []
     indices: 

@@ -6,10 +6,16 @@ using OrcaTetris.Adventure;
 /// Picks which 3 shapes to offer next in the tray. No lookahead, no hypothetical
 /// combos — each candidate shape is judged only on what IT achieves by itself,
 /// placed at its single best spot on the board exactly as it looks right now.
-/// The 3 shapes offered are simply the top 3 by that score: a full clear beats
-/// everything, then whoever clears the most lines, then (as a tiebreak) the
-/// smaller/simpler shape. If fewer than 3 shapes can clear anything, the
-/// remaining slots go to whichever placeable shapes leave the board healthiest.
+/// Shapes that clear a line are ranked first — a full clear beats everything,
+/// then whoever clears the most lines, then (as a tiebreak) the smaller/simpler
+/// shape — but difficulty caps how many of the 3 slots may be *multi-line*
+/// clears. At max helpfulness all 3 can be, which is what made the tray feel
+/// like it was solving the level for the player; at max difficulty only 1 is and
+/// the other clearing slots drop to single-line options, so building the big
+/// combo is the player's job again. Clearing shapes are never withheld outright,
+/// and the cap lifts once the board is crowded — see TraySelectionCore for why
+/// both of those are load-bearing. Slots not filled by a clear go to whichever
+/// placeable shapes leave the board healthiest.
 /// This keeps every offered shape something the player can actually look at
 /// and see why it was offered — no 2-3-move-deep setup a player has no way to
 /// perceive.
@@ -40,13 +46,16 @@ public class ShapeSelectionAlgorithm
     /// <param name="shapePool">All shapes that may be offered.</param>
     /// <param name="cellSize">Passed through to Shape.GetCells to read each shape's footprint.</param>
     /// <param name="difficulty">
-    /// 1 = most helpful/easy, 0 = most chaotic/hard. Controls two things:
+    /// 1 = most helpful/easy, 0 = most chaotic/hard. Controls three things:
     /// how many of the 3 slots are guaranteed placeable at all (3 at
     /// difficulty 1 down to 1 at difficulty 0, the rest filled with decoys
-    /// that don't fit anywhere right now), and — as a fallback when fewer
-    /// than the real-slot count can clear anything on their own — whether
-    /// remaining real slots prefer whichever placeable shape leaves the
-    /// board healthiest (1) or are picked without regard to board health (0).
+    /// that don't fit anywhere right now); how many slots may arrive with a
+    /// multi-line clear already set up (again 3 down to 1 — the one dial that
+    /// still bites in Adventure, where every slot is forced placeable); and — as a
+    /// fallback when fewer than the real-slot count can clear anything on
+    /// their own — whether remaining real slots prefer whichever placeable
+    /// shape leaves the board healthiest (1) or are picked without regard to
+    /// board health (0).
     /// </param>
     /// <param name="allowDecoys">
     /// Whether unplaceable shapes may fill the slots above the real-slot count.
@@ -68,6 +77,32 @@ public class ShapeSelectionAlgorithm
 
         var picks = TraySelectionCore.SelectTray(
             grid, offsets, difficulty, allowDecoys, SharedRandom);
+
+        foreach (int index in picks)
+            result.Add(pool[index]);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Adventure's tray policy: see <see cref="TraySelectionCore.SelectTrayChained"/> for why it's
+    /// a different method rather than another <see cref="SelectTray"/> parameter. Classic doesn't
+    /// use this — it has a revive safety net and gets its difficulty from decoys instead, which
+    /// chaining has no equivalent of.
+    /// </summary>
+    public List<Shape> SelectTrayChained(bool[,] grid, IReadOnlyList<Shape> shapePool, float cellSize, float difficulty)
+    {
+        var result = new List<Shape>();
+        if (grid == null || shapePool == null || shapePool.Count == 0)
+            return result;
+
+        var pool = shapePool.Where(p => p != null).Distinct().ToList();
+        if (pool.Count == 0)
+            return result;
+
+        var offsets = pool.Select(p => p.GetCells(cellSize)).ToList();
+
+        var picks = TraySelectionCore.SelectTrayChained(grid, offsets, difficulty, SharedRandom);
 
         foreach (int index in picks)
             result.Add(pool[index]);

@@ -26,6 +26,16 @@ public class PlayerManeger : Singleton<PlayerManeger>
     }
 
     [SerializeField] private bool enableDailyBonus = true;
+
+    /// <summary>
+    /// Overwrites the daily-bonus switch from Remote Config. The bonus grants free level skips, so
+    /// being able to turn it off without a build matters if it ever turns out to be handing away
+    /// more progress than intended.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        enableDailyBonus = GameSettings.GetBool(RemoteConfigKeys.DailyBonusEnabled);
+    }
     
     [Serializable]
     public class PlayerProgressData
@@ -52,6 +62,11 @@ public class PlayerManeger : Singleton<PlayerManeger>
         if (PlayerProgress == null) return;
         PlayerProgress.LastBonusDate = System.DateTime.Now.ToString("yyyy-MM-dd");
         SavePlayerProgress();
+
+        // Also declared-but-never-fired. This is the retention hook — how many players come back
+        // on a second day at all is not currently answerable from the data.
+        AnalyticsManager.instance?.SendEvent(
+            AnalyticsManager.AnalyticsEvent.DailyBonusClaimed.ToString());
     }
 
     public event Action<int> OnCoinsUpdatedEvent;
@@ -111,6 +126,11 @@ public class PlayerManeger : Singleton<PlayerManeger>
 
         if (_playerProgress.DisplayLevel < 0)
             _playerProgress.DisplayLevel = _playerProgress.HighestUnlockedLevel;
+
+#if UNITY_EDITOR
+        // DEBUG: Uncomment the line below to test high level progression (change 40 to any level number)
+        //_playerProgress.HighestUnlockedLevel = 34;
+#endif
     }
 
     public int GetCoins()
@@ -126,6 +146,13 @@ public class PlayerManeger : Singleton<PlayerManeger>
         PlayerProgress.Coins += amount;
         SavePlayerProgress();
         OnCoinsUpdatedEvent?.Invoke(PlayerProgress.Coins);
+
+        // CoinsEarned has been declared in the analytics enum since the beginning and never once
+        // fired. Coins are Classic-only (ScoreManager short-circuits the award in Adventure), so
+        // this doubles as a read on how much of the playerbase touches Classic at all.
+        AnalyticsManager.instance?.SendEvent(
+            AnalyticsManager.AnalyticsEvent.CoinsEarned.ToString(),
+            AnalyticsManager.AnalyticsParam.Of("Amount", amount));
     }
 
     public void SavePlayerProgress()

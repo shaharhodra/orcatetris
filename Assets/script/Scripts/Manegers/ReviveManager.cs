@@ -19,6 +19,17 @@ public class ReviveManager : MonoBehaviour
     [SerializeField] private PlaceManager placeManager;
     [SerializeField] private PopUpService popUpService;
 
+    /// <summary>
+    /// Overwrites the revive allowance and decision timer from Remote Config. Both are Classic-only
+    /// in effect — revive is gated to Classic — but they are the strongest levers on how punishing
+    /// a Classic run feels, so they are worth being able to move without a build.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        maxRevives = GameSettings.GetInt(RemoteConfigKeys.ReviveMaxPerRun);
+        reviveCountdownDuration = GameSettings.GetFloat(RemoteConfigKeys.ReviveCountdownSeconds);
+    }
+
     [Header("Revive countdown")]
     [SerializeField] private float reviveCountdownDuration = 5f;
     [SerializeField] private Text reviveCountdownText;
@@ -423,7 +434,10 @@ public class ReviveManager : MonoBehaviour
         System.Action restart = () => GameManager.instance.InvokeOnLevelRestartedEvent();
 
         if (AdsManager.instance != null)
+        {
+            AdsManager.instance.NoteLevelEnded();
             AdsManager.instance.ShowInterstitialAd(restart);
+        }
         else
             restart();
     }
@@ -450,9 +464,9 @@ public class ReviveManager : MonoBehaviour
         if (AnalyticsManager.instance == null)
             return;
 
-        AnalyticsManager.instance.SendEvent(evt.ToString(), new System.Collections.Generic.List<AnalyticsManager.AnalyticsEventData>
+        AnalyticsManager.instance.SendEvent(evt.ToString(), new System.Collections.Generic.List<AnalyticsManager.AnalyticsParam>
         {
-            new AnalyticsManager.AnalyticsEventData("RevivesUsed", usedRevives.ToString())
+            AnalyticsManager.AnalyticsParam.Of("RevivesUsed", usedRevives)
         });
     }
 }

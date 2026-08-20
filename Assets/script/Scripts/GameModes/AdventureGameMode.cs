@@ -50,6 +50,21 @@ public class AdventureGameMode : IGameMode
         if (!HasAnyMoveAvailable())
         {
             Debug.Log("[AdventureGameMode] No moves available, triggering game over");
+
+            // The failure mode the whole difficulty model is tuned against. Reported with how far
+            // into the level it happened, because "stuck at move 5" and "stuck at move 40" are
+            // different problems: the first says the tray dealt something unplayable, the second
+            // says the level slowly ran out of room.
+            if (AnalyticsManager.instance != null)
+            {
+                AnalyticsManager.instance.SendEvent(
+                    AnalyticsManager.AnalyticsEvent.NoMoves.ToString(),
+                    new System.Collections.Generic.List<AnalyticsManager.AnalyticsParam>
+                    {
+                        AnalyticsManager.AnalyticsParam.Of("LevelTime", AnalyticsManager.instance.GetElapsedLevelTime()),
+                    });
+            }
+
             TriggerGameOver();
         }
     }

@@ -1,0 +1,148 @@
+{
+  "parameters": {
+    "ads_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "ads_interstitial_unit_id_android": {
+      "defaultValue": { "value": "ca-app-pub-3940256099942544/1033173712" },
+      "valueType": "STRING"
+    },
+    "ads_rewarded_unit_id_android": {
+      "defaultValue": { "value": "ca-app-pub-3940256099942544/5224354917" },
+      "valueType": "STRING"
+    },
+    "ads_interstitial_unit_id_ios": {
+      "defaultValue": { "value": "ca-app-pub-3940256099942544/1033173712" },
+      "valueType": "STRING"
+    },
+    "ads_rewarded_unit_id_ios": {
+      "defaultValue": { "value": "ca-app-pub-3940256099942544/5224354917" },
+      "valueType": "STRING"
+    },
+    "ads_interstitial_cooldown_seconds": {
+      "defaultValue": { "value": "0" },
+      "valueType": "NUMBER"
+    },
+    "ads_interstitial_min_level_ends": {
+      "defaultValue": { "value": "0" },
+      "valueType": "NUMBER"
+    },
+    "adv_difficulty_ceiling": {
+      "defaultValue": { "value": "75" },
+      "valueType": "NUMBER"
+    },
+    "adv_difficulty_saturation_level": {
+      "defaultValue": { "value": "65" },
+      "valueType": "NUMBER"
+    },
+    "adv_in_level_difficulty_peak": {
+      "defaultValue": { "value": "90" },
+      "valueType": "NUMBER"
+    },
+    "adv_size_saturation_level": {
+      "defaultValue": { "value": "150" },
+      "valueType": "NUMBER"
+    },
+    "adv_target_floor": {
+      "defaultValue": { "value": "12" },
+      "valueType": "NUMBER"
+    },
+    "adv_target_ceiling": {
+      "defaultValue": { "value": "45" },
+      "valueType": "NUMBER"
+    },
+    "adv_fill_floor": {
+      "defaultValue": { "value": "8" },
+      "valueType": "NUMBER"
+    },
+    "adv_fill_ceiling": {
+      "defaultValue": { "value": "18" },
+      "valueType": "NUMBER"
+    },
+    "adv_min_per_type": {
+      "defaultValue": { "value": "3" },
+      "valueType": "NUMBER"
+    },
+    "adv_first_generated_level": {
+      "defaultValue": { "value": "4" },
+      "valueType": "NUMBER"
+    },
+    "tray_jackpot_relief_fill": {
+      "defaultValue": { "value": "0.45" },
+      "valueType": "NUMBER"
+    },
+    "tray_min_safe_anchors": {
+      "defaultValue": { "value": "3" },
+      "valueType": "NUMBER"
+    },
+    "tray_robust_anchor_cap": {
+      "defaultValue": { "value": "12" },
+      "valueType": "NUMBER"
+    },
+    "gift_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "gift_cooldown_refills_classic": {
+      "defaultValue": { "value": "3" },
+      "valueType": "NUMBER"
+    },
+    "gift_adventure_scale": {
+      "defaultValue": { "value": "0.35" },
+      "valueType": "NUMBER"
+    },
+    "gift_adventure_cooldown_refills": {
+      "defaultValue": { "value": "6" },
+      "valueType": "NUMBER"
+    },
+    "classic_score_for_max_difficulty": {
+      "defaultValue": { "value": "500000" },
+      "valueType": "NUMBER"
+    },
+    "classic_random_initial_shapes": {
+      "defaultValue": { "value": "2" },
+      "valueType": "NUMBER"
+    },
+    "score_per_placed_cell": {
+      "defaultValue": { "value": "10" },
+      "valueType": "NUMBER"
+    },
+    "score_per_cleared_cell": {
+      "defaultValue": { "value": "100" },
+      "valueType": "NUMBER"
+    },
+    "revive_max_per_run": {
+      "defaultValue": { "value": "3" },
+      "valueType": "NUMBER"
+    },
+    "revive_countdown_seconds": {
+      "defaultValue": { "value": "5" },
+      "valueType": "NUMBER"
+    },
+    "no_moves_revive_delay": {
+      "defaultValue": { "value": "5" },
+      "valueType": "NUMBER"
+    },
+    "daily_bonus_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "daily_bonus_min_levels": {
+      "defaultValue": { "value": "1" },
+      "valueType": "NUMBER"
+    },
+    "daily_bonus_max_levels": {
+      "defaultValue": { "value": "3" },
+      "valueType": "NUMBER"
+    },
+    "debug_log_shape_selection": {
+      "defaultValue": { "value": "false" },
+      "valueType": "BOOLEAN"
+    },
+    "debug_log_grid_placer": {
+      "defaultValue": { "value": "false" },
+      "valueType": "BOOLEAN"
+    }
+  }
+}

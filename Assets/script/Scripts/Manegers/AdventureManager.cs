@@ -24,6 +24,48 @@ public class AdventureManager : MonoBehaviour
 
     public Dictionary<ColectionTypes, int> RemainingTargets => remainingTargets;
 
+    // The level's full symbol requirement, captured whenever targets are (re)loaded. It has to
+    // come from the level data rather than from the remaining counts, because a resumed session
+    // restores a remainder that has already been partly spent.
+    private int totalTargets;
+
+    public int TotalTargets => totalTargets;
+
+    /// <summary>
+    /// Fraction of the level's symbols already collected — 0 on the first move, 1 on the last.
+    /// ShapeTrayManager drives its in-level difficulty ramp from this, since Adventure has no
+    /// score to ramp from.
+    /// </summary>
+    public float TargetProgress
+    {
+        get
+        {
+            if (totalTargets <= 0)
+                return 0f;
+
+            int remaining = 0;
+            foreach (var kvp in remainingTargets)
+                remaining += Mathf.Max(0, kvp.Value);
+
+            return Mathf.Clamp01(1f - remaining / (float)totalTargets);
+        }
+    }
+
+    private static int CountTotalTargets(LevelData levelData)
+    {
+        if (levelData == null || levelData.LevelTargets == null)
+            return 0;
+
+        int total = 0;
+        foreach (var target in levelData.LevelTargets)
+        {
+            if (target.Target > 0)
+                total += target.Target;
+        }
+
+        return total;
+    }
+
     private bool levelCompleted;
 
     private void Start()
@@ -80,6 +122,10 @@ public class AdventureManager : MonoBehaviour
     /// </summary>
     private void LoadTargetsForLevel(LevelData levelData)
     {
+        // Capture the total up front: the restore path below never sees the level data, and the
+        // saved remainder alone can't tell us what the level originally asked for.
+        totalTargets = CountTotalTargets(levelData);
+
         var snapshot = AdventureSessionCache.GetSnapshotFor(levelData.Level);
         if (snapshot != null && snapshot.remainingTargets != null)
             RestoreTargets(snapshot.remainingTargets);
@@ -109,6 +155,7 @@ public class AdventureManager : MonoBehaviour
     {
         remainingTargets.Clear();
         levelCompleted = false;
+        totalTargets = CountTotalTargets(levelData);
 
         if (levelData.LevelTargets == null || levelData.LevelTargets.Count == 0)
             return;

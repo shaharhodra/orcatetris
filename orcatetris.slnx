@@ -1,7 +1,10 @@
 ﻿<Solution>
   <Project Path="Unity.Windsurf.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="OrcaTetris.Config.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="GoogleMobileAds.Editor.csproj" />
+  <Project Path="OrcaTetris.Adventure.Core.csproj" />
+  <Project Path="OrcaTetris.Adventure.Tests.csproj" />
 </Solution>

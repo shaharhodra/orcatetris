@@ -948,8 +948,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: max points
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 51831b6890010d54d99bfdafb370ec77, type: 2}
-  m_sharedMaterial: {fileID: -3714598793970264967, guid: 51831b6890010d54d99bfdafb370ec77, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3247,8 +3247,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 546012939}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.14, y: -2.15, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -4, z: 0}
   m_LocalScale: {x: 3.975, y: 3.9967315, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4141,7 +4141,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &726509795
 Transform:
   m_ObjectHideFlags: 0
@@ -4922,6 +4922,14 @@ MonoBehaviour:
   - {fileID: 3668488296882935676, guid: 77c3f6642be07ba4e8cead77f865acda, type: 3}
   - {fileID: 3668488296882935676, guid: 848106a4a83234f49b3bb1e7ca0236c6, type: 3}
   - {fileID: 3668488296882935676, guid: b74902d43e9131548a45658009d06443, type: 3}
+  - {fileID: 7124560530169151585, guid: 63d8bef816e73ae4fa43cbb6c8936ca7, type: 3}
+  - {fileID: 7512819623302204685, guid: 4edc656e6c2105047bb45928d51fdd9d, type: 3}
+  - {fileID: 3377432257175623823, guid: e40da49fe857084409554994d19c72ec, type: 3}
+  - {fileID: 7343978826957606958, guid: 8127e631a3f4ae1458cacacdb1c25cf0, type: 3}
+  - {fileID: 6156633813424930437, guid: b2ecb33fedd96f445a0983f96b8352dd, type: 3}
+  - {fileID: 3321859716735637222, guid: 116bf1d47379f9f47972583b9b35eddf, type: 3}
+  - {fileID: 6710879557082285381, guid: a5fc6cb476794814e83b64df491ba095, type: 3}
+  - {fileID: 3832695518073686804, guid: 1d1bb8814c00d8045b00f3ccd2ef23c0, type: 3}
   adventureManager: {fileID: 579939638}
   shapePrefabs: []
   useAddressables: 1
@@ -4930,11 +4938,12 @@ MonoBehaviour:
   minPlaceableToConsiderMovable: 1
   difficulty: 0
   scoreProgress: 0
-  scoreProgressStepPoints: 25000
-  scoreProgressStep: 0.02
+  scoreForMaxDifficulty: 500000
   enableGiftOpportunities: 1
   giftChance: 1
   giftCooldownRefills: 3
+  adventureGiftScale: 0.35
+  adventureGiftCooldownRefills: 6
   debugLogShapeSelection: 1
   reviveManager: {fileID: 2006691660}
 --- !u!4 &855154865
@@ -8088,7 +8097,7 @@ MonoBehaviour:
   height: 8
   buildOnStart: 0
   cellSize: 0.5
-  origin: {x: -2, y: -4.3}
+  origin: {x: -2, y: -6}
   cellPrefab: {fileID: 7939442195821052815, guid: 66dbd45837a00dc46ba27d7481693143, type: 3}
   animateClearedBlocks: 1
   clearJumpPower: 1.2
@@ -8150,7 +8159,7 @@ Transform:
   m_GameObject: {fileID: 1414012164}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.3, z: 0}
+  m_LocalPosition: {x: 0, y: -4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8230,8 +8239,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: points
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 51831b6890010d54d99bfdafb370ec77, type: 2}
-  m_sharedMaterial: {fileID: -3714598793970264967, guid: 51831b6890010d54d99bfdafb370ec77, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -9100,7 +9109,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1545152767
 Transform:
   m_ObjectHideFlags: 0
@@ -12191,7 +12200,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2104771312
 Transform:
   m_ObjectHideFlags: 0
@@ -12452,6 +12461,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1560363973}
   - {fileID: 1368204038}
+  - {fileID: 546012941}
   - {fileID: 1414012166}
   - {fileID: 2086338500}
   - {fileID: 1328476889}
@@ -12470,4 +12480,3 @@ SceneRoots:
   - {fileID: 1361403137}
   - {fileID: 4757967689012411780}
   - {fileID: 196205713}
-  - {fileID: 546012941}

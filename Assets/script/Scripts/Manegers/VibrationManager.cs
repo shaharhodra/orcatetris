@@ -14,7 +14,7 @@ public class VibrationManager : MonoBehaviour
     // intensity knob on it. On Android we bypass it and drive the Vibrator service
     // directly with VibrationEffect.createOneShot(duration, amplitude), which is the only
     // way to actually turn the strength down. Amplitude is 1-255; tune this to taste.
-    private const int AndroidAmplitude = 40;
+    private const int AndroidAmplitude = 80;
     private const long AndroidDurationMs = 30;
 
 #if UNITY_ANDROID && !UNITY_EDITOR

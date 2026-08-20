@@ -13,6 +13,82 @@ public class AdsManager : Singleton<AdsManager>
 
 	private InterstitialAd _interstitialAd;
 	private RewardedAd _rewardedAd;
+
+	// How many level-ends have happened since the last interstitial actually played, for the
+	// frequency gate below.
+	private int levelEndsSinceInterstitial;
+	private float lastInterstitialShownTime = -99999f;
+
+	/// <summary>
+	/// Which unit ID to load, per platform, from Remote Config.
+	///
+	/// This used to be a hardcoded const, and the build loaded the *test* unit — the real IDs were
+	/// declared right beside it and never referenced, so a shipped build would have earned nothing.
+	/// Routing it through config both fixes that and makes it switchable: internal testing stays on
+	/// test units (the shipped default) and production flips over from the console without a build,
+	/// which also means a misbehaving unit can be swapped or killed mid-incident.
+	/// </summary>
+	private static string InterstitialUnitId =>
+#if UNITY_IOS
+		GameSettings.GetString(RemoteConfigKeys.AdsInterstitialUnitIdIos);
+#else
+		GameSettings.GetString(RemoteConfigKeys.AdsInterstitialUnitIdAndroid);
+#endif
+
+	private static string RewardedUnitId =>
+#if UNITY_IOS
+		GameSettings.GetString(RemoteConfigKeys.AdsRewardedUnitIdIos);
+#else
+		GameSettings.GetString(RemoteConfigKeys.AdsRewardedUnitIdAndroid);
+#endif
+
+	/// <summary>
+	/// Whether an interstitial may play right now, per the Remote Config frequency rules. Both
+	/// gates default to 0, which reproduces the previous behaviour of showing one at every single
+	/// level end, fail and Classic loss with nothing in between.
+	/// </summary>
+	public bool CanShowInterstitialNow()
+	{
+		if (!GameSettings.GetBool(RemoteConfigKeys.AdsEnabled))
+			return false;
+
+		int minLevelEnds = GameSettings.GetInt(RemoteConfigKeys.AdsInterstitialMinLevelEnds);
+		if (levelEndsSinceInterstitial < minLevelEnds)
+			return false;
+
+		float cooldown = GameSettings.GetFloat(RemoteConfigKeys.AdsInterstitialCooldownSeconds);
+		if (cooldown > 0f && Time.realtimeSinceStartup - lastInterstitialShownTime < cooldown)
+			return false;
+
+		return true;
+	}
+
+	/// <summary>Counts a level ending, whether or not an ad follows it.</summary>
+	public void NoteLevelEnded()
+	{
+		levelEndsSinceInterstitial++;
+	}
+
+	private static void LogAdEvent(AnalyticsManager.AnalyticsEvent evt, string format, string placement, double value = 0d, string currency = null)
+	{
+		if (AnalyticsManager.instance == null)
+			return;
+
+		var parameters = new System.Collections.Generic.List<AnalyticsManager.AnalyticsParam>
+		{
+			AnalyticsManager.AnalyticsParam.Of("AdFormat", format),
+			AnalyticsManager.AnalyticsParam.Of("Placement", placement),
+		};
+
+		if (currency != null)
+		{
+			// AdMob reports micros; GA4's revenue conventions expect whole currency units.
+			parameters.Add(AnalyticsManager.AnalyticsParam.Of("value", value / 1_000_000d));
+			parameters.Add(AnalyticsManager.AnalyticsParam.Of("currency", currency));
+		}
+
+		AnalyticsManager.instance.SendEvent(evt.ToString(), parameters);
+	}
 	public void Init()
 	{
 		Debug.Log("AdsManager Init");
@@ -41,12 +117,13 @@ public class AdsManager : Singleton<AdsManager>
 		var adRequest = new AdRequest();
 
 		// Send the request to load the ad.
-		InterstitialAd.Load(TestInterstitialAdUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
+		InterstitialAd.Load(InterstitialUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
 		{
 			if (error != null)
 			{
 				// The ad failed to load.
 				Debug.LogError("Interstitial ad failed to load: " + error);
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdFailed, "interstitial", "load");
 				return;
 			}
 			_interstitialAd = ad;
@@ -55,15 +132,18 @@ public class AdsManager : Singleton<AdsManager>
 
 			_interstitialAd.OnAdPaid += (AdValue adValue) =>
 			{
-				// Raised when the ad is estimated to have earned money.
+				// The revenue moment. This callback was empty, which meant the game had no measure
+				// of ad earnings at all — the single most important number in an ad-funded title.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdRevenue, "interstitial", "impression",
+					adValue.Value, adValue.CurrencyCode);
 			};
 			_interstitialAd.OnAdImpressionRecorded += () =>
 			{
-				// Raised when an impression is recorded for an ad.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdImpression, "interstitial", "impression");
 			};
 			_interstitialAd.OnAdClicked += () =>
 			{
-				// Raised when a click is recorded for an ad.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdClicked, "interstitial", "click");
 			};
 			_interstitialAd.OnAdFullScreenContentOpened += () =>
 			{
@@ -76,7 +156,7 @@ public class AdsManager : Singleton<AdsManager>
 
 				// Reload the ad so that we can show another as soon as possible.
 				var adRequest = new AdRequest();
-				InterstitialAd.Load(TestInterstitialAdUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
+				InterstitialAd.Load(InterstitialUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
 				{
 					// Handle ad loading here.
 					_interstitialAd = ad;
@@ -105,12 +185,27 @@ public class AdsManager : Singleton<AdsManager>
 	/// </summary>
 	public void ShowInterstitialAd(System.Action onClosed)
 	{
-		if (_interstitialAd == null || !_interstitialAd.CanShowAd())
+		if (!CanShowInterstitialNow())
 		{
-			Debug.Log("Interstitial ad is not ready yet.");
+			// Gated by the Remote Config frequency rules rather than by availability. Reported
+			// separately from "no ad loaded" so the two are distinguishable in reports — a high
+			// gated count means the cap is working, a high unavailable count means fill problems.
+			Debug.Log("Interstitial suppressed by frequency config.");
+			LogAdEvent(AnalyticsManager.AnalyticsEvent.AdUnavailable, "interstitial", "gated");
 			onClosed?.Invoke();
 			return;
 		}
+
+		if (_interstitialAd == null || !_interstitialAd.CanShowAd())
+		{
+			Debug.Log("Interstitial ad is not ready yet.");
+			LogAdEvent(AnalyticsManager.AnalyticsEvent.AdUnavailable, "interstitial", "not_ready");
+			onClosed?.Invoke();
+			return;
+		}
+
+		levelEndsSinceInterstitial = 0;
+		lastInterstitialShownTime = Time.realtimeSinceStartup;
 
 		var ad = _interstitialAd;
 		bool callbackFired = false;
@@ -151,12 +246,13 @@ public class AdsManager : Singleton<AdsManager>
 		var adRequest = new AdRequest();
 
 		// Send the request to load the ad.
-		RewardedAd.Load(TestRewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+		RewardedAd.Load(RewardedUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
 		{
 			if (error != null)
 			{
 				// The ad failed to load.
 				Debug.LogError("Rewarded ad failed to load: " + error);
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdFailed, "rewarded", "load");
 				return;
 			}
 			_rewardedAd = ad;
@@ -164,15 +260,16 @@ public class AdsManager : Singleton<AdsManager>
 			// The ad loaded successfully.
 			_rewardedAd.OnAdPaid += (AdValue adValue) =>
 			{
-				// Raised when the ad is estimated to have earned money.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdRevenue, "rewarded", "impression",
+					adValue.Value, adValue.CurrencyCode);
 			};
 			_rewardedAd.OnAdImpressionRecorded += () =>
 			{
-				// Raised when an impression is recorded for an ad.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdImpression, "rewarded", "impression");
 			};
 			_rewardedAd.OnAdClicked += () =>
 			{
-				// Raised when a click is recorded for an ad.
+				LogAdEvent(AnalyticsManager.AnalyticsEvent.AdClicked, "rewarded", "click");
 			};
 			_rewardedAd.OnAdFullScreenContentOpened += () =>
 			{
@@ -185,7 +282,7 @@ public class AdsManager : Singleton<AdsManager>
 
 				// Reload the ad so that we can show another as soon as possible.
 				var adRequest = new AdRequest();
-				RewardedAd.Load(TestRewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+				RewardedAd.Load(RewardedUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
 				{
 					// Handle ad loading here.
 					_rewardedAd = ad;

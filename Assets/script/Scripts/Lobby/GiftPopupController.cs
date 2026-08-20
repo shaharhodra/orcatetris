@@ -17,6 +17,17 @@ public class GiftPopupController : MonoBehaviour
     [SerializeField] private int minLevelsSkip = 1;
     [SerializeField] private int maxLevelsSkip = 3;
 
+    /// <summary>
+    /// Overwrites the daily-bonus skip range from Remote Config. This is the single most
+    /// generous thing the game gives away — it advances the player's displayed level for free —
+    /// so it is worth being able to retune without shipping.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        minLevelsSkip = GameSettings.GetInt(RemoteConfigKeys.DailyBonusMinLevels);
+        maxLevelsSkip = GameSettings.GetInt(RemoteConfigKeys.DailyBonusMaxLevels);
+    }
+
     [Header("Popup Animation")]
     [SerializeField] private float popupScaleDuration = 0.35f;
     [SerializeField] private Ease popupEase = Ease.OutBack;

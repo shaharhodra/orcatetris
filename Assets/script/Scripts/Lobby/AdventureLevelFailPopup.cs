@@ -100,9 +100,9 @@ public class AdventureLevelFailPopup : MonoBehaviour
         if (popupRoot != null)
             popupRoot.SetActive(true);
 
-		var levelTime = Time.realtimeSinceStartup - AnalyticsManager.instance.LevelStartTime;
-		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelFail.ToString(), new List<AnalyticsManager.AnalyticsEventData>() {
-			new AnalyticsManager.AnalyticsEventData("GameType", "adventure"), new AnalyticsManager.AnalyticsEventData("LevelTime", levelTime.ToString())});
+		AnalyticsManager.instance.SendEvent(AnalyticsManager.AnalyticsEvent.LevelFail.ToString(), new List<AnalyticsManager.AnalyticsParam>() {
+			AnalyticsManager.AnalyticsParam.Of("GameType", "adventure"),
+			AnalyticsManager.AnalyticsParam.Of("LevelTime", AnalyticsManager.instance.GetElapsedLevelTime())});
 
 		if (overlay != null)
         {
@@ -147,7 +147,10 @@ public class AdventureLevelFailPopup : MonoBehaviour
         System.Action reloadLevel = () => GameManager.instance.ReloadCurrentScene();
 
         if (AdsManager.instance != null)
+        {
+            AdsManager.instance.NoteLevelEnded();
             AdsManager.instance.ShowInterstitialAd(reloadLevel);
+        }
         else
             reloadLevel();
     }

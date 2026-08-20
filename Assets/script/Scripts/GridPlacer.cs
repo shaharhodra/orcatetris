@@ -20,6 +20,19 @@ public class GridPlacer : MonoBehaviour
     [SerializeField] private int scorePerPlacedCell = 1;
     [SerializeField] private int scorePerClearedCell = 2;
 
+    /// <summary>
+    /// Overwrites the scoring values from Remote Config. Called by GameConfigApplier after the
+    /// scene's Awake pass — the scene file's serialized overrides land before that, and these two
+    /// fields are a good example of why that ordering matters: the code defaults are 1 and 2, but
+    /// the scene ships 10 and 100.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        scorePerPlacedCell = GameSettings.GetInt(RemoteConfigKeys.ScorePerPlacedCell);
+        scorePerClearedCell = GameSettings.GetInt(RemoteConfigKeys.ScorePerClearedCell);
+        debugLogs = GameSettings.GetBool(RemoteConfigKeys.DebugLogGridPlacer);
+    }
+
     // Fixed sorting order for any block once it sits on the grid, so tray shapes
     // (sortingOrder 20, set in ShapeTrayManager) always render above them,
     // regardless of whatever order the source prefab happened to be authored with.

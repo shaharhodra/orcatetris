@@ -8,6 +8,9 @@ public class LobbyLevelManager : MonoBehaviour
     [SerializeField] private LobbyLevelCell[] levelCells;
     [SerializeField] private RectTransform pointer;
 
+    [Tooltip("How many already-completed levels to keep visible behind the player's current progress. The rest of levelCells fills in ahead as locked levels. Adventure has no level ceiling, so this window is what lets a fixed number of physical cells represent an unbounded level range.")]
+    [SerializeField] private int levelsBehindCurrent = 2;
+
     [Header("Level Unlock Animation")]
     [SerializeField] private float punchScale = 0.25f;
     [SerializeField] private float punchDuration = 0.4f;
@@ -55,11 +58,19 @@ public class LobbyLevelManager : MonoBehaviour
         LobbyLevelCell currentCell = null; // exact match: the level the player is about to play
         int coverAnimIndex = 0;
 
+        // Slide the fixed set of physical cells into a window of levelCells.Length
+        // consecutive levels, starting levelsBehindCurrent before the player's current
+        // progress, so this same set of cells can represent any level range instead of
+        // only ever showing whatever level each one was originally baked to.
+        int windowStart = Mathf.Max(0, highest - levelsBehindCurrent);
+
         for (int i = 0; i < levelCells.Length; i++)
         {
             var cell = levelCells[i];
             if (cell == null)
                 continue;
+
+            cell.SetLevelIndex(windowStart + i);
 
             bool isUnlocked = cell.LevelIndex <= highest;
             bool isCompleted = cell.LevelIndex < highest;

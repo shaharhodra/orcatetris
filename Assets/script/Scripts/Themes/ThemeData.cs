@@ -37,7 +37,7 @@ public class ThemeData : ScriptableObject
     public GameObject boardClearedParticlePrefab;
 
     [Header("Grid Glow Particle")]
-    [Tooltip("Optional particle prefab that plays continuously around the grid border while this theme is active. Leave empty to disable.")]
+    [Tooltip("Optional particle prefab that plays around the grid border only while the \"Amazing\" popup (multi-line clear) is showing. Leave empty to disable.")]
     public GameObject gridGlowParticlePrefab;
 
     [Header("UI Colors")]

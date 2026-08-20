@@ -52,6 +52,12 @@ public class TutorialManager :Singleton<TutorialManager>
 
     public void NextTutorialStep()
     {
+        // Onboarding funnel: which step players stop at is the difference between "the tutorial is
+        // too long" and "step 3 is confusing", and nothing distinguishes those today.
+        AnalyticsManager.instance?.SendEvent(
+            AnalyticsManager.AnalyticsEvent.TutorialStep.ToString(),
+            AnalyticsManager.AnalyticsParam.Of("StepIndex", Tutorialindex));
+
         Tutorialindex++;
         if (Tutorialindex >= _tutorialData.Tutorials.Count)
         {

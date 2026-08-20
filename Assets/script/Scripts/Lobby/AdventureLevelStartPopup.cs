@@ -246,6 +246,12 @@ public class AdventureLevelStartPopup : MonoBehaviour
 
         autoStartTween?.Kill();
 
+        // The real start of play. AppManager stamps a baseline at level load, but that is several
+        // seconds early — it happens while this popup is still up and before any interstitial has
+        // finished — so LevelTime measured from there overstated every level. Re-stamping here
+        // makes the Adventure numbers measure play rather than waiting.
+        AnalyticsManager.instance?.MarkLevelStarted();
+
         if (SoundManager.instance != null)
             SoundManager.instance.PlayButtonClick();
 

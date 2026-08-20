@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "OrcaTetris.Adventure.Core",
+        "OrcaTetris.Config",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

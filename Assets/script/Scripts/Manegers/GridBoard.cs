@@ -50,6 +50,16 @@ public class GridBoard : MonoBehaviour
     [Tooltip("Same as above, but for Adventure mode. Only applies to levels whose JSON doesn't already define InitialBlocks — a curated level layout always takes priority over this.")]
     [SerializeField] private int adventureRandomInitialShapeCount = 0;
 
+    /// <summary>
+    /// Overwrites the pre-fill count from Remote Config. Only Classic is exposed: Adventure's
+    /// starting layout comes from AdventureLevelCurves.GetInitialBlocks, and this field is a
+    /// fallback that generated levels never reach.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        classicRandomInitialShapeCount = GameSettings.GetInt(RemoteConfigKeys.ClassicRandomInitialShapes);
+    }
+
     [Header("Initial Block Entry Animation")]
     [SerializeField] private bool animateInitialBlockEntry = true;
     [SerializeField] private float initialBlockEntryDuration = 0.25f;

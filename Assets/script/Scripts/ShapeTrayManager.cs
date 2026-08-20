@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using OrcaTetris.Adventure;
 
 public class ShapeTrayManager : MonoBehaviour
 {
@@ -36,24 +37,25 @@ public class ShapeTrayManager : MonoBehaviour
     [SerializeField] private int minPlaceableToConsiderMovable = 1;
 
     [Header("Difficulty")]
-    [Tooltip("0 = Easy: all 3 tray slots stay genuinely placeable, and fallback ties prefer whichever option leaves the board healthiest. 1 = Hard: only 1 of the 3 slots is guaranteed placeable — the other 2 are decoys that don't fit anywhere on the board right now (once the board has enough clutter for decoys to exist), and fallback ties ignore board health. Line clears themselves always win regardless of this value.")]
+    [Tooltip("0 = Easy: all 3 tray slots stay genuinely placeable, all 3 may arrive with a ready-made multi-line clear, and fallback ties prefer whichever option leaves the board healthiest. 1 = Hard: only 1 slot is guaranteed placeable (the other 2 are decoys that fit nowhere on the board right now — Classic only; Adventure always keeps all 3 placeable), only 1 slot may arrive with a multi-line clear so building the big combo is the player's job, and fallback ties ignore board health. Single-line clears are never withheld and the cap lifts on a crowded board — the board needs that relief to stay playable.")]
     [SerializeField, Range(0f, 1f)] private float difficulty = 0.3f;
 
-    [Header("Score-based Difficulty Ramp")]
-    [Tooltip("0 = gift chance at its highest and difficulty at its lowest (start of game). Automatically overwrites Difficulty and Gift Chance above as the score climbs — editing them directly will just get overwritten on the next score update. Read-only display of the current ramp value; edit the two fields below to change its behavior.")]
+    [Header("Score-based Difficulty Ramp (Classic only)")]
+    [Tooltip("0 = gift chance at its highest and difficulty at its lowest (start of game). Automatically overwrites Difficulty and Gift Chance above as the score climbs — editing it directly will just get overwritten on the next score update. Read-only display of the current ramp value; edit scoreForMaxDifficulty below to change its behavior. Adventure has no score, so it ramps off target progress instead — see RecomputeAdventureDifficulty.")]
     [SerializeField, Range(0f, 1f)] private float scoreProgress = 0f;
-    [Tooltip("How many points must be scored for one Score Progress Step.")]
-    [SerializeField] private int scoreProgressStepPoints = 10000;
-    [Tooltip("How much Score Progress rises per Score Progress Step Points scored.")]
-    [SerializeField] private float scoreProgressStep = 0.1f;
+    [Tooltip("Score at which the ramp reaches 1 (hardest). Scales smoothly and continuously between 0 and this score, instead of jumping in visible steps, so difficulty climbs gradually across the whole game rather than hitting a hard wall partway through.")]
+    [SerializeField] private float scoreForMaxDifficulty = 500000f;
 
     // Adventure: each level's LevelData.DifficultyLevel (0-100, unused by Adventure until now —
     // Classic mode reads it separately via palceManager) seeds the automation's starting
     // toughness, so a late-campaign level starts harder than an early one instead of every level
-    // starting equally easy and only escalating from in-level score. The score-based ramp above
-    // still climbs from this base up to fully-hard, so even late levels keep some in-level room
-    // to escalate further. Stays 0 for Classic mode / levels without a set DifficultyLevel.
+    // starting equally easy. RecomputeAdventureDifficulty climbs from this base as the level's
+    // targets get collected, so even late levels keep in-level room to escalate further. Stays 0
+    // for Classic mode / levels without a set DifficultyLevel.
     private float baseDifficulty;
+
+    private bool IsAdventureMode => AppManager.instance != null &&
+                                    AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
 
     private void SeedDifficultyForLevel()
     {
@@ -64,6 +66,49 @@ public class ShapeTrayManager : MonoBehaviour
             return;
 
         baseDifficulty = Mathf.Clamp01(app.CurrentLevelData.DifficultyLevel / 100f);
+        RecomputeAdventureDifficulty();
+    }
+
+    /// <summary>
+    /// Adventure's stand-in for the score ramp: difficulty climbs from the level's baseDifficulty
+    /// toward AdventureLevelCurves.InLevelDifficultyPeak as the level's symbol targets get
+    /// collected, so a level opens fair and tightens as the player closes it out. Without this,
+    /// Adventure difficulty is frozen for the whole level — ScoreManager refuses to track score in
+    /// Adventure, so the score-driven ramp never fires there and the tray keeps dealing ready-made
+    /// multi-line clears right up to the win.
+    ///
+    /// Driven by AdventureManager.OnTargetsUpdated, which fires on every collection as well as on
+    /// init and on a resumed session, so a level picked back up mid-play resumes at the toughness
+    /// it was left at rather than restarting from its base.
+    /// </summary>
+    private void RecomputeAdventureDifficulty()
+    {
+        if (!IsAdventureMode)
+            return;
+
+        float targetProgress = adventureManager != null ? adventureManager.TargetProgress : 0f;
+        difficulty = Mathf.Clamp01(AdventureLevelCurves.GetDifficultyAtProgress(baseDifficulty, targetProgress));
+
+        // Adventure gifts are scaled down on top of the usual inverse-of-difficulty: the combo
+        // detector hands over an exact multi-line clear, which is by far the largest single source
+        // of "this is too easy" in a mode with no score pressure to outrun it.
+        giftChance = Mathf.Clamp01((1f - difficulty) * adventureGiftScale);
+    }
+
+    private void HandleAdventureTargetsUpdated(Dictionary<ColectionTypes, int> remainingTargets)
+    {
+        RecomputeAdventureDifficulty();
+    }
+
+    // adventureManager may still be unresolved when OnEnable runs (Start does the
+    // FindFirstObjectByType fallback), so both call this and it re-subscribes idempotently.
+    private void SubscribeToAdventureTargets()
+    {
+        if (adventureManager == null)
+            return;
+
+        adventureManager.OnTargetsUpdated -= HandleAdventureTargetsUpdated;
+        adventureManager.OnTargetsUpdated += HandleAdventureTargetsUpdated;
     }
 
     private readonly ShapeSelectionAlgorithm shapeSelectionAlgorithm = new ShapeSelectionAlgorithm();
@@ -71,14 +116,45 @@ public class ShapeTrayManager : MonoBehaviour
     [Header("Gift Opportunities")]
     [Tooltip("When enabled, occasionally checks whether 2-3 fully empty rows/columns can be exactly filled by a small combo of shapes from the pool, and if so offers exactly those shapes so the player can pull off a satisfying multi-line clear.")]
     [SerializeField] private bool enableGiftOpportunities = true;
-    [Tooltip("Chance (per refill, once the cooldown below has passed) to actually offer a found gift combo instead of the normal smart pick. Overwritten by the score-based ramp above once the game is running.")]
+    [Tooltip("Chance (per refill, once the cooldown below has passed) to actually offer a found gift combo instead of the normal smart pick. Overwritten by the difficulty ramp once the game is running.")]
     [SerializeField, Range(0f, 1f)] private float giftChance = 0.5f;
     [Tooltip("Minimum number of refills that must pass between gifts, so they can't happen back-to-back even if opportunities keep appearing.")]
     [SerializeField] private int giftCooldownRefills = 3;
+    [Tooltip("Adventure only: scales the gift chance down on top of the usual inverse-of-difficulty. A gift hands the player an exact multi-line clear, so in a mode with no score pressure it should read as a rare surprise rather than a metronome.")]
+    [SerializeField, Range(0f, 1f)] private float adventureGiftScale = 0.35f;
+    [Tooltip("Adventure only: the cooldown used instead of Gift Cooldown Refills above.")]
+    [SerializeField] private int adventureGiftCooldownRefills = 6;
 
     private readonly GiftOpportunityDetector giftOpportunityDetector = new GiftOpportunityDetector();
     // Large enough that a gift can still fire on the very first refill of a level.
     private int refillsSinceLastGift = int.MaxValue / 2;
+
+    /// <summary>
+    /// Overwrites the tunable tray settings from Remote Config.
+    ///
+    /// Note which fields are deliberately absent: <c>difficulty</c> and <c>giftChance</c>. Both are
+    /// recomputed from scratch on every score update (HandleScoreUpdatedForDifficultyRamp) and every
+    /// target update (RecomputeAdventureDifficulty), so anything written here would survive until
+    /// the player's next placement and no longer — a remote override that appears to work in the
+    /// inspector and silently does nothing in play. The real knobs are the inputs those two
+    /// functions read: scoreForMaxDifficulty for Classic and adventureGiftScale for Adventure.
+    /// </summary>
+    public void ApplyRemoteSettings()
+    {
+        scoreForMaxDifficulty = GameSettings.GetFloat(RemoteConfigKeys.ClassicScoreForMaxDifficulty);
+
+        enableGiftOpportunities = GameSettings.GetBool(RemoteConfigKeys.GiftEnabled);
+        giftCooldownRefills = GameSettings.GetInt(RemoteConfigKeys.GiftCooldownRefillsClassic);
+        adventureGiftScale = GameSettings.GetFloat(RemoteConfigKeys.GiftAdventureScale);
+        adventureGiftCooldownRefills = GameSettings.GetInt(RemoteConfigKeys.GiftAdventureCooldownRefills);
+
+        noMovesReviveDelay = GameSettings.GetFloat(RemoteConfigKeys.NoMovesReviveDelay);
+        debugLogShapeSelection = GameSettings.GetBool(RemoteConfigKeys.DebugLogShapeSelection);
+
+        // giftChance is derived from difficulty; recompute so a new adventureGiftScale takes
+        // effect immediately rather than waiting for the next target collection.
+        RecomputeAdventureDifficulty();
+    }
 
     [Header("Debug")]
     [Tooltip("Logs every candidate shape's best achievable score for each refill, so a confusing tray choice can be diagnosed from the Console instead of guessed at.")]
@@ -168,20 +244,27 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (ScoreManager.instance != null)
             ScoreManager.instance.OnScoreUpdatedEvent += HandleScoreUpdatedForDifficultyRamp;
+
+        SubscribeToAdventureTargets();
     }
 
-    // Drives difficulty/giftChance from the current score, ramping from the level's
-    // baseDifficulty (0 for Classic/levels without a DifficultyLevel) up to fully-hard as
-    // score climbs — so a late-campaign Adventure level starts tougher than an early one
-    // instead of every level starting equally easy, while still leaving room for in-level
-    // score progression to escalate further even from a high base.
+    // Classic's difficulty ramp: drives difficulty/giftChance from the current score, climbing to
+    // fully-hard as the score does.
+    //
+    // Adventure deliberately does not use this. ScoreManager refuses to track score in Adventure
+    // at all, so this never fired there in practice — it just left difficulty pinned at
+    // baseDifficulty and giftChance at whatever the scene had serialized. Adventure ramps off
+    // target progress in RecomputeAdventureDifficulty instead; bailing out here keeps this from
+    // stomping those values if Adventure scoring is ever turned on.
     private void HandleScoreUpdatedForDifficultyRamp(int score)
     {
-        if (scoreProgressStepPoints <= 0)
+        if (IsAdventureMode)
             return;
 
-        int steps = score / scoreProgressStepPoints;
-        scoreProgress = Mathf.Clamp01(steps * scoreProgressStep);
+        if (scoreForMaxDifficulty <= 0f)
+            return;
+
+        scoreProgress = Mathf.Clamp01(score / scoreForMaxDifficulty);
         difficulty = Mathf.Clamp01(baseDifficulty + scoreProgress * (1f - baseDifficulty));
         giftChance = 1f - difficulty;
     }
@@ -200,12 +283,19 @@ public class ShapeTrayManager : MonoBehaviour
 
         // Adventure never gets decoys: the tray only refills once every shape is placed, and
         // Adventure has no revive, so an unplaceable slot ends the level outright instead of
-        // making it harder. Adventure's difficulty lives in its move limit instead.
-        bool isAdventureMode = AppManager.instance != null &&
-                               AppManager.instance.CurrentGameMode == AppManager.GameMode.Adventure;
+        // making it harder.
+        //
+        // Adventure also doesn't use the plain SelectTray at all — it uses the chained variant,
+        // which scores the tray's later slots against the board as it would look after the
+        // earlier ones land and clear, rather than against today's board independently. That's
+        // what makes clearing with one shape the thing that opens room for the next, instead of
+        // all 3 shapes always fitting comfortably regardless of what the player does. See
+        // TraySelectionCore.SelectTrayChained for the full rationale.
+        bool isAdventureMode = IsAdventureMode;
 
-        var result = shapeSelectionAlgorithm.SelectTray(
-            BuildOccupancyGrid(), prefabs, board.cellSize, helpfulness, allowDecoys: !isAdventureMode);
+        var result = isAdventureMode
+            ? shapeSelectionAlgorithm.SelectTrayChained(BuildOccupancyGrid(), prefabs, board.cellSize, helpfulness)
+            : shapeSelectionAlgorithm.SelectTray(BuildOccupancyGrid(), prefabs, board.cellSize, helpfulness, allowDecoys: true);
 
         if (debugLogShapeSelection)
         {
@@ -232,7 +322,8 @@ public class ShapeTrayManager : MonoBehaviour
         if (!enableGiftOpportunities || board == null)
             return null;
 
-        if (refillsSinceLastGift <= giftCooldownRefills)
+        int cooldown = IsAdventureMode ? adventureGiftCooldownRefills : giftCooldownRefills;
+        if (refillsSinceLastGift <= cooldown)
             return null;
 
         if (Random.value > giftChance)
@@ -277,12 +368,17 @@ public class ShapeTrayManager : MonoBehaviour
 
         if (ScoreManager.instance != null)
             ScoreManager.instance.OnScoreUpdatedEvent -= HandleScoreUpdatedForDifficultyRamp;
+
+        if (adventureManager != null)
+            adventureManager.OnTargetsUpdated -= HandleAdventureTargetsUpdated;
     }
 
     private void Start()
     {
         if (adventureManager == null)
             adventureManager = FindFirstObjectByType<AdventureManager>();
+
+        SubscribeToAdventureTargets();
 
         GameManager.instance.OnLevelRestartedEvent += HandleOnLevelRestartedEvent;
 
@@ -357,6 +453,8 @@ public class ShapeTrayManager : MonoBehaviour
 
         // Level data wasn't ready when Start() ran its initial seed, so redo it now that
         // CurrentLevelData is actually available, and recompute the ramp against it.
+        // SeedDifficultyForLevel folds in the Adventure ramp itself; the score call below is the
+        // Classic path and no-ops in Adventure.
         SeedDifficultyForLevel();
         if (ScoreManager.instance != null)
             HandleScoreUpdatedForDifficultyRamp(ScoreManager.instance.Score);
