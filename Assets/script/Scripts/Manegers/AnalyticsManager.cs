@@ -15,12 +15,10 @@ public class AnalyticsManager : Singleton<AnalyticsManager>
     public enum AnalyticsEvent
     {
         GameStart,
-        GameEnd,
         LevelStart,
         LevelComplete,
         LevelFail,
         LevelAbandon,
-        LevelResumed,
         NoMoves,
         BoardCleared,
         ComboStep,
