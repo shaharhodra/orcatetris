@@ -1217,6 +1217,38 @@ public class GridBoard : MonoBehaviour
     }
 
     /// <summary>
+    /// Counts how many anchor positions on the board currently accept this shape, stopping
+    /// as soon as the count passes <paramref name="cap"/> — callers only need to know whether
+    /// the true count is at or below a threshold (e.g. "this shape barely had anywhere to go"),
+    /// not the exact number on a crowded board.
+    /// </summary>
+    public int CountValidPlacements(Shape shape, int cap)
+    {
+        if (shape == null || cells == null)
+            return 0;
+
+        var offsets = shape.GetCells(cellSize);
+        if (offsets == null || offsets.Length == 0)
+            return 0;
+
+        int count = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (!CanPlaceShapeAtInternal(offsets, new Vector2Int(x, y)))
+                    continue;
+
+                count++;
+                if (count > cap)
+                    return count;
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
     /// בודק אם אפשר למקם צורה במיקום ספציפי (internal helper)
     /// </summary>
     private bool CanPlaceShapeAtInternal(Vector2Int[] offsets, Vector2Int position)

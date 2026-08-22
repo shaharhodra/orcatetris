@@ -10,6 +10,12 @@ public class Shape : MonoBehaviour
 {
     public ShapeOffset shapeData;
 
+    // Set at runtime by ShapeTrayManager when this instance was dealt as part of a
+    // gift combo, so GridPlacer can give it the "impressive placement" feedback
+    // unconditionally instead of relying on the tight-fit heuristic. Never set on
+    // the prefab asset itself, so every fresh instance starts false.
+    [System.NonSerialized] public bool IsGiftShape;
+
     private void Reset()
     {
         EnsureRigidbody2D();

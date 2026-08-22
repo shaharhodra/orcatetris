@@ -9,9 +9,10 @@ public class SoundManager : MonoBehaviour
     [Header("Audio Sources")]
     [SerializeField] private AudioSource audioSource;
 
-    [Header("UI / Shapes")] 
+    [Header("UI / Shapes")]
     [SerializeField] private AudioClip clickShapeClip;      // לחיצה על צורה
     [SerializeField] private AudioClip placeShapeClip;      // הנחה של צורה על הלוח
+    [SerializeField] private AudioClip impressivePlacementClip; // הצבה מרשימה של צורה גדולה/מתנה שבקושי נכנסה
 
     [Header("Combos")]
     [SerializeField] private AudioClip combo1Clip;          // מחיקה של שורה/עמודה אחת
@@ -74,6 +75,12 @@ public class SoundManager : MonoBehaviour
     public void PlayPlaceShape()
     {
         PlayClip(placeShapeClip);
+    }
+
+    public void PlayImpressivePlacement()
+    {
+        VibrationManager.instance?.Vibrate();
+        PlayClip(impressivePlacementClip);
     }
 
     public void PlayCombo(int clearedLines)

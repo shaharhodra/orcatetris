@@ -129,6 +129,13 @@ public class ShapeTrayManager : MonoBehaviour
     // Large enough that a gift can still fire on the very first refill of a level.
     private int refillsSinceLastGift = int.MaxValue / 2;
 
+    // Which prefabs in this refill's selectedPrefabs actually came from the gift combo
+    // (as opposed to filler shapes appended when the combo was shorter than 3), so the
+    // instantiated Shape can be tagged IsGiftShape for GridPlacer's celebratory feedback.
+    // Reset at the top of every TryOfferGiftCombo call, so a refill with no gift never
+    // carries over a stale tag from a previous one.
+    private readonly HashSet<Shape> giftComboPrefabsThisRefill = new HashSet<Shape>();
+
     /// <summary>
     /// Overwrites the tunable tray settings from Remote Config.
     ///
@@ -318,6 +325,7 @@ public class ShapeTrayManager : MonoBehaviour
     private List<Shape> TryOfferGiftCombo()
     {
         refillsSinceLastGift++;
+        giftComboPrefabsThisRefill.Clear();
 
         if (!enableGiftOpportunities || board == null)
             return null;
@@ -332,6 +340,8 @@ public class ShapeTrayManager : MonoBehaviour
         var combo = giftOpportunityDetector.TryFindGift(BuildOccupancyGrid(), classicShapePrefabs, board.cellSize);
         if (combo == null || combo.Count == 0)
             return null;
+
+        giftComboPrefabsThisRefill.UnionWith(combo);
 
         var selected = new List<Shape>(combo);
         if (selected.Count < 3)
@@ -655,7 +665,10 @@ public class ShapeTrayManager : MonoBehaviour
             Shape shape = null;
 
             if (i < selectedPrefabs.Count && selectedPrefabs[i] != null)
+            {
                 shape = Instantiate(selectedPrefabs[i], slot.position, slot.rotation, slot);
+                shape.IsGiftShape = giftComboPrefabsThisRefill.Contains(selectedPrefabs[i]);
+            }
 
             if (shape == null)
                 continue;

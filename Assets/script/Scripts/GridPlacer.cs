@@ -45,6 +45,18 @@ public class GridPlacer : MonoBehaviour
     [SerializeField] private float blockEntryDistance = 6f;
     [SerializeField] private float blockEntryDelayPerBlock = 0.05f;
 
+    [Header("Impressive Placement Feedback")]
+    [Tooltip("When a placed shape is bigger than this many cells AND either came from a gift combo or barely had anywhere else to go (see Tight Fit Max Valid Spots below), every one of its blocks gets a little celebratory pop plus a dedicated sound.")]
+    [SerializeField] private bool enableImpressivePlacementFeedback = true;
+    [Tooltip("Minimum cell count for a shape to ever qualify — small 1-2 cell shapes never feel like an achievement to fit in.")]
+    [SerializeField] private int impressivePlacementMinCells = 3;
+    [Tooltip("A non-gift shape counts as a tight/impressive fit when, right before this placement, the board had at most this many valid spots left for it (counting the spot just used).")]
+    [SerializeField] private int tightFitMaxValidPlacements = 3;
+    [SerializeField] private float impressiveBlockPunchScale = 0.25f;
+    [SerializeField] private float impressiveBlockPunchDuration = 0.35f;
+    [SerializeField] private int impressiveBlockPunchVibrato = 6;
+    [SerializeField] private float impressiveBlockDelayPerBlock = 0.04f;
+
     public bool CanPlaceShape(Shape shape, Vector2Int targetCell)
     {
         var offsets = shape.GetCells(board.cellSize);
@@ -78,6 +90,10 @@ public class GridPlacer : MonoBehaviour
             return false;
 
         var offsets = shape.GetCells(board.cellSize);
+
+        // Must be judged against the board as it stood before this placement, so compute it
+        // now, before the loop below starts occupying cells.
+        bool isImpressivePlacement = enableImpressivePlacementFeedback && IsImpressivePlacement(shape, offsets);
 
         var childBlocks = new System.Collections.Generic.Dictionary<Vector2Int, Transform>(offsets.Length);
         int childCount = shape.transform.childCount;
@@ -125,7 +141,13 @@ public class GridPlacer : MonoBehaviour
                 {
                     block.position = targetPosition;
                 }
-                
+
+                if (isImpressivePlacement)
+                {
+                    float entryDelay = animateBlockEntry ? blockEntryDuration : 0f;
+                    AnimateImpressiveBlock(block, entryDelay + blockIndex * impressiveBlockDelayPerBlock);
+                }
+
                 board.SetPlacedBlock(cell, block.gameObject);
 
                 // Mark as placed so ThemeBlock uses squareColor
@@ -146,6 +168,12 @@ public class GridPlacer : MonoBehaviour
                 blockIndex++;
             }
         }
+
+        // Layered on top of whatever placement/line-clear sound plays below, same as
+        // PlayLineClearPossible elsewhere in this codebase — a distinct "well done" cue,
+        // not a replacement for the normal placement feedback.
+        if (isImpressivePlacement && SoundManager.instance != null)
+            SoundManager.instance.PlayImpressivePlacement();
 
         // Fire before line clearing so Adventure symbols can be assigned to just-placed blocks
         OnBlocksPlacedBeforeClear?.Invoke(placedCells);
@@ -214,6 +242,32 @@ public class GridPlacer : MonoBehaviour
         Destroy(shape.gameObject);
 
         return clearResult.LinesCleared > 0;
+    }
+
+    // A shape counts as an impressive placement when it's bigger than a trivial 1-2 cell
+    // piece AND either arrived as a gift combo (curated to fill a gap the player couldn't
+    // have set up on their own) or was a genuine tight fit — very few other spots on the
+    // board would have accepted it. CountValidPlacements is checked against the board as
+    // it stood before this placement, so callers must call this before any occupancy
+    // mutation.
+    private bool IsImpressivePlacement(Shape shape, Vector2Int[] offsets)
+    {
+        if (offsets == null || offsets.Length < impressivePlacementMinCells)
+            return false;
+
+        if (shape.IsGiftShape)
+            return true;
+
+        return board.CountValidPlacements(shape, tightFitMaxValidPlacements) <= tightFitMaxValidPlacements;
+    }
+
+    private void AnimateImpressiveBlock(Transform block, float delay)
+    {
+        if (block == null)
+            return;
+
+        block.DOPunchScale(Vector3.one * impressiveBlockPunchScale, impressiveBlockPunchDuration, impressiveBlockPunchVibrato)
+            .SetDelay(delay);
     }
 
     private void AnimateBlockEntry(Transform block, Vector3 targetPosition, float delay)

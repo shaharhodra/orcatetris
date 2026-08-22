@@ -8186,6 +8186,13 @@ MonoBehaviour:
   blockEntryEase: 27
   blockEntryDistance: 6
   blockEntryDelayPerBlock: 0.05
+  enableImpressivePlacementFeedback: 1
+  impressivePlacementMinCells: 3
+  tightFitMaxValidPlacements: 3
+  impressiveBlockPunchScale: 0.25
+  impressiveBlockPunchDuration: 0.35
+  impressiveBlockPunchVibrato: 6
+  impressiveBlockDelayPerBlock: 0.04
 --- !u!114 &1414012168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8897,6 +8904,7 @@ MonoBehaviour:
   audioSource: {fileID: 1513654286}
   clickShapeClip: {fileID: 8300000, guid: f9d2cd7253edd5d4e9a51b1d9759049e, type: 3}
   placeShapeClip: {fileID: 8300000, guid: 3dcaecc81a031f948940360c979c960d, type: 3}
+  impressivePlacementClip: {fileID: 0}
   combo1Clip: {fileID: 8300000, guid: 7f3082f2ab6508f499b7f729c9c9f7e6, type: 3}
   combo2Clip: {fileID: 8300000, guid: c0e6e033f762ece469deec7eaaf632a7, type: 3}
   combo3Clip: {fileID: 8300000, guid: e87261a6ca38a61418f4e80ebaab6cfa, type: 3}
