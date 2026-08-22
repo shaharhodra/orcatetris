@@ -45,6 +45,24 @@ public class GridPlacer : MonoBehaviour
     [SerializeField] private float blockEntryDistance = 6f;
     [SerializeField] private float blockEntryDelayPerBlock = 0.05f;
 
+    [Header("Block Pop Animation")]
+    [Tooltip("When enabled, every block of an Impressive Placement pops in (scales up from blockPopStartScale to its full size with overshoot) once it reaches its position, right before the celebratory punch below.")]
+    [SerializeField] private bool enableBlockPopAnimation = true;
+    [SerializeField] private float blockPopStartScale = 0f;
+    [SerializeField] private float blockPopDuration = 0.25f;
+    [SerializeField] private Ease blockPopEase = Ease.OutBack;
+    [SerializeField] private float blockPopDelayPerBlock = 0.03f;
+
+    [Header("Impressive Placement Like Animation")]
+    [Tooltip("Sprite popped up briefly over each block of an Impressive Placement (e.g. the 'like button' art, imported as a Sprite). Assign in the Inspector — left empty, this effect is skipped.")]
+    [SerializeField] private Sprite impressiveLikeSprite;
+    [SerializeField] private Vector3 impressiveLikeLocalOffset = new Vector3(0f, 0.3f, 0f);
+    [SerializeField] private float impressiveLikeScale = 0.6f;
+    [SerializeField] private float impressiveLikePopDuration = 0.25f;
+    [SerializeField] private float impressiveLikeHoldDuration = 0.35f;
+    [SerializeField] private float impressiveLikeFadeDuration = 0.2f;
+    [SerializeField] private int impressiveLikeSortingOrder = 10;
+
     [Header("Impressive Placement Feedback")]
     [Tooltip("When a placed shape is bigger than this many cells AND either came from a gift combo or barely had anywhere else to go (see Tight Fit Max Valid Spots below), every one of its blocks gets a little celebratory pop plus a dedicated sound.")]
     [SerializeField] private bool enableImpressivePlacementFeedback = true;
@@ -145,7 +163,19 @@ public class GridPlacer : MonoBehaviour
                 if (isImpressivePlacement)
                 {
                     float entryDelay = animateBlockEntry ? blockEntryDuration : 0f;
-                    AnimateImpressiveBlock(block, entryDelay + blockIndex * impressiveBlockDelayPerBlock);
+                    float popDuration = 0f;
+
+                    if (enableBlockPopAnimation)
+                    {
+                        popDuration = blockPopDuration;
+                        AnimateBlockPop(block, entryDelay + blockIndex * blockPopDelayPerBlock);
+                    }
+
+                    // Punch starts after the pop finishes so the two scale tweens never fight
+                    // over the same transform at once.
+                    float punchDelay = entryDelay + popDuration + blockIndex * impressiveBlockDelayPerBlock;
+                    AnimateImpressiveBlock(block, punchDelay);
+                    AnimateImpressiveLike(block, punchDelay);
                 }
 
                 board.SetPlacedBlock(cell, block.gameObject);
@@ -259,6 +289,42 @@ public class GridPlacer : MonoBehaviour
             return true;
 
         return board.CountValidPlacements(shape, tightFitMaxValidPlacements) <= tightFitMaxValidPlacements;
+    }
+
+    private void AnimateBlockPop(Transform block, float delay)
+    {
+        if (block == null)
+            return;
+
+        Vector3 originalScale = block.localScale;
+        DOTween.Sequence()
+            .AppendInterval(delay)
+            .AppendCallback(() => block.localScale = originalScale * blockPopStartScale)
+            .Append(block.DOScale(originalScale, blockPopDuration).SetEase(blockPopEase));
+    }
+
+    private void AnimateImpressiveLike(Transform block, float delay)
+    {
+        if (block == null || impressiveLikeSprite == null)
+            return;
+
+        var likeObject = new GameObject("ImpressiveLike");
+        likeObject.transform.SetParent(block, false);
+        likeObject.transform.localPosition = impressiveLikeLocalOffset;
+        likeObject.transform.localScale = Vector3.zero;
+
+        var renderer = likeObject.AddComponent<SpriteRenderer>();
+        renderer.sprite = impressiveLikeSprite;
+        renderer.sortingOrder = impressiveLikeSortingOrder;
+
+        Vector3 targetScale = Vector3.one * impressiveLikeScale;
+
+        DOTween.Sequence()
+            .AppendInterval(delay)
+            .Append(likeObject.transform.DOScale(targetScale, impressiveLikePopDuration).SetEase(Ease.OutBack))
+            .AppendInterval(impressiveLikeHoldDuration)
+            .Append(renderer.DOFade(0f, impressiveLikeFadeDuration))
+            .OnComplete(() => Destroy(likeObject));
     }
 
     private void AnimateImpressiveBlock(Transform block, float delay)

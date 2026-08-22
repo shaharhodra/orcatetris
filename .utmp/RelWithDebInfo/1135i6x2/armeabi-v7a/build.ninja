@@ -81,7 +81,7 @@ build FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o: CXX_COM
   DEFINES = -DEXTERNAL_FRAME_PACING_CODE -Dswappywrapper_EXPORTS
   DEP_FILE = FramePacing\CMakeFiles\swappywrapper.dir\UnitySwappyWrapper.cpp.o.d
   FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security   -Wall -Wextra -pedantic -Werror -O2 -g -DNDEBUG -fPIC
-  INCLUDES = -IC:/Users/ASUS/orcatetris/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/FramePacing -isystem C:/Users/ASUS/.gradle/caches/9.1.0/transforms/4ebbe5df63d1eb82789c97756ba50259/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/include
+  INCLUDES = -IC:/Users/ASUS/orcatetris/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/FramePacing -isystem C:/Users/ASUS/.gradle/caches/9.1.0/transforms/c54f7e74c257c66ce22693b3084fb929/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/include
   OBJECT_DIR = FramePacing\CMakeFiles\swappywrapper.dir
   OBJECT_FILE_DIR = FramePacing\CMakeFiles\swappywrapper.dir
 
@@ -93,10 +93,10 @@ build FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o: CXX_COM
 #############################################
 # Link the shared library C:\Users\ASUS\orcatetris\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\1135i6x2\obj\armeabi-v7a\libswappywrapper.so
 
-build C$:/Users/ASUS/orcatetris/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1135i6x2/obj/armeabi-v7a/libswappywrapper.so: CXX_SHARED_LIBRARY_LINKER__swappywrapper_RelWithDebInfo FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o | C$:/Users/ASUS/.gradle/caches/9.1.0/transforms/4ebbe5df63d1eb82789c97756ba50259/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/libs/android.armeabi-v7a/libswappy_static.a
+build C$:/Users/ASUS/orcatetris/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1135i6x2/obj/armeabi-v7a/libswappywrapper.so: CXX_SHARED_LIBRARY_LINKER__swappywrapper_RelWithDebInfo FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o | C$:/Users/ASUS/.gradle/caches/9.1.0/transforms/c54f7e74c257c66ce22693b3084fb929/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/libs/android.armeabi-v7a/libswappy_static.a
   LANGUAGE_COMPILE_FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security   -Wall -Wextra -pedantic -Werror -O2 -g -DNDEBUG
   LINK_FLAGS = -Wl,--build-id=sha1 -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  -Wl,--wrap=__android_log_print -Wl,--gc-sections
-  LINK_LIBRARIES = -landroid  C:/Users/ASUS/.gradle/caches/9.1.0/transforms/4ebbe5df63d1eb82789c97756ba50259/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/libs/android.armeabi-v7a/libswappy_static.a  -llog  -lc++  -latomic -lm
+  LINK_LIBRARIES = -landroid  C:/Users/ASUS/.gradle/caches/9.1.0/transforms/c54f7e74c257c66ce22693b3084fb929/workspace/transformed/jetified-games-frame-pacing-2.1.2/prefab/modules/swappy_static/libs/android.armeabi-v7a/libswappy_static.a  -llog  -lc++  -latomic -lm
   OBJECT_DIR = FramePacing\CMakeFiles\swappywrapper.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

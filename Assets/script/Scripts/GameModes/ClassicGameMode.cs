@@ -15,7 +15,13 @@ public class ClassicGameMode : IGameMode
     public void Initialize()
     {
         Debug.Log("[ClassicGameMode] Initializing Classic mode...");
-        
+
+        // Defensive reset: Adventure popups (start/fail/complete) set this static flag
+        // and only clear it via their own button, so leaving Adventure through another
+        // path (e.g. the Back button) could otherwise carry a stuck "blocked" state into
+        // Classic mode and make shapes unclickable/undraggable.
+        ShapeDragHandler.InputBlocked = false;
+
         // Get required components
         shapeTrayManager = Object.FindFirstObjectByType<ShapeTrayManager>();
         board = Object.FindFirstObjectByType<GridBoard>();
