@@ -1042,7 +1042,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -52}
+  m_AnchoredPosition: {x: 0, y: -257}
   m_SizeDelta: {x: 298.5, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &179523896
@@ -8902,6 +8902,18 @@ MonoBehaviour:
   blockEntryEase: 27
   blockEntryDistance: 6
   blockEntryDelayPerBlock: 0.05
+  enableBlockPopAnimation: 1
+  blockPopStartScale: 0
+  blockPopDuration: 0.25
+  blockPopEase: 27
+  blockPopDelayPerBlock: 0.03
+  impressiveLikeSprite: {fileID: -859962779226903066, guid: d22d19b857c4f004e8162ce1cfcca54c, type: 3}
+  impressiveLikeLocalOffset: {x: 0, y: 0.3, z: 0}
+  impressiveLikeScale: 0.6
+  impressiveLikePopDuration: 0.25
+  impressiveLikeHoldDuration: 0.35
+  impressiveLikeFadeDuration: 0.2
+  impressiveLikeSortingOrder: 10
   enableImpressivePlacementFeedback: 1
   impressivePlacementMinCells: 3
   tightFitMaxValidPlacements: 3
@@ -9056,7 +9068,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 902}
+  m_AnchoredPosition: {x: 0, y: 1033}
   m_SizeDelta: {x: 421, y: 153.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1444041367
@@ -9624,7 +9636,7 @@ MonoBehaviour:
   musicVolume: 0.418
   clickShapeClip: {fileID: 8300000, guid: 47a0f4418398b08459a695c118c69aa2, type: 3}
   placeShapeClip: {fileID: 8300000, guid: 6cc62e052772091498fac3783ca2ccc0, type: 3}
-  impressivePlacementClip: {fileID: 0}
+  impressivePlacementClip: {fileID: 8300000, guid: 861d96534a0d7434f846517f3008fdd6, type: 3}
   combo1Clip: {fileID: 8300000, guid: 036071423a3f64e4cb618e6bf5aeb68e, type: 3}
   combo2Clip: {fileID: 8300000, guid: c0e6e033f762ece469deec7eaaf632a7, type: 3}
   combo3Clip: {fileID: 8300000, guid: e87261a6ca38a61418f4e80ebaab6cfa, type: 3}

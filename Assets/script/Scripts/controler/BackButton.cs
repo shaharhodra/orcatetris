@@ -18,6 +18,12 @@ public class BackButton : MonoBehaviour
                 });
         }
 
+        // Leaving mid-play can happen while a popup (start/fail/complete) has the drag
+        // handlers blocked — those popups only clear the flag on their own button press,
+        // so bailing out via Back would otherwise leave input stuck blocked in whatever
+        // mode is loaded next.
+        ShapeDragHandler.InputBlocked = false;
+
         if (GameManager.instance.CurrentGameMode == GameManager.GameMode.Adventure)
         {
             // שמירת מצב המשחק הנוכחי כדי לחזור אליו כשהשחקן ייכנס שוב לאותו שלב
