@@ -70,6 +70,9 @@ public class VibrationManager : MonoBehaviour
 
     public void Vibrate()
     {
+        if (SettingsManager.instance != null && !SettingsManager.instance.VibrationEnabled)
+            return;
+
         if (Time.unscaledTime - lastVibrateTime < MinIntervalSeconds)
             return;
 

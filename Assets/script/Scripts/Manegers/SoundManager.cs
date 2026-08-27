@@ -9,6 +9,11 @@ public class SoundManager : MonoBehaviour
     [Header("Audio Sources")]
     [SerializeField] private AudioSource audioSource;
 
+    [Header("Background Music")]
+    [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioClip backgroundMusicClip;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.5f;
+
     [Header("UI / Shapes")]
     [SerializeField] private AudioClip clickShapeClip;      // לחיצה על צורה
     [SerializeField] private AudioClip placeShapeClip;      // הנחה של צורה על הלוח
@@ -55,6 +60,53 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        if (SettingsManager.instance != null)
+            SettingsManager.instance.OnMusicEnabledChanged += HandleMusicEnabledChanged;
+
+        if (SettingsManager.instance == null || SettingsManager.instance.MusicEnabled)
+            PlayBackgroundMusic();
+    }
+
+    private void OnDestroy()
+    {
+        if (SettingsManager.instance != null)
+            SettingsManager.instance.OnMusicEnabledChanged -= HandleMusicEnabledChanged;
+    }
+
+    private void HandleMusicEnabledChanged(bool isEnabled)
+    {
+        if (isEnabled)
+            PlayBackgroundMusic();
+        else
+            StopBackgroundMusic();
+    }
+
+    // ===== Background Music =====
+
+    public void PlayBackgroundMusic()
+    {
+        if (musicSource == null || backgroundMusicClip == null)
+            return;
+
+        if (SettingsManager.instance != null && !SettingsManager.instance.MusicEnabled)
+            return;
+
+        musicSource.clip = backgroundMusicClip;
+        musicSource.loop = true;
+        musicSource.volume = musicVolume;
+
+        if (!musicSource.isPlaying)
+            musicSource.Play();
+    }
+
+    public void StopBackgroundMusic()
+    {
+        if (musicSource != null && musicSource.isPlaying)
+            musicSource.Stop();
     }
 
     private void PlayClip(AudioClip clip, float volume = 1f)
