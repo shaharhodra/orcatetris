@@ -16,13 +16,15 @@ MonoBehaviour:
   cameraBackgroundColor: {r: 0.01, g: 0.01, b: 0.06, a: 1}
   backgroundSprite: {fileID: -5908506062746681475, guid: 7915446f2dd584b4f8682035b91c3b0c, type: 3}
   backgroundTint: {r: 1, g: 1, b: 1, a: 1}
-  gridCellEmptyColor: {r: 0.3, g: 0.4, b: 1, a: 0.18}
-  gridCellOccupiedColor: {r: 0.6, g: 0.1, b: 1, a: 1}
-  blockSprite: {fileID: 4900889284799673793, guid: a86319a7141b27d42aebdcb0edf0a491, type: 3}
-  blockColor: {r: 0.2, g: 0.85, b: 1, a: 1}
-  squareColor: {r: 0.7, g: 0.15, b: 1, a: 1}
+  gridCellEmptyColor: {r: 1, g: 0.5168299, b: 0, a: 0.18}
+  gridCellOccupiedColor: {r: 1, g: 1, b: 1, a: 1}
+  blockSprite: {fileID: 7501387830980884940, guid: 356daca1b8befd8408493a107292b9d0, type: 3}
+  blockColor: {r: 1, g: 1, b: 1, a: 1}
+  squareColor: {r: 1, g: 1, b: 1, a: 1}
   gridCellSprite: {fileID: 21300000, guid: 411c07eebf44ffa4283cf1ba06914797, type: 3}
   previewClearParticlePrefab: {fileID: 4715996153622213367, guid: ae20b07969868bc489a9bf8ee9ce4697, type: 3}
+  boardClearedParticlePrefab: {fileID: 0}
+  gridGlowParticlePrefab: {fileID: 0}
   uiPrimaryColor: {r: 0.4, g: 0.7, b: 1, a: 1}
   uiSecondaryColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   transitionDuration: 1.5
