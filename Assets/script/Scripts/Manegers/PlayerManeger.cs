@@ -44,6 +44,8 @@ public class PlayerManeger : Singleton<PlayerManeger>
         public int Coins;
         public int DisplayLevel; // visual-only level shown to player, not tied to JSON index
         public string LastBonusDate; // yyyy-MM-dd of last daily bonus grant
+        public string LastLoginStreakDate; // yyyy-MM-dd of the last daily-login streak check-in
+        public int LoginStreak; // consecutive days checked in via the daily-login popup
     }
 
     public bool IsDailyBonusAvailable()
@@ -67,6 +69,45 @@ public class PlayerManeger : Singleton<PlayerManeger>
         // on a second day at all is not currently answerable from the data.
         AnalyticsManager.instance?.SendEvent(
             AnalyticsManager.AnalyticsEvent.DailyBonusClaimed.ToString());
+    }
+
+    public int LoginStreak => PlayerProgress?.LoginStreak ?? 0;
+
+    // Has today's daily-login streak check-in not happened yet? Gates the streak popup so
+    // reopening it the same day doesn't re-advance the streak.
+    public bool IsLoginStreakCheckInPending()
+    {
+        if (!enableDailyBonus) return false;
+        if (PlayerProgress == null) return false;
+        return PlayerProgress.LastLoginStreakDate != System.DateTime.Now.ToString("yyyy-MM-dd");
+    }
+
+    // Records today's check-in, advancing the consecutive-day streak (or resetting it to 1 if a
+    // day was missed), and grants a +2 level-skip bonus whenever the streak lands on a multiple
+    // of 5. Returns whether this check-in earned that bonus.
+    public bool CheckInDailyLoginStreak()
+    {
+        if (!enableDailyBonus || PlayerProgress == null)
+            return false;
+
+        string today = System.DateTime.Now.ToString("yyyy-MM-dd");
+        string yesterday = System.DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+
+        PlayerProgress.LoginStreak = PlayerProgress.LastLoginStreakDate == yesterday
+            ? PlayerProgress.LoginStreak + 1
+            : 1;
+        PlayerProgress.LastLoginStreakDate = today;
+
+        bool streakBonus = PlayerProgress.LoginStreak % 5 == 0;
+        if (streakBonus)
+            PlayerProgress.DisplayLevel = PlayerProgress.HighestUnlockedLevel + 2;
+
+        SavePlayerProgress();
+        if (streakBonus)
+            AnalyticsManager.instance?.SendEvent(
+                AnalyticsManager.AnalyticsEvent.DailyBonusClaimed.ToString());
+
+        return streakBonus;
     }
 
     public event Action<int> OnCoinsUpdatedEvent;
