@@ -298,7 +298,7 @@ public class PopUpService : MonoBehaviour
 
         await UniTask.Delay(TimeSpan.FromSeconds(duration));
 
-        // Already closed manually (x button) while waiting — don't run the close twice.
+        // Already closed manually while waiting — don't run the close twice.
         if (!IsActive)
             return;
 

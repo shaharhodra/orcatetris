@@ -72,9 +72,4 @@ public class DailyBonusPopupController : MonoBehaviour
 
         popUpService.ShowForSeconds(displaySeconds);
     }
-
-    public void OnCloseClicked()
-    {
-        popUpService.OnXButtonClicked();
-    }
 }
