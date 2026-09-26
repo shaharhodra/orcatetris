@@ -19,6 +19,13 @@ public class DailyBonusPopupController : MonoBehaviour
 
     private static bool shownThisSession;
 
+    // The panel is left visible (scale 1) in the scene so it can be designed in the editor;
+    // hide it as soon as play starts — PopUpService scales it back in when it's shown.
+    private void Awake()
+    {
+        transform.localScale = Vector3.zero;
+    }
+
     private void Start()
     {
         if (showOncePerSession && shownThisSession)
