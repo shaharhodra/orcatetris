@@ -279,7 +279,16 @@ public class PopUpService : MonoBehaviour
         }
     }
 
-    async UniTask RunPopupSequenceAsync ()
+    // פותח את הפופאפ ל-X שניות ואז סוגר אותו אוטומטית (בלי כפתור)
+    public void ShowForSeconds(float seconds)
+    {
+        if (IsBlockedByFirstTutorialStep())
+            return;
+
+        RunPopupSequenceAsync(seconds).Forget();
+    }
+
+    async UniTask RunPopupSequenceAsync (float duration = popUPDuretion)
     {
         IsActive = true;
         if (SoundManager.instance != null)
@@ -287,7 +296,11 @@ public class PopUpService : MonoBehaviour
         SetOverlayActiveState(true);
         ShowPopUp(true);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(popUPDuretion));
+        await UniTask.Delay(TimeSpan.FromSeconds(duration));
+
+        // Already closed manually (x button) while waiting — don't run the close twice.
+        if (!IsActive)
+            return;
 
         ShowPopUp(false);
         SetOverlayActiveState(false);
